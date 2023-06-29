@@ -25,10 +25,10 @@ Our datasets are sampled from the following datasets:
 - `stories`: prompts and completions for story generation. The dataset is described here: https://aclanthology.org/P18-1082/. Currently, we have 5000 examples.
 README files within each folder include further details for each dataset.
 
-
 ### Preprocessing
 For `dailydialog`, punctuation has been standardized and irregular transcription has been normalized (see `datasets/dailydialog/utils.py`).
 Text for all dataset is lowercased, but further preprocessing may be needed.
+Unprocessed datasets are kept under `datasets/*/raw.ndjson`.
 
 ### TODO:
 - [x] Describe datasets (**partially completed**)
