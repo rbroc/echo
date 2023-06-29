@@ -3,8 +3,7 @@ Data structure:
 ```
 [{'id': '',
   'source': 'this is text to summarize',
-  'human_completion': ['this is the first summary',
-                       'this is the second summary']}]
+  'human_completions': 'this is the first summary'}]
 ```
 
 Model-generated completions could later on be added to this (with 'model_completion' as key, and dictionary as value, where keys would be model names), or saved as a separate ndjson file, with same example id. 
