@@ -29,7 +29,7 @@ def process(dataframe):
         completions = nlp.pipe(dataframe["human_completions"])
         completion_metrics = td.extract_df(completions,
                                            include_text=False)
-    except KeyError:
+    except KeyError: # NOTE: this should be redundant now
         completions = nlp.pipe(dataframe["human_completion"])
         completion_metrics = td.extract_df(completions,
                                            include_text=False)
@@ -40,7 +40,7 @@ def process(dataframe):
 
 def main():
     args = path_loaders()
-    infile = "data/" + args.input
+    infile = "datasets/" + args.input + '/data.ndjson'
     # change to required file
     data = pd.read_json(infile, lines=True)
     # process with spacy
