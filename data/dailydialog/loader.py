@@ -2,6 +2,7 @@ from datasets import load_dataset
 import ndjson
 import random
 import argparse
+from utils import standardize_punctuation
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--sep', type=str, default="[EOT]")
@@ -24,8 +25,9 @@ def create_dataset(n=5000, sep="[EOT]", seed=42):
     out = []
     for s in sample_idx:
         sdict = {'id': f'dailydialog-{s}',
-                'source': f' {sep} '.join(dialogues[s][:-1]).replace('\n', ''),
-                'human_completions': [dialogues[s][-1]],
+                'source': f' {sep} '.join([standardize_punctuation(t.replace('\n', '')) 
+                                           for t in dialogues[s][:-1]]).strip(),
+                'human_completions': standardize_punctuation(dialogues[s][-1]).strip(),
                 'annotations': {'n-turns': len(dialogues[s][:-1]),
                                 'source-emo': emotions[s][:-1],
                                 'comp-emo': emotions[s][-1],
