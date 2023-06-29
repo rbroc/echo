@@ -15,7 +15,7 @@ bash run.sh
 The pipeline requries  *Python3.11* - it should work down to *3.9*, but hasn't been tested.
 
 ### TODO:
-- [ ] Describe datasets
+- [x] Describe datasets (**partially completed**)
 - [ ] Identify algorithms
 - [ ] Sample examples
 - [ ] Set up experiment
