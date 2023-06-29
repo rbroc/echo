@@ -7,18 +7,19 @@ def cleanup():
     ''' Standardizes datasets by lowercasing and removing irregular format '''
 
     # Cleanup mrsp
-    msrpath = Path('..') / 'data' / 'msrp' 
+    msrpath = Path('..') / 'datasets' / 'mrpc' 
     msrfile = msrpath / 'raw.ndjson'
     with open(msrfile) as f:
         msrp = ndjson.load(f)
     for m in msrp:
         m['human_completions'] = m['human_completions'][0][0].lower()
         m['source'] = m['source'].lower()
+        m['id'] = 'mrpc' + m['id'][4:]
     with open(msrpath / 'data.ndjson', 'w') as f:
         ndjson.dump(msrp, f)
     
     # Cleanup stories
-    storiespath = Path('..') / 'data' / 'stories' 
+    storiespath = Path('..') / 'datasets' / 'stories' 
     storiesfile = storiespath / 'raw.json'
     with open(storiesfile) as f:
         stories = json.load(f)
@@ -29,7 +30,7 @@ def cleanup():
         ndjson.dump(stories, f)
 
     # Cleanup dailymail
-    dmpath = Path('..') / 'data' / 'dailymail_cnn' 
+    dmpath = Path('..') / 'datasets' / 'dailymail_cnn' 
     dmfile = dmpath / 'raw.ndjson'
     with open(dmfile) as f:
         dm = ndjson.load(f)
