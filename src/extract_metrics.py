@@ -46,8 +46,8 @@ def main():
     # process with spacy
     source_results, completion_results = process(data)
     # get filepaths
-    source_outfile = "out/" + args.input.split[0] + "_source.csv"
-    completion_outfile = "out/" + args.input.split[0] + "_completions.csv"
+    source_outfile = "out/" + args.input.split()[0] + "_source.csv"
+    completion_outfile = "out/" + args.input.split()[0] + "_completions.csv"
     # save
     source_results.to_csv(source_outfile)
     completion_results.to_csv(completion_outfile)
