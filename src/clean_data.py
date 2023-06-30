@@ -35,7 +35,7 @@ def cleanup():
     with open(dmfile) as f:
         dm = ndjson.load(f)
     for d in dm:
-        d['human_completions'] = d['human_completions'][0][0].lower()
+        d['human_completions'] = d['human_completions'].lower()
         d['source'] = d['source'].lower()
     with open(dmpath / 'data.ndjson', 'w') as f:
         ndjson.dump(dm, f)
