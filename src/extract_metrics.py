@@ -18,21 +18,19 @@ def path_loaders():
 def process(dataframe):
     print("[INFO] Extracting metrics from sources...")
     # process source text
+    ids = dataframe['id']
     sources = nlp.pipe(dataframe["source"])
     # extract the metrics as a dataframe
     source_metrics = td.extract_df(sources,
                                    include_text=False)
+    source_metrics['id'] = id
     print("... done!")
     # process completions
     print("[INFO] Extracting metrics from completions...")
-    try:
-        completions = nlp.pipe(dataframe["human_completions"])
-        completion_metrics = td.extract_df(completions,
-                                           include_text=False)
-    except KeyError: # NOTE: this should be redundant now
-        completions = nlp.pipe(dataframe["human_completion"])
-        completion_metrics = td.extract_df(completions,
-                                           include_text=False)
+    completions = nlp.pipe(dataframe["human_completions"])
+    completion_metrics = td.extract_df(completions,
+                                        include_text=False)
+    completion_metrics['id'] = id
     print("...done!")
 
     return source_metrics, completion_metrics
