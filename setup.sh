@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/bin/bash
 
 python3.11 -m venv env
 source ./env/bin/activate
