@@ -23,14 +23,14 @@ def process(dataframe):
     # extract the metrics as a dataframe
     source_metrics = td.extract_df(sources,
                                    include_text=False)
-    source_metrics['id'] = id
+    source_metrics['id'] = ids
     print("... done!")
     # process completions
     print("[INFO] Extracting metrics from completions...")
     completions = nlp.pipe(dataframe["human_completions"])
     completion_metrics = td.extract_df(completions,
                                         include_text=False)
-    completion_metrics['id'] = id
+    completion_metrics['id'] = ids
     print("...done!")
 
     return source_metrics, completion_metrics
