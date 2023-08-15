@@ -16,7 +16,7 @@ def cleanup():
         m['source'] = m['source'].lower()
         m['id'] = 'mrpc' + m['id'][4:]
     with open(msrpath / 'data.ndjson', 'w') as f:
-        ndjson.dump(msrp, f)
+        ndjson.dump(msrp, f, ensure_ascii=False)
     
     # Cleanup stories
     storiespath = Path('..') / 'datasets' / 'stories' 
@@ -27,7 +27,7 @@ def cleanup():
         s['source'] = s['source'].lower()
         s['human_completions'] = s['human_completions'].lower()
     with open(storiespath / 'data.ndjson', 'w') as f:
-        ndjson.dump(stories, f)
+        ndjson.dump(stories, f, ensure_ascii=False)
 
     # Cleanup dailymail
     dmpath = Path('..') / 'datasets' / 'dailymail_cnn' 
@@ -38,7 +38,7 @@ def cleanup():
         d['human_completions'] = d['human_completions'].lower()
         d['source'] = d['source'].lower()
     with open(dmpath / 'data.ndjson', 'w') as f:
-        ndjson.dump(dm, f)
+        ndjson.dump(dm, f, ensure_ascii=False)
     
 
 if __name__ == '__main__':
