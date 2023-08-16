@@ -1,10 +1,20 @@
-from transformers import pipeline, AutoTokenizer
-import pandas as pd 
-import pathlib
-import ndjson
-from tqdm import tqdm
-import argparse
+'''
+Pipeline to generate AI completions with various models using Hugging Face's pipeline() function. 
+'''
 
+# utils 
+import pathlib
+import argparse
+from tqdm import tqdm
+
+# data wrangling 
+import pandas as pd 
+import ndjson
+
+# models  
+from transformers import pipeline, AutoTokenizer
+
+# initialize the parser
 def input_parse():
     parser = argparse.ArgumentParser()
 
@@ -18,10 +28,20 @@ def input_parse():
 
     return args
 
-def load_file(datafile):
+def load_file(filepath):
+    '''
+    Load ndjson file from path and convert to pandas dataframe 
+
+    Args
+        filepath: full path to file 
+    
+    Returns
+        df: pandas dataframe 
+    '''
+
     # load data
     print("[INFO:] Loading data ...")
-    with open(datafile) as f:
+    with open(filepath) as f:
         data = ndjson.load(f)
     
     # make into dataframe
@@ -33,30 +53,49 @@ def model_picker(chosen_model:str="t5"):
     '''
     Function for picking model to finetune.
 
-    Args:
+    Args
         chosen_model: name of model to use. 
     
-    Returns:
+    Returns
         full_name: full string name of model 
+        tokenizer: loaded tokenizer if chosen_model = "falcon-7b" or "falcon-instruct" 
     '''
+    tokenizer = None
+
     if chosen_model == "falcon":
         full_name = "tiiuae/falcon-7b"
+        tokenizer = AutoTokenizer.from_pretrained(full_name)
 
     if chosen_model == "falcon-instruct":
         full_name = "tiiuae/falcon-7b-instruct"
+        tokenizer = AutoTokenizer.from_pretrained(full_name)
 
     if chosen_model == "t5": 
         full_name = "google/flan-t5-large"        
 
-    return full_name
+    return full_name, tokenizer
 
-def completions_generator(df, model, min_len, max_len, outfile):
+def completions_generator(df, model, min_len, max_tokens, outfilepath):
+    '''
+    Create completions based on source text in dataframe (df). Save to outfilepath.
+
+    Args
+        df: dataframe with "source" text col
+        model: initalised pipeline
+        min_len: minimum length of the completion (output)
+        max_tokens: maximum new tokens to be added 
+        outfilepath: path where the file should be saved
+
+    Returns
+        df: dataframe with "ai_completions" column
+    '''
+
     # empty list for completions
     completions = []
 
     # generate the text
     for prompt in tqdm(df["source"], desc="Generating"):
-        completion = model(prompt, min_length=min_len, max_length=max_len, top_k = 10)
+        completion = model(prompt, min_length=min_len, max_new_tokens=max_tokens)
 
         # extraxt ONLY the text from the completion (it is wrapped as a list of dicts otherwise)
         completion_txt = list(completion[0].values())[0]
@@ -71,7 +110,7 @@ def completions_generator(df, model, min_len, max_len, outfile):
     df_json = df.to_json(orient="records", lines=True)
 
     # save it
-    with open(outfile, "w") as file:
+    with open(outfilepath, "w") as file:
         file.write(df_json)
 
     return df
@@ -91,15 +130,16 @@ def main():
     # load stuff
     df = load_file(datafile)
 
-    # subset 
-    df = df[:1]
+    # subset (temporary for testing)
+    df = df[:10]
     
-    # choose model
-    full_name = model_picker(args.chosen_model)
+    # choose model (tokenizer is none if not falcon is chosen)
+    full_name, tokenizer = model_picker(args.chosen_model)
 
     # initialise pipeline 
     print("[INFO]: Loading model ...")
-    tokenizer = AutoTokenizer.from_pretrained(full_name)
+
+    # initialise the tokenizer (necessary for falcon)
     model = pipeline(
         model = full_name,
         tokenizer = tokenizer,
@@ -109,10 +149,10 @@ def main():
     )
 
     # define min and max length 
-    min_len, max_len = 5, 200
+    min_len, max_tokens = 5, 40
 
     # generate text and save it to json
-    df_json = completions_generator(df, model, min_len, max_len, outfile)
+    df_json = completions_generator(df, model, min_len, max_tokens, outfile)
 
 if __name__ == "__main__":
     main()
