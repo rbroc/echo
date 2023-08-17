@@ -75,9 +75,9 @@ def model_picker(chosen_model:str="t5"):
 
     return full_name, tokenizer
 
-def completions_generator(df, model, model_name:str, min_len:int , max_tokens: int, outfilepath):
+def completions_generator(df, model, model_name:str, min_len:int , max_tokens: int, outfilepath=None):
     '''
-    Create completions based on source text in dataframe (df). Save to outfilepath.
+    Create completions based on source text in dataframe (df). Save to outfilepath if specified.
 
     Args
         df: dataframe with "source" text col
@@ -85,7 +85,7 @@ def completions_generator(df, model, model_name:str, min_len:int , max_tokens: i
         model_name: name of model (used for naming the column with generated text)
         min_len: minimum length of the completion (output)
         max_tokens: maximum new tokens to be added 
-        outfilepath: path where the file should be saved
+        outfilepath: path where the file should be saved (defaults to none, not saving anything)
 
     Returns
         completions_df: dataframe with model completions and ID 
@@ -110,12 +110,12 @@ def completions_generator(df, model, model_name:str, min_len:int , max_tokens: i
     # add completions 
     completions_df[f"{model_name}_completions"] = completions
 
-    # convert to json
-    completions_json = completions_df.to_json(orient="records", lines=True)
+    # save it to json ONLY if outfilepath is specified 
+    if outfilepath is not None:
+        completions_json = completions_df.to_json(orient="records", lines=True)
 
-    # save it
-    with open(outfilepath, "w") as file:
-        file.write(completions_json)
+        with open(outfilepath, "w") as file:
+            file.write(completions_json)
 
     return completions_df
 
@@ -154,7 +154,7 @@ def main():
     min_len, max_tokens = 5, 40
 
     # generate text and save it to json
-    df_json = completions_generator(df, model, args.chosen_model, min_len, max_tokens, outfile)
+    df = completions_generator(df, model, args.chosen_model, min_len, max_tokens, outfile)
 
 if __name__ == "__main__":
     main()
