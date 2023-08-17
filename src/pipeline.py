@@ -75,19 +75,20 @@ def model_picker(chosen_model:str="t5"):
 
     return full_name, tokenizer
 
-def completions_generator(df, model, min_len, max_tokens, outfilepath):
+def completions_generator(df, model, model_name:str, min_len:int , max_tokens: int, outfilepath):
     '''
     Create completions based on source text in dataframe (df). Save to outfilepath.
 
     Args
         df: dataframe with "source" text col
         model: initalised pipeline
+        model_name: name of model (used for naming the column with generated text)
         min_len: minimum length of the completion (output)
         max_tokens: maximum new tokens to be added 
         outfilepath: path where the file should be saved
 
     Returns
-        df: dataframe with "ai_completions" column
+        completions_df: dataframe with model completions and ID 
     '''
 
     # empty list for completions
@@ -103,17 +104,20 @@ def completions_generator(df, model, min_len, max_tokens, outfilepath):
         # append to lst 
         completions.append(completion_txt)
     
-    # make completions into a pandas dataframe    
-    df["ai_completions"] = completions
+    # add ID column from completions_df   
+    completions_df = df[["id"]].copy()
+
+    # add completions 
+    completions_df[f"{model_name}_completions"] = completions
 
     # convert to json
-    df_json = df.to_json(orient="records", lines=True)
+    completions_json = completions_df.to_json(orient="records", lines=True)
 
     # save it
     with open(outfilepath, "w") as file:
-        file.write(df_json)
+        file.write(completions_json)
 
-    return df
+    return completions_df
 
 
 def main(): 
@@ -125,7 +129,7 @@ def main():
     datapath = path.parents[1] / "datasets" / args.filename
     datafile = datapath / "data.ndjson"
 
-    outfile = datapath / "full_data.ndjson"
+    outfile = datapath / f"{args.chosen_model}_data.ndjson"
 
     # load stuff
     df = load_file(datafile)
@@ -138,8 +142,6 @@ def main():
 
     # initialise pipeline 
     print("[INFO]: Loading model ...")
-
-    # initialise the tokenizer (necessary for falcon)
     model = pipeline(
         model = full_name,
         tokenizer = tokenizer,
@@ -152,7 +154,7 @@ def main():
     min_len, max_tokens = 5, 40
 
     # generate text and save it to json
-    df_json = completions_generator(df, model, min_len, max_tokens, outfile)
+    df_json = completions_generator(df, model, args.chosen_model, min_len, max_tokens, outfile)
 
 if __name__ == "__main__":
     main()
