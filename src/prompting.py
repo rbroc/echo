@@ -12,8 +12,7 @@ import ndjson
 import pandas as pd 
 
 # custom
-from pipeline import completions_generator
-
+from modules.pipeline_fns import completions_generator
 
 def create_prompt(datapath): 
     dailymail_cnn = {"task_prefix": "summarize the following news article. Do no copy paste from the news article: "}
@@ -42,7 +41,7 @@ def main():
     df = df[:1]
 
     # define model
-    model_name = "google/flan-t5-large"
+    model_name = "google/flan-t5-xxl"
 
     # intialise pipeline
     model = pipeline(
