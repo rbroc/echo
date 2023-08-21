@@ -82,7 +82,8 @@ def main():
         tokenizer = tokenizer,
         # task = args.task,
         trust_remote_code = True,
-        device_map = "auto"
+        device_map = "auto",
+        return_full_text=False,
     )
 
     # define min and max length 

@@ -45,7 +45,16 @@ def create_prompt(df, datafile:str="dailymail_cnn", prompt_number:int=1):
         "stories_2": "write a small text based on this story: ",
         "stories_3": "complete the text: ",
         "stories_4": "complete the story: ",
-    }
+
+        # mrpc (paraphrase)
+        "mrpc_1": "paraphrase this text: ",
+        "mrpc_2": "summarize this text: ", 
+        "mrpc_3": "summarize this: ",
+        "mrpc_4": "create a summary of this: ",
+
+        # dailydialog 
+        "dailydialog_1": "respond to the final sentence: ",
+        "dailydialog_2": "continue this dialog: "    }
 
     # create prompt col 
     df[f"prompt_{prompt_number}"] = prompts[f"{datafile}_{prompt_number}"] + df["source"].copy()
