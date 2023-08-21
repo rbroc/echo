@@ -7,7 +7,7 @@ import pathlib
 import argparse
 
 # models  
-from transformers import pipeline
+from transformers import AutoTokenizer, pipeline
 
 # import custom pipeline fns
 from modules.pipeline_fns import load_file, create_prompt, completions_generator
