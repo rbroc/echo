@@ -33,32 +33,24 @@ def load_file(filepath):
     
     return df 
 
-def model_picker(chosen_model:str="t5"): 
-    '''
-    Function for picking model to finetune.
+def create_prompt(df, datafile:str="dailymail_cnn", prompt_number:int=1): 
+    prompts = {
+        # daily mail (summarization)
+        "dailymail_cnn_1": "summarize the main points of this article: ", 
+        "dailymail_cnn_2": "create a summary of the news article: ", 
+        "dailymail_cnn_3": "write a short summarised text of the news article: ",
 
-    Args
-        chosen_model: name of model to use. 
+        # stories (text generate)
+        "stories_1": "continue the story: ",
+        "stories_2": "write a small text based on this story: ",
+        "stories_3": "complete the text: ",
+        "stories_4": "complete the story: ",
+    }
+
+    # create prompt col 
+    df[f"prompt_{prompt_number}"] = prompts[f"{datafile}_{prompt_number}"] + df["source"].copy()
     
-    Returns
-        full_name: full string name of model 
-        tokenizer: loaded tokenizer if chosen_model = "falcon-7b" or "falcon-instruct" 
-    '''
-    tokenizer = None
-
-    if chosen_model == "falcon":
-        full_name = "tiiuae/falcon-7b"
-        tokenizer = AutoTokenizer.from_pretrained(full_name)
-
-    if chosen_model == "falcon-instruct":
-        full_name = "tiiuae/falcon-7b-instruct"
-        tokenizer = AutoTokenizer.from_pretrained(full_name)
-
-    if chosen_model == "t5": 
-        full_name = "google/flan-t5-large"        
-
-    return full_name, tokenizer
-
+    return df 
 
 def completions_generator(df, prompt_col:str, model, model_name:str, min_len:int , max_tokens: int, outfilepath=None):
     '''
@@ -91,7 +83,7 @@ def completions_generator(df, prompt_col:str, model, model_name:str, min_len:int
         completions.append(completion_txt)
     
     # add ID column from completions_df   
-    completions_df = df[["id"]].copy()
+    completions_df = df[["id", prompt_col]].copy()
 
     # add completions 
     completions_df[f"{model_name}_completions"] = completions
