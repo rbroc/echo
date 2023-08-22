@@ -39,6 +39,7 @@ def create_prompt(df, datafile:str="dailymail_cnn", prompt_number:int=1):
         "dailymail_cnn_1": "summarize the main points of this article: ", 
         "dailymail_cnn_2": "create a summary of the news article: ", 
         "dailymail_cnn_3": "write a short summarised text of the news article: ",
+        "dailymail_cnn_4": "summarize this: ",
 
         # stories (text generate)
         "stories_1": "continue the story: ",
@@ -54,7 +55,9 @@ def create_prompt(df, datafile:str="dailymail_cnn", prompt_number:int=1):
 
         # dailydialog 
         "dailydialog_1": "respond to the final sentence: ",
-        "dailydialog_2": "continue this dialog: "    }
+        "dailydialog_2": "continue this dialog: ",
+        "dailydialog_3": "finish this dialog: ",
+        "dailydialog_4": "respond to the final sentence: "   }
 
     # create prompt col 
     df[f"prompt_{prompt_number}"] = prompts[f"{datafile}_{prompt_number}"] + df["source"].copy()

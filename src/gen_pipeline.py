@@ -87,7 +87,7 @@ def main():
     )
 
     # define min and max length 
-    min_len, max_tokens = 30, 100
+    min_len, max_tokens = 30, 50
 
     # generate text and save it to json
     df = completions_generator(df, f"prompt_{args.prompt_number}", model, args.chosen_model, min_len, max_tokens, outfilepath=path.parents[0]/"test.ndjson")
