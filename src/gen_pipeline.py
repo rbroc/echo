@@ -13,7 +13,7 @@ def input_parse():
     parser = argparse.ArgumentParser()
 
     # add arguments 
-    parser.add_argument("-f", "--filename", help = "pick which dataset you want", type = str, default = "mrpc")
+    parser.add_argument("-f", "--filename", help = "pick which dataset you want", type = str, default = "stories")
     parser.add_argument("-mdl", "--chosen_model", help = "Choose between ...", type = str, default = "t5")
     parser.add_argument("-prompt_n", "--prompt_number", help = "choose which prompt to use", type = int, default = 1)
     parser.add_argument("-subset", "--data_subset", help = "how many rows you want to include. Useful for testing. Defaults to None.", type = int, default=None)
@@ -42,6 +42,15 @@ def main():
 
     # define min and max length 
     min_len, max_tokens = 30, 50
+
+    if args.chosen_model == "llama2":
+        from huggingface_hub import login
+
+        # get token from txt
+        with open(path.parents[1] / "tokens" / "hf_token.txt") as f:
+            hf_token = f.read()
+
+        login(hf_token)
 
     # run pipeline 
     completions_df = generation_pipeline(
