@@ -7,3 +7,4 @@ accelerate==0.20.3
 transformers==4.31.0
 torch==2.0.1
 einops==0.6.1
+huggingface_hub==0.16.4
