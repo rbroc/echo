@@ -10,7 +10,9 @@ import argparse
 from transformers import AutoTokenizer, pipeline
 
 # import custom pipeline fns
-from modules.pipeline_fns import load_file, create_prompt, completions_generator
+from modules.pipeline_fns import load_file, completions_generator
+
+from modules.prompt_fns import PromptGenerator, BelugaPromptGenerator
 
 def input_parse():
     parser = argparse.ArgumentParser()
@@ -18,7 +20,6 @@ def input_parse():
     # add arguments 
     parser.add_argument("-f", "--filename", help = "pick which dataset you want", type = str, default = "mrpc")
     parser.add_argument("-mdl", "--chosen_model", help = "Choose between ...", type = str, default = "t5")
-    parser.add_argument("-tsk", "--task", help = "which task do you want it to do", type = str, default = "summarization")
     parser.add_argument("-prompt_n", "--prompt_number", help = "choose which prompt to use", type = int, default = 1)
 
     # save arguments to be parsed from the CLI
@@ -50,6 +51,9 @@ def model_picker(chosen_model:str="t5"):
     if chosen_model == "t5": 
         full_name = "google/flan-t5-xl"        
 
+    if chosen_model == "beluga": 
+        full_name = "stabilityai/StableBeluga-7B"    
+
     return full_name, tokenizer
 
 def main(): 
@@ -67,10 +71,16 @@ def main():
     df = load_file(datafile)
 
     # subset (temporary for testing)
-    df = df[:10]
+    df = df[:5]
 
     # create prompt
-    df = create_prompt(df, datafile=args.filename, prompt_number=args.prompt_number)
+    if args.chosen_model == "beluga":
+        beluga_pg = BelugaPromptGenerator(args.prompt_number)
+        df = beluga_pg.create_beluga_prompt(df, args.filename)
+
+    else: 
+        pg = PromptGenerator(prompt_number=2)
+        df = pg.create_prompt(df, args.filename)
     
     # choose model (tokenizer is none if not falcon is chosen)
     full_name, tokenizer = model_picker(args.chosen_model)
