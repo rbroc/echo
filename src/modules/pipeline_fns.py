@@ -12,6 +12,9 @@ import ndjson
 # models  
 from transformers import pipeline, AutoTokenizer
 
+# import prompting 
+from modules.prompt_fns import PromptGenerator, BelugaPromptGenerator
+
 def load_file(filepath):
     '''
     Load ndjson file from path and convert to pandas dataframe 
@@ -33,96 +36,31 @@ def load_file(filepath):
     
     return df 
 
-def create_prompt(df, datafile:str="dailymail_cnn", prompt_number:int=1): 
+def model_picker(chosen_model:str="t5"): 
     '''
-    Create prompt column. Tested on models FLAN-T5 (xl), Falcon 7B (instruct and normal).   
-    '''
+    Function for picking model to finetune.
 
-    prompts = {
-        # daily mail (summarization)
-        "dailymail_cnn_1": "summarize the main points of this article: ", 
-        "dailymail_cnn_2": "create a summary of the news article: ", 
-        "dailymail_cnn_3": "write a short summarised text of the news article: ",
-        "dailymail_cnn_4": "summarize this: ",
-
-        # stories (text generate)
-        "stories_1": "continue the story: ",
-        "stories_2": "write a small text based on this story: ",
-        "stories_3": "complete the text: ",
-        "stories_4": "complete the story: ",
-
-        # mrpc (paraphrase)
-        "mrpc_1": "paraphrase this text: ",
-        "mrpc_2": "summarize this text: ", 
-        "mrpc_3": "summarize this: ",
-        "mrpc_4": "create a summary of this: ",
-
-        # dailydialog 
-        "dailydialog_1": "respond to the final sentence: ",
-        "dailydialog_2": "continue this dialog: ",
-        "dailydialog_3": "finish this dialog: ",
-        "dailydialog_4": "respond to the final sentence: "   }
-
-    # create prompt col 
-    df[f"prompt_{prompt_number}"] = prompts[f"{datafile}_{prompt_number}"] + df["source"].copy()
+    Args
+        chosen_model: name of model to use. 
     
-    return df 
-
-def create_beluga_prompt(df, datafile:str="dailymail_cnn", prompt_number:int=1):
+    Returns
+        model_name: full string name of model 
     '''
-    Create prompt column for Stable Beluga 7B 
-    (the model follows a specific prompt structure: https://huggingface.co/stabilityai/StableBeluga-7B) 
-    '''
+    tokenizer = None
 
-    # define system prompt 
-    system_prompt = "### System:\nYou are StableBeluga, an AI that follows instructions extremely well. Help as much as you can. Remember, be safe, and don't do anything illegal.\n\n"
+    if chosen_model == "falcon":
+        model_name = "tiiuae/falcon-7b"
 
-    # task prompt (specify task)
-    task_prompts = {
-        # daily mail (summarization)
-        "dailymail_cnn_1": "summarize the main points of this article: ", 
-        "dailymail_cnn_2": "create a summary of the news article: ", 
-        "dailymail_cnn_3": "write a short summarised text of the news article: ",
-        "dailymail_cnn_4": "summarize this: ",
+    if chosen_model == "falcon_instruct":
+        model_name = "tiiuae/falcon-7b-instruct"
 
-        # stories (text generate)
-        "stories_1": "continue the story: ",
-        "stories_2": "write a small text based on this story: ",
-        "stories_3": "complete the text: ",
-        "stories_4": "complete the story: ",
+    if chosen_model == "t5": 
+        model_name = "google/flan-t5-xl"        
 
-        # mrpc (paraphrase)
-        "mrpc_1": "paraphrase this text: ",
-        "mrpc_2": "summarize this text: ", 
-        "mrpc_3": "summarize this: ",
-        "mrpc_4": "create a summary of this: ",
+    if chosen_model == "beluga": 
+        model_name = "stabilityai/StableBeluga-7B"    
 
-        # dailydialog 
-        "dailydialog_1": "respond to the final sentence: ",
-        "dailydialog_2": "continue this dialog: ",
-        "dailydialog_3": "finish this dialog: ",
-        "dailydialog_4": "respond to the final sentence: "   }
-
-    # empty list for formatted 
-    formatted_prompts = []
-
-    for row in df.itertuples(): 
-        # exract source text
-        source_text = row.source
-
-        # create prompt
-        user_prompt = task_prompts[f"{datafile}_{prompt_number}"] + source_text
-
-        # formatted, final prompt
-        final_prompt = f"{system_prompt}### User: {user_prompt}\n\n### Assistant:\n"
-
-        # append to list 
-        formatted_prompts.append(final_prompt)
-
-    df[f"prompt_{prompt_number}"] = formatted_prompts
-
-    return df 
-
+    return model_name
 
 def completions_generator(df, prompt_col:str, model, model_name:str, min_len:int , max_tokens: int, outfilepath=None):
     '''
@@ -131,7 +69,7 @@ def completions_generator(df, prompt_col:str, model, model_name:str, min_len:int
     Args
         df: dataframe with "source" text col
         prompt_col: name of column to generate completions from 
-        model: initalised pipeline
+        model: initalised model pipeline
         model_name: name of model (used for naming the column with generated text)
         min_len: minimum length of the completion (output)
         max_tokens: maximum new tokens to be added 
@@ -169,3 +107,39 @@ def completions_generator(df, prompt_col:str, model, model_name:str, min_len:int
 
     return completions_df
 
+def generation_pipeline(chosen_model, df, datafile, prompt_number, min_len, max_tokens, outfilepath=None):
+    # create prompts (specific to the model)
+    if chosen_model == "beluga":
+        pg = BelugaPromptGenerator(prompt_number)
+        df = pg.create_beluga_prompt(df, datafile)
+    else: 
+        pg = PromptGenerator(prompt_number)
+        df = pg.create_prompt(df, datafile)
+
+    # retrive full name of chosen model 
+    model_name = model_picker(chosen_model)
+    
+    # initialise model (different initialisation for falcon)
+    print("[INFO]: Loading model ...")
+    if "falcon" in chosen_model:
+        # intialise tokenizer
+        tokenizer = AutoTokenizer.from_pretrained(model_name)
+
+        model = pipeline(
+            model = model_name,
+            tokenizer = tokenizer, 
+            trust_remote_code = True,
+            device_map = "auto",
+            return_full_text=False
+        )
+    
+    else: 
+        model = pipeline(
+            model = model_name,
+            device_map = "auto"
+        )
+
+    # generate text and save it to json 
+    df_completions = completions_generator(df, f"prompt_{prompt_number}", model, chosen_model, min_len, max_tokens, outfilepath=outfilepath) 
+
+    return df
