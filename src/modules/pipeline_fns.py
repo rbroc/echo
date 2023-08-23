@@ -46,8 +46,6 @@ def model_picker(chosen_model:str="t5"):
     Returns
         model_name: full string name of model 
     '''
-    tokenizer = None
-
     if chosen_model == "falcon":
         model_name = "tiiuae/falcon-7b"
 
@@ -59,6 +57,9 @@ def model_picker(chosen_model:str="t5"):
 
     if chosen_model == "beluga": 
         model_name = "stabilityai/StableBeluga-7B"    
+    
+    if chosen_model == "llama2":
+        model_name = "meta-llama/Llama-2-7b-hf"
 
     return model_name
 
@@ -119,7 +120,7 @@ def generation_pipeline(chosen_model, df, datafile, prompt_number, min_len, max_
     # retrive full name of chosen model 
     model_name = model_picker(chosen_model)
     
-    # initialise model (different initialisation for falcon)
+    # initialise model (different initialisation for falcon & llama2)
     print("[INFO]: Loading model ...")
     if "falcon" in chosen_model:
         # intialise tokenizer
@@ -129,6 +130,13 @@ def generation_pipeline(chosen_model, df, datafile, prompt_number, min_len, max_
             model = model_name,
             tokenizer = tokenizer, 
             trust_remote_code = True,
+            device_map = "auto",
+            return_full_text=False
+        )
+
+    if "llama2" in chosen_model: 
+        model = pipeline(
+            model = model_name,
             device_map = "auto",
             return_full_text=False
         )
