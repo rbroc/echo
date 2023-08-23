@@ -6,7 +6,14 @@ import re
 def clean_stories_data(stories): 
     for col in ["source", "human_completions"]:
         for s in stories: 
+            # lowercase the text 
             s[col] = s[col].lower()
+
+            # remove tokens that have brackets [ wp ] [ ip ]
+            s[col] = re.sub(r'\[[^\]]+\]', '', s[col])
+
+            # remove the specific string "# # # # # # ( # dropcap )"
+            s[col] = re.sub(r'#\s*#\s*#\s*#\s*#\s*#\s*\(\s*#\s*dropcap\s*\)', '', s[col])
 
             # remove weird newlines
             s[col] = re.sub(r'\n|<newline>', ' ', s[col])

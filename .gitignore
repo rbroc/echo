@@ -166,3 +166,7 @@ cython_debug/
 
 # MAC
 .DS_Store
+
+# tokens 
+tokens/*
+!tokens/README.md
