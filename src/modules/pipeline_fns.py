@@ -101,9 +101,9 @@ def completions_generator(df, prompt_col:str, model, model_name:str, min_len:int
 
     # save it to json ONLY if outfilepath is specified 
     if outfilepath is not None:
-        completions_json = completions_df.to_json(orient="records", lines=True)
+        completions_json = completions_df.to_json(orient="records", lines=True, force_ascii=False)
 
-        with open(outfilepath, "w") as file:
+        with open(outfilepath, "w", encoding = "utf-8") as file:
             file.write(completions_json)
 
     return completions_df
@@ -134,7 +134,7 @@ def generation_pipeline(chosen_model, df, datafile, prompt_number, min_len, max_
             return_full_text=False
         )
 
-    if "llama2" in chosen_model: 
+    elif "llama2" in chosen_model: 
         model = pipeline(
             model = model_name,
             device_map = "auto",
