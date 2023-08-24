@@ -13,12 +13,15 @@ class PromptGenerator:
             "dailymail_cnn_2": "create a summary of the news article: ",
             "dailymail_cnn_3": "write a short summarized text of the news article: ",
             "dailymail_cnn_4": "summarize this: ",
+            "dailymail_cnn_5" : "What are the important parts of this article?: ",
 
             # stories (text generate)
             "stories_1": "continue the story: ",
             "stories_2": "write a small text based on this story: ",
             "stories_3": "complete the text: ",
             "stories_4": "complete the story: ",
+            "stories_5": "finish the story: ",
+            "stories_6": "Make a story based on this writing prompt : ",
 
             # mrpc (paraphrase)
             "mrpc_1": "paraphrase this text: ",
@@ -31,6 +34,7 @@ class PromptGenerator:
             "dailydialog_2": "continue this dialog: ",
             "dailydialog_3": "finish this dialog: ",
             "dailydialog_4": "respond to the final sentence: ",
+            "dailydialog_5": "continue writing the next sentence in this: "
         }
 
         # returns the prompt that corresponds to the prompt number it was initalised with and the datafile specified in get .get_prompt() method 

@@ -53,7 +53,7 @@ def model_picker(chosen_model:str="t5"):
         model_name = "tiiuae/falcon-7b-instruct"
 
     if chosen_model == "t5": 
-        model_name = "google/flan-t5-xl"        
+        model_name = "google/flan-t5-xxl"        
 
     if chosen_model == "beluga": 
         model_name = "stabilityai/StableBeluga-7B"    
