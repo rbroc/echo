@@ -75,7 +75,25 @@ def cleanup():
         d['source'] = d['source'].lower()
     with open(dmpath / 'data.ndjson', 'w') as f:
         ndjson.dump(dm, f, ensure_ascii=False)
-    
+
+
+    # clean dailydialog (remove EOT tokens)
+    dmpath = Path('..') / 'datasets' / 'dailydialog' 
+    dmfile = dmpath / 'data.ndjson'
+
+    with open(dmfile) as f:
+        dm = ndjson.load(f)
+
+    for col in ["source", "human_completions"]:
+        for d in dm:
+            # remove EOT token
+            d[col] = re.sub(r'\s*\[EOT\]\s*', '', d[col])
+
+            # replace multiple spaces with a single space
+            d[col] = re.sub(r'\s+', ' ', d[col])
+
+    with open(dmpath / 'data.ndjson', 'w') as f:
+        ndjson.dump(dm, f, ensure_ascii=False)
 
 if __name__ == '__main__':
     cleanup()
