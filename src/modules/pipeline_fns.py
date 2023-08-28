@@ -137,7 +137,7 @@ def generation_pipeline(chosen_model, df, datafile, prompt_number, min_len, max_
             return_full_text=False
         )
 
-    elif "llama2" or "beluga" in chosen_model: 
+    elif "llama2" in chosen_model or "beluga" in chosen_model: 
         model = pipeline(
             model = model_name,
             device_map = "auto",
