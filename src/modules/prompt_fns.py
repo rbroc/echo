@@ -53,42 +53,62 @@ class PromptGenerator:
             print(f"No prompt created for datafile '{datafile}'. Invalid prompt_number or no prompts available.")
             return df
 
-class BelugaPromptGenerator(PromptGenerator):
-    def create_beluga_prompt(self, df, datafile="dailymail_cnn"):
-        '''
-        Create prompt column for Stable Beluga 7B 
-        (the model follows a specific prompt structure: https://huggingface.co/stabilityai/StableBeluga-7B) 
-        '''
-        # define system prompt
-        system_prompt = (
-            "### System:\nYou are StableBeluga, an AI that follows instructions extremely well. Help as much as you can. Remember, be safe, and don't do anything illegal.\n\n"
-        )
-        
-        # retrieve task prompt 
+class SpecialPromptGenerator(PromptGenerator):
+    '''
+    Create special prompts for models StableBeluga and LLama2 chat versions
+        StableBeluga follows this prompt structure: https://huggingface.co/stabilityai/StableBeluga-7B) 
+        Llama2 chat versions follow this prompt structure: https://gpus.llm-utils.org/llama-2-prompt-template/ (note that the DEFAULT system prompt is recommended to be removed https://github.com/facebookresearch/llama/commit/a971c41bde81d74f98bc2c2c451da235f1f1d37c. Custom system prompts may be useful. Regardless of whether a system prompt is used, the format below is required to produce intelligble text) 
+    '''
+
+    def __init__(self, prompt_number, model_type): 
+        # inherit prompt number from super class, define model type 
+        super().__init__(prompt_number)
+        self.model_type = model_type
+
+    def get_system_prompt(self, model_type):
+        system_prompts = {
+            "beluga": "You are StableBeluga, an AI that follows instructions extremely well. Help as much as you can. Remember, be safe, and don't do anything illegal.\n\n",
+            "llama2_chat": "You are an AI, but you do not deviate from the task prompt and you do not small talk. You get straight to the point."
+        }
+    
+        return system_prompts.get(model_type, "")
+
+    def format_prompt(self, df, datafile="dailymail_cnn", model_type="beluga"):
+        # retrieve system prompts
+        system_prompt = self.get_system_prompt(model_type)
+
+        # retrieve task prompt
         task_prompt = self.get_prompt(datafile)
 
-        # empty list for beluga formatted prompts
+        # empty list for formatted prompts
         formatted_prompts = []
-
+        
+        # iterate over dataframe
         for row in df.itertuples():
-            # retrieve source text
+            # extract source text 
             source_text = row.source
-
-            # if there is a task prompt, then combine task prompt and source text and format for stable beluga
+            
+            # format prompts IF there is a task prompt 
             if task_prompt:
-                # e.g., "summarize this text: 'I love language models'"
+                # define user prompt (task prompt e.g., ""summarize this: 'I love language models'")
                 user_prompt = task_prompt + source_text
-
-                # final, formatted prompt e.g., "### System:\nYou are StableBeluga (...) ### User: summarize this text: 'I love to work with language models' \n\n### Assistant:\n"
-                final_prompt = f"{system_prompt}### User: {user_prompt}\n\n### Assistant:\n"
-
-                # append to formatted prompts list 
+                
+                # format the final prompt depending on the model type 
+                if self.model_type == "beluga":
+                    final_prompt = f"### System:\n{system_prompt}### User: {user_prompt}\n\n### Assistant:\n"
+                
+                elif self.model_type == "llama2_chat":    
+                    final_prompt = f"<s>[INST] <<SYS>>\n{system_prompt}\n<</SYS>>\n\n{user_prompt} [/INST]"
+                
+                # add to list of formatted prompts
                 formatted_prompts.append(final_prompt)
 
             else:
-                formatted_prompts.append(f"No prompt created for datafile '{datafile}'. Invalid prompt_number or no prompts available.")
+                formatted_prompts.append(f"No prompt created for datafile '{datafile}'. Invalid prompt_number or no task prompts available.")
 
-        # add formatted prompts to df 
         df[f"prompt_{self.prompt_number}"] = formatted_prompts
 
         return df
+
+
+

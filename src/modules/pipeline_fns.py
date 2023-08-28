@@ -13,7 +13,7 @@ import ndjson
 from transformers import pipeline, AutoTokenizer
 
 # import prompting 
-from modules.prompt_fns import PromptGenerator, BelugaPromptGenerator
+from modules.prompt_fns import PromptGenerator, SpecialPromptGenerator
 
 def load_file(filepath):
     '''
@@ -60,6 +60,9 @@ def model_picker(chosen_model:str="t5"):
     
     if chosen_model == "llama2":
         model_name = "meta-llama/Llama-2-7b-hf"
+
+    if chosen_model == "llama2_chat":
+        model_name = "meta-llama/Llama-2-7b-chat-hf"
 
     return model_name
 
@@ -109,10 +112,10 @@ def completions_generator(df, prompt_col:str, model, model_name:str, min_len:int
     return completions_df
 
 def generation_pipeline(chosen_model, df, datafile, prompt_number, min_len, max_tokens, outfilepath=None):
-    # create prompts (specific to the model)
-    if chosen_model == "beluga":
-        pg = BelugaPromptGenerator(prompt_number)
-        df = pg.create_beluga_prompt(df, datafile)
+    # create prompts (specific to the model beluga and llama chat )
+    if chosen_model == "beluga" or chosen_model == "llama2_chat":
+        pg = SpecialPromptGenerator(prompt_number, chosen_model)
+        df = pg.format_prompt(df, datafile, chosen_model)
     else: 
         pg = PromptGenerator(prompt_number)
         df = pg.create_prompt(df, datafile)
@@ -134,7 +137,7 @@ def generation_pipeline(chosen_model, df, datafile, prompt_number, min_len, max_
             return_full_text=False
         )
 
-    elif "llama2" in chosen_model: 
+    elif "llama2" or "beluga" in chosen_model: 
         model = pipeline(
             model = model_name,
             device_map = "auto",
