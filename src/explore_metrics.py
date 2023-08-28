@@ -1,5 +1,5 @@
 '''
-Script for exploring metrics within the different datasets. Useful for systematising the prompts for T5
+Script for exploring metrics within the different datasets. Useful for systematising the prompts
 '''
 
 # utils
