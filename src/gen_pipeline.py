@@ -43,7 +43,7 @@ def main():
     # define min and max length 
     min_len, max_tokens = 30, 50
 
-    if args.chosen_model == "llama2":
+    if "llama2" in args.chosen_model:
         from huggingface_hub import login
 
         # get token from txt
