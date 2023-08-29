@@ -1,13 +1,9 @@
 '''
-Functions for running the text generation pipelines 
+Classes and functions for generating text for the pipeline.
 '''
 
-# utils 
+# utils
 from tqdm import tqdm
-
-# data wrangling 
-import pandas as pd 
-import ndjson
 
 # models  
 from transformers import pipeline, AutoTokenizer
@@ -15,104 +11,131 @@ from transformers import pipeline, AutoTokenizer
 # import prompting 
 from modules.prompt_fns import PromptGenerator, SpecialPromptGenerator
 
-def load_file(filepath):
+class BaseModel():
     '''
-    Load ndjson file from path and convert to pandas dataframe 
-
-    Args
-        filepath: full path to file 
-    
-    Returns
-        df: pandas dataframe 
+    Base model for generating text.
     '''
 
-    # load data
-    print("[INFO:] Loading data ...")
-    with open(filepath) as f:
-        data = ndjson.load(f)
+    def __init__(self, chosen_model):
+        self.chosen_model = chosen_model
+        self.model_name = self.get_model_name() # store model name as an instance var
+        self.model = None # intialize as None. Later represented as HF pipeline. 
+        
+    def get_model_name(self): 
+        '''
+        Get full model name from a shorter, chosen name.
+        '''
+
+        model_names = {
+            "falcon": "tiiuae/falcon-7b",
+            "falcon_instruct": "tiiuae/falcon-7b-instruct", 
+            "t5":"google/flan-t5-xxl",
+            "beluga":"stabilityai/StableBeluga-7B", 
+            "llama2": "meta-llama/Llama-2-7b-hf", 
+            "llama2_chat":"meta-llama/Llama-2-7b-chat-hf"
+        }
+
+        return model_names.get(self.chosen_model)
+
+    def initialize_model(self): 
+        '''
+        Initialize model if not already done. Common method for pipeline. Overridden by subclasses
+        '''
+        if self.model is None: 
+            self.model = pipeline(model = self.model_name, device_map = "auto")
     
-    # make into dataframe
-    df = pd.DataFrame(data)
-    
-    return df 
+    def completions_generator(self, df, prompt_col, min_len, max_tokens, outfilepath=None):
+        '''
+        Create completions based on source text in dataframe (df). Save to outfilepath if specified.
 
-def model_picker(chosen_model:str="t5"): 
-    '''
-    Function for picking model to finetune.
+        Args
+            df: dataframe with prompt col 
+            prompt_col: name of column to generate completions from 
+            min_len: minimum length of the completion (output)
+            max_tokens: maximum new tokens to be added 
+            outfilepath: path where the file should be saved (defaults to none, not saving anything)
 
-    Args
-        chosen_model: name of model to use. 
-    
-    Returns
-        model_name: full string name of model 
-    '''
-    if chosen_model == "falcon":
-        model_name = "tiiuae/falcon-7b"
+        Returns
+            completions_df: dataframe with model completions and ID 
+        '''
 
-    if chosen_model == "falcon_instruct":
-        model_name = "tiiuae/falcon-7b-instruct"
+        # init model if needed (will only do once)
+        self.initialize_model() 
+        
+        # empty list for completions
+        completions = []
 
-    if chosen_model == "t5": 
-        model_name = "google/flan-t5-xxl"        
+        for prompt in tqdm(df[prompt_col], desc="Generating"):
+            # use initlaised model to create completion
+            completion = self.model(prompt, min_length=min_len, max_new_tokens=max_tokens)
 
-    if chosen_model == "beluga": 
-        model_name = "stabilityai/StableBeluga-7B"    
-    
-    if chosen_model == "llama2":
-        model_name = "meta-llama/Llama-2-7b-hf"
+            # extraxt ONLY the text from the completion (it is wrapped as a list of dicts otherwise)
+            completion_txt = list(completion[0].values())[0]
 
-    if chosen_model == "llama2_chat":
-        model_name = "meta-llama/Llama-2-7b-chat-hf"
+            # append to lst
+            completions.append(completion_txt)
 
-    return model_name
+        # add ID column 
+        completions_df = df[["id", prompt_col]].copy()
+        
+        # add chosen_mdl name to column
+        completions_df[f"{self.chosen_model}_completions"] = completions
 
-def completions_generator(df, prompt_col:str, model, model_name:str, min_len:int , max_tokens: int, outfilepath=None):
-    '''
-    Create completions based on source text in dataframe (df). Save to outfilepath if specified.
+        # save to outfilepath if not None
+        if outfilepath is not None:
+            completions_df.to_json(outfilepath, orient="records", lines=True, force_ascii=False)
 
-    Args
-        df: dataframe with "source" text col
-        prompt_col: name of column to generate completions from 
-        model: initalised model pipeline
-        model_name: name of model (used for naming the column with generated text)
-        min_len: minimum length of the completion (output)
-        max_tokens: maximum new tokens to be added 
-        outfilepath: path where the file should be saved (defaults to none, not saving anything)
+        return completions_df
 
-    Returns
-        completions_df: dataframe with model completions and ID 
-    '''
+class BelugaModel(BaseModel):
+    def __init__(self):
+        super().__init__(chosen_model="beluga") # only one chosen_model, so it is specified here, inherited by BaseModel. 
 
-    # empty list for completions
-    completions = []
+    def initialize_model(self):
+        if self.model is None: 
+            self.model = pipeline(
+                model=self.get_model_name(),  # get mdl name from base class
+                device_map = "auto",
+                return_full_text=False
+            )
 
-    # generate the text
-    for prompt in tqdm(df[prompt_col], desc="Generating"):
-        completion = model(prompt, min_length=min_len, max_new_tokens=max_tokens)
+class Llama2Model(BaseModel):
+    def initialize_model(self):
+        if self.model is None: 
+            self.model = pipeline(
+                model=self.get_model_name(),  # get mdl name from base class
+                device_map="auto",
+                return_full_text=False
+            )
 
-        # extraxt ONLY the text from the completion (it is wrapped as a list of dicts otherwise)
-        completion_txt = list(completion[0].values())[0]
+class FalconModel(BaseModel):
+    def initialize_model(self):
+        if self.model is None:
+            # init tokenizer for falcon 
+            tokenizer = AutoTokenizer.from_pretrained(self.get_model_name())  # get mdl name from base class
 
-        # append to lst 
-        completions.append(completion_txt)
-    
-    # add ID column from completions_df   
-    completions_df = df[["id", prompt_col]].copy()
-
-    # add completions 
-    completions_df[f"{model_name}_completions"] = completions
-
-    # save it to json ONLY if outfilepath is specified 
-    if outfilepath is not None:
-        completions_json = completions_df.to_json(orient="records", lines=True, force_ascii=False)
-
-        with open(outfilepath, "w", encoding = "utf-8") as file:
-            file.write(completions_json)
-
-    return completions_df
+            self.model = pipeline(
+                model=self.get_model_name(),  # get mdl name from base class
+                tokenizer=tokenizer,
+                trust_remote_code=True, # trust remote code for falcon
+                device_map="auto",
+                return_full_text=False, 
+            )
 
 def generation_pipeline(chosen_model, df, datafile, prompt_number, min_len, max_tokens, outfilepath=None):
-    # create prompts (specific to the model beluga and llama chat )
+    if chosen_model == "beluga":
+        model_instance = BelugaModel()
+    
+    elif "llama2" in chosen_model:
+        model_instance = Llama2Model(chosen_model)
+
+    elif "falcon" in chosen_model: 
+        model_instance = FalconModel(chosen_model)
+
+    else:
+        model_instance = BaseModel(chosen_model)  # init BaseModel for other models than the specified ones
+
+    # create prompt col 
     if chosen_model == "beluga" or chosen_model == "llama2_chat":
         pg = SpecialPromptGenerator(prompt_number, chosen_model)
         df = pg.format_prompt(df, datafile, chosen_model)
@@ -120,37 +143,7 @@ def generation_pipeline(chosen_model, df, datafile, prompt_number, min_len, max_
         pg = PromptGenerator(prompt_number)
         df = pg.create_prompt(df, datafile)
 
-    # retrive full name of chosen model 
-    model_name = model_picker(chosen_model)
-    
-    # initialise model (different initialisation for falcon & llama2)
-    print("[INFO]: Loading model ...")
-    if "falcon" in chosen_model:
-        # intialise tokenizer
-        tokenizer = AutoTokenizer.from_pretrained(model_name)
+    # create completions with completions generator from BaseModel
+    df_completions = model_instance.completions_generator(df, f"prompt_{prompt_number}", min_len, max_tokens, outfilepath=outfilepath)
 
-        model = pipeline(
-            model = model_name,
-            tokenizer = tokenizer, 
-            trust_remote_code = True,
-            device_map = "auto",
-            return_full_text=False
-        )
-
-    elif "llama2" in chosen_model or "beluga" in chosen_model: 
-        model = pipeline(
-            model = model_name,
-            device_map = "auto",
-            return_full_text=False
-        )
-    
-    else: 
-        model = pipeline(
-            model = model_name,
-            device_map = "auto"
-        )
-
-    # generate text and save it to json 
-    df_completions = completions_generator(df, f"prompt_{prompt_number}", model, chosen_model, min_len, max_tokens, outfilepath=outfilepath) 
-
-    return df
+    return df_completions
