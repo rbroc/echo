@@ -6,10 +6,6 @@ Pipeline to generate AI completions with various models using Hugging Face's pip
 import argparse
 import pathlib
 
-# utils 
-import pathlib
-import argparse
-
 # custom functions for datasets
 from modules.data_fns import load_file, extract_min_max_tokens
 
