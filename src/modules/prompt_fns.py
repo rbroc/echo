@@ -75,7 +75,7 @@ class SpecialPromptGenerator(PromptGenerator):
 
     def create_prompt(self, df, datafile="dailymail_cnn"):
         # retrieve system prompts
-        system_prompt = self.get_system_prompt(model_type)
+        system_prompt = self.get_system_prompt(self.model_type)
 
         # retrieve task prompt
         task_prompt = self.get_prompt(datafile)
