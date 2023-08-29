@@ -1,5 +1,5 @@
 '''
-Prompting functions 
+Classes for generating prompts. Contains the special class "SpecialPromptGenerator" for embedding task prompts within an interface (used for chat-models "llama2_chat" and "beluga"). 
 '''
 
 class PromptGenerator:
@@ -73,7 +73,7 @@ class SpecialPromptGenerator(PromptGenerator):
     
         return system_prompts.get(model_type, "")
 
-    def format_prompt(self, df, datafile="dailymail_cnn", model_type="beluga"):
+    def create_prompt(self, df, datafile="dailymail_cnn", model_type="beluga"):
         # retrieve system prompts
         system_prompt = self.get_system_prompt(model_type)
 
