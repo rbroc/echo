@@ -155,8 +155,8 @@ def generation_pipeline(chosen_model:str, df:pd.DataFrame, datafile:str, prompt_
     # intialise prompt generator
     pg = SpecialPromptGenerator(prompt_number, chosen_model) if chosen_model in ["beluga", "llama2_chat"] else PromptGenerator(prompt_number)
 
-    # create prompt
-    df = pg.create_prompt(df, datafile, chosen_model)
+    # create prompt 
+    df = pg.create_prompt(df, datafile)
 
     # create completions with completions generator from BaseModel
     df_completions = model_instance.completions_generator(df, f"prompt_{prompt_number}", min_len, max_tokens, outfilepath=outfilepath)

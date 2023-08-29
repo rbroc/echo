@@ -73,7 +73,7 @@ class SpecialPromptGenerator(PromptGenerator):
     
         return system_prompts.get(model_type, "")
 
-    def create_prompt(self, df, datafile="dailymail_cnn", model_type="beluga"):
+    def create_prompt(self, df, datafile="dailymail_cnn"):
         # retrieve system prompts
         system_prompt = self.get_system_prompt(model_type)
 
@@ -109,6 +109,56 @@ class SpecialPromptGenerator(PromptGenerator):
         df[f"prompt_{self.prompt_number}"] = formatted_prompts
 
         return df
+    
+class OneShotGenerator(PromptGenerator):
+    '''
+    One shot learning generator for T5 models.
+    '''
+    def __init__(self, prompt_number): 
+        # inherit prompt number from super class, define model type 
+        super().__init__(prompt_number)
+
+    def create_prompt(self, df, datafile="dailymail_cnn"):
+        # retrieve task prompt
+        task_prompt = self.get_prompt(datafile)
+
+        # retrieve first example
+        example = df.iloc[0]
+        example_source = example["source"]
+        example_completion = example["human_completions"] # take a human completion as example 
+
+        # create one shot example
+        one_shot_example = task_prompt + example_source + f"Completion: {example_completion}"
+
+        formatted_prompts = []
+
+        # iterate over dataframe
+        for row in df.itertuples():
+            # extract source text 
+            source_text = row.source
+            
+            # format prompts IF there is a task prompt 
+            if task_prompt:
+                # define user prompt (task prompt e.g., ""summarize this: 'I love language models'")
+                user_prompt = task_prompt + source_text
+                
+                # embed oneshot example
+                final_prompt = f"Example: {one_shot_example}. User: {user_prompt}. Completion: "
+                
+                # add to list of formatted prompts
+                formatted_prompts.append(final_prompt)
+
+            else:
+                formatted_prompts.append(f"No prompt created for datafile '{datafile}'. Invalid prompt_number or no task prompts available.")
+
+        df[f"prompt_{self.prompt_number}"] = formatted_prompts
+
+        return df
+
+
+         
 
 
 
+
+    
