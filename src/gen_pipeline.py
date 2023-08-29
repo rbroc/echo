@@ -3,11 +3,18 @@ Pipeline to generate AI completions with various models using Hugging Face's pip
 '''
 
 # utils 
+import argparse
+import pathlib
+
+# utils 
 import pathlib
 import argparse
 
-# import custom functions 
-from modules.pipeline_fns import load_file, generation_pipeline
+# custom functions for datasets
+from modules.data_fns import load_file, extract_min_max_tokens
+
+# custom function for pipeline 
+from modules.pipeline_fns import generation_pipeline
 
 def input_parse():
     parser = argparse.ArgumentParser()
@@ -41,7 +48,7 @@ def main():
         df = df[:args.data_subset]
 
     # define min and max length 
-    min_len, max_tokens = 30, 50
+    min_len, max_tokens = extract_min_max_tokens(args.filename)
 
     if "llama2" in args.chosen_model:
         from huggingface_hub import login
