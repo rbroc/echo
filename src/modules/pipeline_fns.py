@@ -4,7 +4,11 @@ Classes and functions for generating text for the pipeline.
 
 # utils
 from tqdm import tqdm
+
+# data wrangling (for completions)
 import pandas as pd 
+from datasets import Dataset
+from transformers.pipelines.pt_utils import KeyDataset
 
 # models  
 from transformers import pipeline, AutoTokenizer
@@ -44,8 +48,9 @@ class BaseModel():
         '''
         if self.model is None: 
             self.model = pipeline(model = self.model_name, device_map = "auto")
-    
-    def completions_generator(self, df, prompt_col, min_len, max_tokens, outfilepath=None):
+
+
+    def completions_generator(self, df, prompt_col, min_len, max_tokens, batch_size=1, outfilepath=None):
         '''
         Create completions based on source text in dataframe (df). Save to outfilepath if specified.
 
@@ -54,39 +59,36 @@ class BaseModel():
             prompt_col: name of column to generate completions from 
             min_len: minimum length of the completion (output)
             max_tokens: maximum new tokens to be added 
+            batch_size: the amount of batches the data should be handled in (default to 1, i.e., no batching).
             outfilepath: path where the file should be saved (defaults to none, not saving anything)
 
         Returns
-            completions_df: dataframe with model completions and ID 
+            completions_ds: huggingface dataset with model completions and ID 
         '''
-
-        # init model if needed (will only do once)
+        # intialize mdl 
         self.initialize_model() 
-        
+
+        # convert to HF dataset for batching/streaming option
+        ds = Dataset.from_pandas(df)
+
         # empty list for completions
         completions = []
 
-        for prompt in tqdm(df[prompt_col], desc="Generating"):
-            # use initlaised model to create completion
-            completion = self.model(prompt, min_length=min_len, max_new_tokens=max_tokens)
-
-            # extraxt ONLY the text from the completion (it is wrapped as a list of dicts otherwise)
-            completion_txt = list(completion[0].values())[0]
-
-            # append to lst
+        # use pipeline on dataset
+        for out in tqdm(self.model(KeyDataset(ds, prompt_col), batch_size=batch_size), desc="Generating"): 
+            completion_txt = list(out[0].values())[0]
             completions.append(completion_txt)
 
-        # add ID column 
-        completions_df = df[["id", prompt_col]].copy()
+        # make completions ds without human completions and source
+        completions_ds = ds.remove_columns(["human_completions", "source"])
+
+        # add completions to ds  
+        completions_ds = completions_ds.add_column(f"{self.chosen_model}_completions", completions)
         
-        # add chosen_mdl name to column
-        completions_df[f"{self.chosen_model}_completions"] = completions
-
-        # save to outfilepath if not None
         if outfilepath is not None:
-            completions_df.to_json(outfilepath, orient="records", lines=True, force_ascii=False)
+            completions_ds.to_json(outfilepath, orient="records", lines=True, force_ascii=False)
 
-        return completions_df
+        return completions_ds 
 
 class BelugaModel(BaseModel):
     def __init__(self):
