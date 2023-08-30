@@ -1,20 +1,35 @@
-### Running the code
-
-The easiest way is to clone the repo and run the setup script to create a virtual environment and install packages:
-
+## Setup 
+To install necessary requirements in a virtual environment (`env`), please run the `setup.sh` in the terminal:
 ```bash
 bash setup.sh
 ```
+Note that this requires python *3.10* which is the standard python version on the UCloud CPU's. 
 
+## Running the Code 
+### Generation Pipeline 
+To run the generation text pipeline, run the script with the custom arguments:
+```
+python src/gen_pipeline.py -mdl {MODELNAME} -f {FILENAME} -prompt_n {PROMPT_NUMBER} -subset {DATA_SUBSET}
+```
+
+With the arguments specified below: 
+| <div style="width:80px">Arg</div>    | Description                             | <div style="width:120px">Default</div>    |
+| :---        |:---                                                                                        |:---             |
+|```-mdl```   | Model to use for generating. Choose between `beluga`, `falcon`, `falcon_instruct`, `llama2` and `llama2_chat`. Currently these are all the smaller 7B models. See full models names at [pipeline_fns.py](src/modules/pipeline_fns.py)            | `beluga`     |
+|```-f```| Filename. Choose between `dailydialog`, `dailymail_cnn`, `mrpc` and `stories`  | `stories`.              |
+|```-prompt_n```   | Integer between 1 and 6 currently. See [prompt_fns.py](src/modules/prompt_fns.py) for the specific prompts to choose between for each dataset.            |    `1`            |
+|```-subset```   |   Integer how big of a subset of the data you want to use `dataset[:subset]``               | `None` (i.e., no subset)               |
+
+*arguments subject to change*
+
+Please note that these models are quite large and require 32 or 64 CPUs to run in decent time on a small subset. For running on CPU, you may want to avoid the `stories` dataset as it is a quite heavy!
+
+### Extracting Metrics 
 You can then extract metrics from all of the data using the second bash script:
 
 ```bash
 bash run.sh
 ```
-
-The pipeline requries  *Python3.11* - it should work down to *3.9*, but hasn't been tested.
-
-
 ### Datasets
 All datasets can be found under `datasets`. In each folder, `data.ndjson` contains the processed version of the dataset (lowercased).
 Each folder also contains additional files, used e.g., to generate or inspect the datasets. <br>
