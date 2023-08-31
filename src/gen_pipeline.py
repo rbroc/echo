@@ -20,6 +20,7 @@ def input_parse():
     parser.add_argument("-mdl", "--chosen_model", help = "Choose between ...", type = str, default = "t5")
     parser.add_argument("-prompt_n", "--prompt_number", help = "choose which prompt to use", type = int, default = 1)
     parser.add_argument("-subset", "--data_subset", help = "how many rows you want to include. Useful for testing. Defaults to None.", type = int, default=None)
+    parser.add_argument("-batch", "--batch_size", help = "Batching of dataset. Mainly for processing in parallel for GPU. Defaults to no batching (batch size of 1). ", type = int, default=1)
 
     # save arguments to be parsed from the CLI
     args = parser.parse_args()
@@ -63,6 +64,7 @@ def main():
         prompt_number = args.prompt_number, 
         min_len = min_len, 
         max_tokens = max_tokens, 
+        batch_size=args.batch_size,
         outfilepath = path.parents[0]/"test.ndjson")
 
 
