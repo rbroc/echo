@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-python3.10 -m venv env
+python3 -m venv env
 source ./env/bin/activate
 pip install -r requirements.txt
 python -m spacy download en_core_web_md
