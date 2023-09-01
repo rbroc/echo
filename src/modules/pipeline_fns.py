@@ -4,13 +4,18 @@ Classes and functions for generating text for the pipeline.
 
 # utils
 from tqdm import tqdm
+
+# data wrangling (for completions)
 import pandas as pd 
+from datasets import Dataset
+from transformers.pipelines.pt_utils import KeyDataset
 
 # models  
 from transformers import pipeline, AutoTokenizer
 
 # import prompting 
 from modules.prompt_fns import PromptGenerator, SpecialPromptGenerator
+from modules.logger import custom_logging
 
 class BaseModel():
     '''
@@ -44,8 +49,9 @@ class BaseModel():
         '''
         if self.model is None: 
             self.model = pipeline(model = self.model_name, device_map = "auto")
-    
-    def completions_generator(self, df, prompt_col, min_len, max_tokens, outfilepath=None):
+
+
+    def completions_generator(self, df:pd.DataFrame, prompt_col:str, min_len:int, max_tokens:int, loggerpath, loggername:str, batch_size=1, outfilepath=None):
         '''
         Create completions based on source text in dataframe (df). Save to outfilepath if specified.
 
@@ -54,39 +60,40 @@ class BaseModel():
             prompt_col: name of column to generate completions from 
             min_len: minimum length of the completion (output)
             max_tokens: maximum new tokens to be added 
+            batch_size: the amount of batches the data should be handled in (default to 1, i.e., no batching).
             outfilepath: path where the file should be saved (defaults to none, not saving anything)
 
         Returns
-            completions_df: dataframe with model completions and ID 
+            completions_ds: huggingface dataset with model completions and ID 
         '''
+        # intialise logger
+        logger = custom_logging("generator", loggername, loggerpath)
 
-        # init model if needed (will only do once)
+        # intialize mdl 
         self.initialize_model() 
-        
+
+        # convert to HF dataset for batching/streaming option
+        ds = Dataset.from_pandas(df)
+
         # empty list for completions
         completions = []
 
-        for prompt in tqdm(df[prompt_col], desc="Generating"):
-            # use initlaised model to create completion
-            completion = self.model(prompt, min_length=min_len, max_new_tokens=max_tokens)
-
-            # extraxt ONLY the text from the completion (it is wrapped as a list of dicts otherwise)
-            completion_txt = list(completion[0].values())[0]
-
-            # append to lst
+        # use pipeline on dataset
+        for out in tqdm(self.model(KeyDataset(ds, prompt_col), min_length=min_len, max_new_tokens=max_tokens, batch_size=batch_size)): 
+            completion_txt = list(out[0].values())[0] # retrieve only the raw text 
+            logger.info(completion_txt)
             completions.append(completion_txt)
 
-        # add ID column 
-        completions_df = df[["id", prompt_col]].copy()
+        # make completions ds without human completions and source
+        completions_ds = ds.remove_columns(["human_completions", "source"])
+
+        # add completions to ds  
+        completions_ds = completions_ds.add_column(f"{self.chosen_model}_completions", completions)
         
-        # add chosen_mdl name to column
-        completions_df[f"{self.chosen_model}_completions"] = completions
-
-        # save to outfilepath if not None
         if outfilepath is not None:
-            completions_df.to_json(outfilepath, orient="records", lines=True, force_ascii=False)
+            completions_ds.to_json(outfilepath, orient="records", lines=True, force_ascii=False)
 
-        return completions_df
+        return completions_ds 
 
 class BelugaModel(BaseModel):
     def __init__(self):
@@ -99,6 +106,9 @@ class BelugaModel(BaseModel):
                 device_map = "auto",
                 return_full_text=False
             )
+            
+            # allow for padding 
+            self.model.tokenizer.pad_token_id = self.model.model.config.eos_token_id
 
 class Llama2Model(BaseModel):
     def initialize_model(self):
@@ -109,21 +119,27 @@ class Llama2Model(BaseModel):
                 return_full_text=False
             )
 
+            # allow for padding 
+            self.model.tokenizer.pad_token_id = self.model.model.config.eos_token_id
+
 class FalconModel(BaseModel):
     def initialize_model(self):
         if self.model is None:
             # init tokenizer for falcon 
-            tokenizer = AutoTokenizer.from_pretrained(self.get_model_name())  # get mdl name from base class
+            tokenizer = AutoTokenizer.from_pretrained(self.get_model_name(), padding_side="left")  # get mdl name from base class
 
             self.model = pipeline(
-                model=self.get_model_name(),  # get mdl name from base class
+                model=self.get_model_name(),  
                 tokenizer=tokenizer,
                 trust_remote_code=True, # trust remote code for falcon
                 device_map="auto",
                 return_full_text=False, 
             )
 
-def generation_pipeline(chosen_model:str, df:pd.DataFrame, datafile:str, prompt_number:int, min_len:int, max_tokens:int, outfilepath=None):
+            # allow for padding 
+            self.model.tokenizer.pad_token_id = self.model.model.config.eos_token_id
+
+def generation_pipeline(chosen_model:str, df:pd.DataFrame, datafile:str, prompt_number:int, min_len:int, max_tokens:int, loggerpath, loggername:str, batch_size:int=1, outfilepath=None):
     '''
     Generation pipeline. Create prompts and completions from "source" column. 
 
@@ -159,6 +175,6 @@ def generation_pipeline(chosen_model:str, df:pd.DataFrame, datafile:str, prompt_
     df = pg.create_prompt(df, datafile)
 
     # create completions with completions generator from BaseModel
-    df_completions = model_instance.completions_generator(df, f"prompt_{prompt_number}", min_len, max_tokens, outfilepath=outfilepath)
+    df_completions = model_instance.completions_generator(df=df, prompt_col=f"prompt_{prompt_number}", min_len=min_len, max_tokens=max_tokens, batch_size=batch_size, outfilepath=outfilepath, loggerpath=loggerpath, loggername=loggername)
 
     return df_completions
