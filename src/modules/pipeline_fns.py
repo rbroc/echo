@@ -15,6 +15,7 @@ from transformers import pipeline, AutoTokenizer
 
 # import prompting 
 from modules.prompt_fns import PromptGenerator, SpecialPromptGenerator
+from modules.logger import custom_logging
 
 class BaseModel():
     '''
@@ -50,7 +51,7 @@ class BaseModel():
             self.model = pipeline(model = self.model_name, device_map = "auto")
 
 
-    def completions_generator(self, df, prompt_col, min_len, max_tokens, batch_size=1, outfilepath=None):
+    def completions_generator(self, df:pd.DataFrame, prompt_col:str, min_len:int, max_tokens:int, loggerpath, loggername:str, batch_size=1, outfilepath=None):
         '''
         Create completions based on source text in dataframe (df). Save to outfilepath if specified.
 
@@ -65,6 +66,9 @@ class BaseModel():
         Returns
             completions_ds: huggingface dataset with model completions and ID 
         '''
+        # intialise logger
+        logger = custom_logging("generator", loggername, loggerpath)
+
         # intialize mdl 
         self.initialize_model() 
 
@@ -77,6 +81,7 @@ class BaseModel():
         # use pipeline on dataset
         for out in tqdm(self.model(KeyDataset(ds, prompt_col), min_length=min_len, max_new_tokens=max_tokens, batch_size=batch_size)): 
             completion_txt = list(out[0].values())[0] # retrieve only the raw text 
+            logger.info(completion_txt)
             completions.append(completion_txt)
 
         # make completions ds without human completions and source
@@ -134,7 +139,7 @@ class FalconModel(BaseModel):
             # allow for padding 
             self.model.tokenizer.pad_token_id = self.model.model.config.eos_token_id
 
-def generation_pipeline(chosen_model:str, df:pd.DataFrame, datafile:str, prompt_number:int, min_len:int, max_tokens:int, batch_size:int=1, outfilepath=None):
+def generation_pipeline(chosen_model:str, df:pd.DataFrame, datafile:str, prompt_number:int, min_len:int, max_tokens:int, loggerpath, loggername:str, batch_size:int=1, outfilepath=None):
     '''
     Generation pipeline. Create prompts and completions from "source" column. 
 
@@ -170,6 +175,6 @@ def generation_pipeline(chosen_model:str, df:pd.DataFrame, datafile:str, prompt_
     df = pg.create_prompt(df, datafile)
 
     # create completions with completions generator from BaseModel
-    df_completions = model_instance.completions_generator(df=df, prompt_col=f"prompt_{prompt_number}", min_len=min_len, max_tokens=max_tokens, batch_size=batch_size, outfilepath=outfilepath)
+    df_completions = model_instance.completions_generator(df=df, prompt_col=f"prompt_{prompt_number}", min_len=min_len, max_tokens=max_tokens, batch_size=batch_size, outfilepath=outfilepath, loggerpath=loggerpath, loggername=loggername)
 
     return df_completions
