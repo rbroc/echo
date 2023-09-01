@@ -20,7 +20,7 @@ def input_parse():
 
     return args
 
-def get_mean_doc_length(datapath, filename):
+def get_min_max_doc_length(datapath, filename):
     # define paths
     source_file = datapath / f"{filename}_source.csv"
     completions_file = datapath / f"{filename}_completions.csv"
@@ -30,12 +30,15 @@ def get_mean_doc_length(datapath, filename):
     completions = pd.read_csv(completions_file)
 
     # get dictionary
-    mean_lengths = {
-        f"{filename}_source": round(source["doc_length"].mean(), 3),
-        f"{filename}_completions": round(completions["doc_length"].mean(), 3)
+    min_lengths = {
+        #f"{filename}_source": round(source["doc_length"].min(), 3),
+        f"{filename}_completions": round(completions["doc_length"].min(), 3)
+    }
+    max_lengths = {
+        f"{filename}_completions": round(completions["doc_length"].max(), 3)
     }
 
-    return mean_lengths
+    return min_lengths, max_lengths
 
 def get_median_doc_length(datapath, filename):
     # define paths
@@ -54,22 +57,22 @@ def get_median_doc_length(datapath, filename):
 
     return median_lengths
 
-def get_quantiles(datapath, filename):
+#def get_quantiles(datapath, filename):
     # define paths
-    source_file = datapath / f"{filename}_source.csv"
-    completions_file = datapath / f"{filename}_completions.csv"
+    #source_file = datapath / f"{filename}_source.csv"
+    #completions_file = datapath / f"{filename}_completions.csv"
 
     # load files
-    source = pd.read_csv(source_file)
-    completions = pd.read_csv(completions_file)
+   # source = pd.read_csv(source_file)
+    #completions = pd.read_csv(completions_file)
 
     # get dictionary
-    quantile_lengths = {
-        f"{filename}_source": source["doc_length"].quantile([0.25, 0.50, 0.75]),
-        f"{filename}_completions": completions["doc_length"].quantile([0.25, 0.50, 0.75])
-    }
+    #quantile_lengths = {
+        #f"{filename}_source": source["doc_length"].quantile([0.25, 0.50, 0.75]),
+       # f"{filename}_completions": completions["doc_length"].quantile([0.25, 0.50, 0.75])
+    #}
 
-    return quantile_lengths
+    #return quantile_lengths
 
 def main(): 
     # init args
@@ -79,21 +82,23 @@ def main():
     path = pathlib.Path(__file__)
     datapath = path.parents[1] / "out" 
 
-    mean_lengths = []
+    min_lengths = []
+    max_lengths = []
     median_lengths = []
-    quantile_lengths = []
+    #quantile_lengths = []
 
     for filename in ["stories", "dailydialog", "dailymail_cnn", "mrpc"]:
-        mean_len = get_mean_doc_length(datapath, filename)
+        min_len, max_len = get_min_max_doc_length(datapath, filename)
         median_len = get_median_doc_length(datapath, filename)
-        quantile_len = get_quantiles(datapath, filename)
+        #quantile_len = get_quantiles(datapath, filename)
 
-        mean_lengths.append(mean_len)
+        min_lengths.append(min_len)
+        max_lengths.append(max_len)
         median_lengths.append(median_len)
-        quantile_lengths.append(quantile_len)
+        #quantile_lengths.append(quantile_len)
 
-    print(f"\n MEAN lengths for each dataset \n {mean_lengths} \n\n MEDIAN lengths for each dataset \n {median_lengths}")
-    print(f"\n QUANTILES \n {quantile_lengths}")
+    print(f"\n MIN lengths for each dataset \n {min_lengths} \n\n MAX lengths for each dataset \n {max_lengths} \n\n MEDIAN lengths for each dataset \n {median_lengths}")
+    #print(f"\n QUANTILES \n {quantile_lengths}")
 
 if __name__ == "__main__":
     main()
