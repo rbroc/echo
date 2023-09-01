@@ -39,8 +39,8 @@ def main():
     outpath = path.parents[1] / "datasets_ai" / f"{args.chosen_model}" 
     loggingpath = path.parents[1] / "datasets_ai" / "logs" / f"{args.chosen_model}" 
 
-    for path in [outpath, loggingpath]:
-        path.mkdir(parents=True, exist_ok=True)
+    for p in [outpath, loggingpath]:
+        p.mkdir(parents=True, exist_ok=True)
 
     df = load_file(datafile)
 
