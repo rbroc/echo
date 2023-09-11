@@ -22,13 +22,13 @@ class PromptGenerator:
             "stories_3": "complete the text: ",
             "stories_4": "complete the story: ",
             "stories_5": "finish the story: ",
-            "stories_6": "Make a story based on this writing prompt : ",
+            "stories_6": "Make a story based on this writing prompt: ",
 
             # mrpc (paraphrase)
             "mrpc_1": "paraphrase this text: ",
             "mrpc_2": "generate a sentence with a similar meaning: ",
             "mrpc_3": "paraphrase this: ",
-            "mrpc_4": "make a sentence that means the same as this",
+            "mrpc_4": "make a sentence that means the same as this: ",
 
             # dailydialog
             "dailydialog_1": "respond to the final sentence: ",
