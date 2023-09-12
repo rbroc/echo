@@ -68,7 +68,7 @@ class SpecialPromptGenerator(PromptGenerator):
     def get_system_prompt(self, model_type):
         system_prompts = {
             "beluga": "You are StableBeluga, an AI that follows instructions extremely well. Help as much as you can. Remember, be safe, and don't do anything illegal.\n\n",
-            "llama2_chat": "You are an AI, but you do not deviate from the task prompt and you do not small talk. You get straight to the point."
+            "llama2_chat": "You are an AI, but you do not deviate from the task prompt and you do not small talk. You get straight to the point. You always begin your response with #Response# "
         }
     
         return system_prompts.get(model_type, "")
