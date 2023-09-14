@@ -33,7 +33,7 @@ def load_file(filepath):
 def extract_min_max_tokens(datafilename):
     if "stories" in datafilename:
         min_tokens = 112
-        max_new_tokens = 3125
+        max_new_tokens = 1000
     
     if "mrpc" in datafilename:
         min_tokens = 8
@@ -41,7 +41,7 @@ def extract_min_max_tokens(datafilename):
     
     if "dailymail_cnn" in datafilename:
         min_tokens = 6
-        max_new_tokens = 433
+        max_new_tokens = 101
     
     if "dailydialog" in datafilename: 
         min_tokens = 2
