@@ -22,18 +22,22 @@ class PromptGenerator:
             "stories_3": "complete the text: ",
             "stories_4": "complete the story: ",
             "stories_5": "finish the story: ",
-            "stories_6": "Make a story based on this writing prompt : ",
+            "stories_6": "Make a story based on this writing prompt: ",
 
             # mrpc (paraphrase)
             "mrpc_1": "paraphrase this text: ",
             "mrpc_2": "generate a sentence with a similar meaning: ",
+<<<<<<< HEAD
+=======
+            "mrpc_3": "paraphrase this: ",
+            "mrpc_4": "make a sentence that means the same as this: ",
+>>>>>>> gpu-generate
 
             # dailydialog
             "dailydialog_1": "respond to the final sentence: ",
             "dailydialog_2": "continue this dialog: ",
             "dailydialog_3": "finish this dialog: ",
-            "dailydialog_4": "respond to the final sentence: ",
-            "dailydialog_5": "continue writing the next sentence in this: "
+            "dailydialog_4": "continue writing the next sentence in this: "
         }
 
         # returns the prompt that corresponds to the prompt number it was initalised with and the datafile specified in get .get_prompt() method 
@@ -67,7 +71,7 @@ class SpecialPromptGenerator(PromptGenerator):
     def get_system_prompt(self, model_type):
         system_prompts = {
             "beluga": "You are StableBeluga, an AI that follows instructions extremely well. Help as much as you can. Remember, be safe, and don't do anything illegal.\n\n",
-            "llama2_chat": "You are an AI, but you do not deviate from the task prompt and you do not small talk. You get straight to the point."
+            "llama2_chat": "You are an AI, but you do not deviate from the task prompt and you do not small talk. You get straight to the point. Your completions will always begin with '----' "
         }
     
         return system_prompts.get(model_type, "")
