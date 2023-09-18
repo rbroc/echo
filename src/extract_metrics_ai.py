@@ -5,7 +5,7 @@ from argparse import ArgumentParser
 import pathlib 
 
 
-def path_loaders():
+def input_parse():
     parser = ArgumentParser()
     parser.add_argument("-d",
                         "--dataset",
@@ -29,25 +29,17 @@ def process(dataframe, model):
 
     completion_metrics['id'] = dataframe["id"]
     print("...done!")
+    
+    # sort columns because td changes the orders each time script is run
+    completion_metrics = completion_metrics.reindex(sorted(completion_metrics.columns), axis=1)
 
     return completion_metrics
 
 def extract_ai_metrics():
-    args = path_loaders()
+    args = input_parse()
 
     prompt_numbers = [1, 2, 3, 4, 5, 6]
     path = pathlib.Path(__file__)
-    '''
-    infile = path.parents[1] / "datasets_ai" / "beluga" / "mrpc_prompt_1.ndjson"
-    data = pd.read_json(infile, lines=True)
-
-    results = process(data, "beluga")
-
-    outpath = path.parents[1] / "out_ai" / "beluga"
-    outpath.mkdir(parents=True, exist_ok=True)
-    
-    results.to_csv(outpath / "mrpc_prompt_1_completions.csv")
-    '''
 
     for prompt in prompt_numbers:
         infile = path.parents[1] / "datasets_ai" / args.model / f"{args.dataset}_prompt_{prompt}.ndjson"
