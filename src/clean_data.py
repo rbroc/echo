@@ -55,7 +55,7 @@ def cleanup():
     
     # Cleanup stories
     storiespath = Path('..') / 'datasets' / 'stories' 
-    storiesfile = storiespath / 'raw.json'
+    storiesfile = storiespath / 'stories_5bins_1000tokens_al.json'
     with open(storiesfile) as f:
         stories = json.load(f)
    
