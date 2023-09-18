@@ -27,11 +27,8 @@ class PromptGenerator:
             # mrpc (paraphrase)
             "mrpc_1": "paraphrase this text: ",
             "mrpc_2": "generate a sentence with a similar meaning: ",
-<<<<<<< HEAD
-=======
             "mrpc_3": "paraphrase this: ",
             "mrpc_4": "make a sentence that means the same as this: ",
->>>>>>> gpu-generate
 
             # dailydialog
             "dailydialog_1": "respond to the final sentence: ",
