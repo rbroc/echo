@@ -33,7 +33,7 @@ def load_file(filepath):
 def extract_min_max_tokens(datafilename):
     if "stories" in datafilename:
         min_tokens = 112
-        max_new_tokens = 1000
+        max_new_tokens = 1055
     
     if "mrpc" in datafilename:
         min_tokens = 8
