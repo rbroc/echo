@@ -3,14 +3,24 @@ import json
 from pathlib import Path
 import re
 
-def clean_stories_data(stories): 
+
+def clean_stories_data(stories):
     for col in ["source", "human_completions"]:
-        for s in stories: 
-            # lowercase the text 
+        for s in stories:
+            # lowercase the text
             s[col] = s[col].lower()
 
             # remove tokens that have brackets [ wp ] [ ip ]
             s[col] = re.sub(r'\[[^\]]+\]', '', s[col])
+
+            # remove parentheses tokens like ( wp )
+            s[col] = re.sub(r'\([^)]+\)', '', s[col])
+
+            # add a space after a word if it is followed by a word with an uppercase letter
+            s[col] = re.sub(r'(\w)([A-Z])', r'\1 \2', s[col])
+
+            # add space after the comma using lookahead assertion
+            s[col] = re.sub(r',(?=\S)', ', ', s[col])
 
             # remove the specific string "# # # # # # ( # dropcap )"
             s[col] = re.sub(r'#\s*#\s*#\s*#\s*#\s*#\s*\(\s*#\s*dropcap\s*\)', '', s[col])
@@ -23,20 +33,26 @@ def clean_stories_data(stories):
 
             # define punctuation marks
             punctuation_marks = r'.,!?;:'
-        
+
             # adjust spaces around punctuation marks, considering contractions
             for mark in punctuation_marks:
                 if mark == "'":
                     continue  # skip apostrophe to handle contractions separately
                 s[col] = re.sub(r'\s*(' + re.escape(mark) + r')\s*', r'\1 ', s[col])
-            
+
             # handle spaces around contractions (apostrophes)
             s[col] = re.sub(r'\s*’\s*', r'’', s[col])
-            
-            # remove extra space before last quotation mark
+
+            # remove space before the apostrophe in contractions
+            s[col] = re.sub(r'\s+(?=\')', '', s[col])
+
+            # handle spaces inside contractions like "doesn't"
+            s[col] = re.sub(r'\s+(?=\w+\'\w+)', '', s[col])
+
+            # remove extra space before the last quotation mark
             s[col] = s[col].strip()
 
-    return stories 
+    return stories
 
 def cleanup():
     ''' Standardizes datasets by lowercasing and removing irregular format '''
