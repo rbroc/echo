@@ -10,23 +10,13 @@ def clean_stories_data(stories):
             # lowercase the text
             s[col] = s[col].lower()
 
-            # remove tokens that have brackets [ wp ] [ ip ]
+            # Remove patterns enclosed by square brackets
             s[col] = re.sub(r'\[[^\]]+\]', '', s[col])
 
-            # remove parentheses tokens like ( wp )
-            s[col] = re.sub(r'\([^)]+\)', '', s[col])
+            # Remove all consecutive backticks (`)
+            s[col] = re.sub(r'`+', '', s[col])
 
-            # add a space after a word if it is followed by a word with an uppercase letter
-            s[col] = re.sub(r'(\w)([A-Z])', r'\1 \2', s[col])
-
-            # add space after the comma using lookahead assertion
-            s[col] = re.sub(r',(?=\S)', ', ', s[col])
-
-            # remove the specific string "# # # # # # ( # dropcap )"
-            s[col] = re.sub(r'#\s*#\s*#\s*#\s*#\s*#\s*\(\s*#\s*dropcap\s*\)', '', s[col])
-
-            # remove weird newlines
-            s[col] = re.sub(r'\n|<newline>', ' ', s[col])
+            # The rest of your cleaning steps go here...
 
             # replace multiple spaces with a single space
             s[col] = re.sub(r'\s+', ' ', s[col])
@@ -53,6 +43,7 @@ def clean_stories_data(stories):
             s[col] = s[col].strip()
 
     return stories
+
 
 def cleanup():
     ''' Standardizes datasets by lowercasing and removing irregular format '''
