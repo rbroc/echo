@@ -12,6 +12,7 @@ from transformers.pipelines.pt_utils import KeyDataset
 
 # models  
 from transformers import pipeline, AutoTokenizer
+import torch
 
 # import prompting 
 from modules.prompt_fns import PromptGenerator, SpecialPromptGenerator
@@ -131,6 +132,7 @@ class FalconModel(BaseModel):
             self.model = pipeline(
                 model=self.get_model_name(),  
                 tokenizer=tokenizer,
+                torch_dtype=torch.bfloat16,
                 trust_remote_code=True, # trust remote code for falcon
                 device_map="auto",
                 return_full_text=False, 
