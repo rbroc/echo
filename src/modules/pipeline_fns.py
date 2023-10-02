@@ -12,7 +12,7 @@ from transformers.pipelines.pt_utils import KeyDataset
 
 # models  
 from transformers import pipeline, AutoTokenizer
-
+import torch
 # import prompting 
 from modules.prompt_fns import PromptGenerator, SpecialPromptGenerator
 from modules.logger import custom_logging
@@ -38,7 +38,7 @@ class BaseModel():
             "t5":"google/flan-t5-xxl",
             "beluga":"stabilityai/StableBeluga-7B", 
             "llama2": "meta-llama/Llama-2-7b-hf", 
-            "llama2_chat":"meta-llama/Llama-2-7b-chat-hf"
+            "llama2_chat":"meta-llama/Llama-2-13b-chat-hf"
         }
 
         return model_names.get(self.chosen_model)
@@ -131,6 +131,7 @@ class FalconModel(BaseModel):
             self.model = pipeline(
                 model=self.get_model_name(),  
                 tokenizer=tokenizer,
+                torch_dtype=torch.bfloat16,
                 trust_remote_code=True, # trust remote code for falcon
                 device_map="auto",
                 return_full_text=False, 
