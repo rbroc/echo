@@ -41,10 +41,10 @@ def extract_min_max_tokens(datafilename):
     
     if "dailymail_cnn" in datafilename:
         min_tokens = 6
-        max_new_tokens = 101
+        max_new_tokens = 433
     
     if "dailydialog" in datafilename: 
         min_tokens = 2
-        max_new_tokens = 110
+        max_new_tokens = 220
 
     return min_tokens, max_new_tokens
