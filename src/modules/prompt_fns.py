@@ -68,7 +68,8 @@ class SpecialPromptGenerator(PromptGenerator):
     def get_system_prompt(self, model_type):
         system_prompts = {
             "beluga": "You are StableBeluga, an AI that follows instructions extremely well. Help as much as you can. Remember, be safe, and don't do anything illegal.\n\n",
-            "llama2_chat": "You are an AI, but you do not deviate from the task prompt and you do not small talk. You get straight to the point. Your completions will always begin with '----' "
+            "llama2_chat": "You are an AI, but you do not deviate from the task prompt and you do not small talk. Never begin your response with 'Sure, here is my response: ' or anything of the like. It is important that you finish without getting cut off."
+            #"You are an AI, but you do not deviate from the task prompt and you do not small talk. You get straight to the point. Your completions will always begin with '----'. Do not put the '----' anywhere but in the beginning of your completions."
         }
     
         return system_prompts.get(model_type, "")

@@ -31,6 +31,11 @@ def process(dataframe):
     completion_metrics = td.extract_df(completions,
                                         include_text=False)
     completion_metrics['id'] = ids
+
+    # sort cols 
+    source_metrics = source_metrics.reindex(sorted(source_metrics.columns), axis=1)
+    completion_metrics = completion_metrics.reindex(sorted(completion_metrics.columns), axis=1)
+
     print("...done!")
 
     return source_metrics, completion_metrics

@@ -39,7 +39,7 @@ class BaseModel():
             "t5":"google/flan-t5-xxl",
             "beluga":"stabilityai/StableBeluga-7B", 
             "llama2": "meta-llama/Llama-2-7b-hf", 
-            "llama2_chat":"meta-llama/Llama-2-7b-chat-hf"
+            "llama2_chat":"meta-llama/Llama-2-13b-chat-hf"
         }
 
         return model_names.get(self.chosen_model)
@@ -104,6 +104,7 @@ class BelugaModel(BaseModel):
         if self.model is None: 
             self.model = pipeline(
                 model=self.get_model_name(),  # get mdl name from base class
+                torch_dtype=torch.bfloat16,
                 device_map = "auto",
                 return_full_text=False
             )
@@ -116,6 +117,7 @@ class Llama2Model(BaseModel):
         if self.model is None: 
             self.model = pipeline(
                 model=self.get_model_name(),  # get mdl name from base class
+                torch_dtype=torch.bfloat16,
                 device_map="auto",
                 return_full_text=False
             )

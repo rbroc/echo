@@ -3,46 +3,55 @@ import json
 from pathlib import Path
 import re
 
-def clean_stories_data(stories): 
+
+def clean_stories_data(stories):
     for col in ["source", "human_completions"]:
-        for s in stories: 
-            # lowercase the text 
+        for s in stories:
+            # lowercase the text
             s[col] = s[col].lower()
 
-            # remove tokens that have brackets [ wp ] [ ip ]
+            # Remove patterns enclosed by square brackets
             s[col] = re.sub(r'\[[^\]]+\]', '', s[col])
 
-            # remove the specific string "# # # # # # ( # dropcap )"
-            s[col] = re.sub(r'#\s*#\s*#\s*#\s*#\s*#\s*\(\s*#\s*dropcap\s*\)', '', s[col])
+            # Remove all consecutive backticks (`)
+            s[col] = re.sub(r'`+', '', s[col])
 
-            # remove weird newlines
-            s[col] = re.sub(r'\n|<newline>', ' ', s[col])
+            # The rest of your cleaning steps go here...
 
             # replace multiple spaces with a single space
             s[col] = re.sub(r'\s+', ' ', s[col])
 
             # define punctuation marks
             punctuation_marks = r'.,!?;:'
-        
+
             # adjust spaces around punctuation marks, considering contractions
             for mark in punctuation_marks:
                 if mark == "'":
                     continue  # skip apostrophe to handle contractions separately
                 s[col] = re.sub(r'\s*(' + re.escape(mark) + r')\s*', r'\1 ', s[col])
-            
+
             # handle spaces around contractions (apostrophes)
             s[col] = re.sub(r'\s*’\s*', r'’', s[col])
-            
-            # remove extra space before last quotation mark
+
+            # remove space before the apostrophe in contractions
+            s[col] = re.sub(r'\s+(?=\')', '', s[col])
+
+            # handle spaces inside contractions like "doesn't"
+            s[col] = re.sub(r'\s+(?=\w+\'\w+)', '', s[col])
+
+            # remove extra space before the last quotation mark
             s[col] = s[col].strip()
 
-    return stories 
+    return stories
+
 
 def cleanup():
     ''' Standardizes datasets by lowercasing and removing irregular format '''
 
+    path = Path(__file__)
+
     # Cleanup mrsp
-    msrpath = Path('..') / 'datasets' / 'mrpc' 
+    msrpath = path.parents[1] / 'datasets' / 'mrpc' 
     msrfile = msrpath / 'raw.ndjson'
     with open(msrfile) as f:
         msrp = ndjson.load(f)
@@ -54,7 +63,7 @@ def cleanup():
         ndjson.dump(msrp, f, ensure_ascii=False)
     
     # Cleanup stories
-    storiespath = Path('..') / 'datasets' / 'stories' 
+    storiespath = path.parents[1] / 'datasets' / 'stories' 
     storiesfile = storiespath / 'stories_5bins_1000tokens_al.json'
     with open(storiesfile) as f:
         stories = json.load(f)
@@ -66,7 +75,7 @@ def cleanup():
         ndjson.dump(cleaned_stories, f, ensure_ascii=False)
 
     # Cleanup dailymail
-    dmpath = Path('..') / 'datasets' / 'dailymail_cnn' 
+    dmpath = path.parents[1] / 'datasets' / 'dailymail_cnn' 
     dmfile = dmpath / 'raw.ndjson'
     with open(dmfile) as f:
         dm = ndjson.load(f)
@@ -78,7 +87,7 @@ def cleanup():
 
 
     # clean dailydialog (remove EOT tokens)
-    dmpath = Path('..') / 'datasets' / 'dailydialog' 
+    dmpath = path.parents[1] / 'datasets' / 'dailydialog' 
     dmfile = dmpath / 'data.ndjson'
 
     with open(dmfile) as f:
