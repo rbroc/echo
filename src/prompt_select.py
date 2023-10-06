@@ -10,7 +10,7 @@ from sklearn.decomposition import PCA
 
 def load_data(ai_dir, human_datapath, models:list, dataset:str): 
     '''
-    Loads data and combines dataframes from human and ai generated data.
+    Combines dataframes from human and ai generated data.
 
     Args
         ai_dir (pathlib.Path): Path to ai generated data
@@ -95,30 +95,11 @@ def run_PCA(metrics_df:pd.DataFrame, feature_names:list):
 
     return pca, df
 
-def run_acrossdatasets(ai_dir, human_datapath, models, datasets):
-    # Load and combine datasets individually
-    combined_data = pd.DataFrame()
-
-    for dataset in datasets:
-        dataset_df = load_data(ai_dir, human_datapath, models, dataset)
-        combined_data = combined_data.append(dataset_df, ignore_index=True)
-
-    # Extract descriptive metrics
-    metrics_df = get_descriptive_metrics(combined_data, text_column='text', id_column='id')
-
-    # Run PCA on the combined metrics
-    feature_names = ['doc_length', 'n_tokens', 'n_characters', 'n_sentences']
-    pca, pca_df = run_PCA(metrics_df, feature_names)
-
-    return pca, pca_df
-
-def main(): 
+def load_single_dataset(dataset, models): 
     spacy.util.fix_random_seed(129)
     
     # load data 
     path = pathlib.Path(__file__)
-    models = ["beluga", "llama2_chat"]
-    dataset = "dailymail_cnn"
 
     ai_dir = path.parents[1] / "datasets_ai"
     human_data = path.parents[1] / "datasets" / dataset / "data.ndjson"
@@ -127,12 +108,44 @@ def main():
 
     # get metrics, perform PCA 
     metrics_df = get_descriptive_metrics(df, "completions", "id")
-    print(len(metrics_df))
 
     pca, final_df = run_PCA(metrics_df, feature_names=["doc_length", "n_tokens", "n_characters", "n_sentences"])
 
     print(final_df)
     print(pca.explained_variance_ratio_)
+
+    return pca, final_df
+
+def pipe_all_datasets(datasets, models): 
+    spacy.util.fix_random_seed(129)
+    
+    # load data 
+    path = pathlib.Path(__file__)
+    ai_dir = path.parents[1] / "datasets_ai"
+
+    all_dfs = []
+    
+    for dataset in datasets: 
+        human_path = path.parents[1] / "datasets" / dataset / "data.ndjson"
+        data = load_data(ai_dir, human_path, models, dataset)
+        all_dfs.append(data)
+
+    combined_df = pd.concat(all_dfs, ignore_index=True, axis=0)
+
+    metrics_df = get_descriptive_metrics(combined_df, "completions", "id")
+
+    pca, final_df = run_PCA(metrics_df, feature_names=["doc_length", "n_tokens", "n_characters", "n_sentences"])
+
+    print(final_df)
+    print(pca.explained_variance_ratio_)
+
+    return pca, final_df
+
+def main(): 
+    models = ["beluga", "llama2_chat"]
+    datasets = ["dailymail_cnn", "stories", "mrpc", "dailydialog"]
+
+    pca, final_df = pipe_all_datasets(datasets, models)
 
 if __name__ == "__main__":
     main()
