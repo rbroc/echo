@@ -85,9 +85,11 @@ def run_PCA(metrics_df:pd.DataFrame, feature_names:list):
     scaled_df = std_scaler.fit_transform(metrics_df[feature_names])
 
     pca = PCA()
-    result = pca.fit_transform(scaled_df)
+    results = pca.fit_transform(scaled_df)
 
-    return pca.components_, result
+    pca_df = pd.DataFrame(data = results)
+
+    return pca_df, pca
 
 
 def main(): 
@@ -106,10 +108,9 @@ def main():
     # get metrics, perform PCA 
     metrics_df = get_descriptive_metrics(df, "completions", "id")
 
-    components, results = run_PCA(metrics_df, feature_names=["doc_length", "n_tokens", "n_characters", "n_sentences"])
+    pca_df, pca = run_PCA(metrics_df, feature_names=["doc_length", "n_tokens", "n_characters", "n_sentences"])
 
-    print(components)
-    print(results)
+    print(pca_df)
 
 if __name__ == "__main__":
     main()
