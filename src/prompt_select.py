@@ -50,7 +50,7 @@ def load_data(ai_dir, human_datapath, models:list, dataset:str):
 
         # replace OG df with new df 
         ai_dfs[idx] = new_df
-    
+   
     human_df = human_df.query('id in @ai_dfs[1]["id"]').copy()
     human_df["model"] = "human"
     human_df.drop(["source"], inplace=True, axis=1)
@@ -60,7 +60,7 @@ def load_data(ai_dir, human_datapath, models:list, dataset:str):
     all_dfs = [human_df, *ai_dfs]
 
     # append human to ai_dfs, concatenate all data
-    combined_data = pd.concat(all_dfs, ignore_index=True)
+    combined_data = pd.concat(all_dfs, ignore_index=True, axis=0)
 
     return combined_data
 
@@ -72,10 +72,9 @@ def get_descriptive_metrics(df:pd.DataFrame, text_column:str, id_column:str):
     idcol = df[id_column]
 
     metrics = td.extract_metrics(text=textcol, spacy_model="en_core_web_lg", metrics=["descriptive_stats", "quality"])
-    metrics["id"] = idcol
-    subset_metrics = metrics[["id", "doc_length", "n_tokens", "n_characters", "n_sentences"]]
+    subset_metrics = metrics[["doc_length", "n_tokens", "n_characters", "n_sentences"]]
     
-    metrics_df = df.merge(subset_metrics, on="id", how="inner")
+    metrics_df = pd.concat([df, subset_metrics], axis=1)
     
     return metrics_df 
 
@@ -84,13 +83,34 @@ def run_PCA(metrics_df:pd.DataFrame, feature_names:list):
     std_scaler = StandardScaler()
     scaled_df = std_scaler.fit_transform(metrics_df[feature_names])
 
-    pca = PCA()
+    # run pca 
+    pca = PCA(n_components=3)
     results = pca.fit_transform(scaled_df)
 
-    pca_df = pd.DataFrame(data = results)
+    # save
+    pca_df = pd.DataFrame(data = results, columns=["pca_1", "pca_2", "pca_3"])
 
-    return pca_df, pca
+    # add new components to overall df 
+    df = pd.concat([metrics_df, pca_df],axis=1)
 
+    return pca, df
+
+def run_acrossdatasets(ai_dir, human_datapath, models, datasets):
+    # Load and combine datasets individually
+    combined_data = pd.DataFrame()
+
+    for dataset in datasets:
+        dataset_df = load_data(ai_dir, human_datapath, models, dataset)
+        combined_data = combined_data.append(dataset_df, ignore_index=True)
+
+    # Extract descriptive metrics
+    metrics_df = get_descriptive_metrics(combined_data, text_column='text', id_column='id')
+
+    # Run PCA on the combined metrics
+    feature_names = ['doc_length', 'n_tokens', 'n_characters', 'n_sentences']
+    pca, pca_df = run_PCA(metrics_df, feature_names)
+
+    return pca, pca_df
 
 def main(): 
     spacy.util.fix_random_seed(129)
@@ -107,10 +127,12 @@ def main():
 
     # get metrics, perform PCA 
     metrics_df = get_descriptive_metrics(df, "completions", "id")
+    print(len(metrics_df))
 
-    pca_df, pca = run_PCA(metrics_df, feature_names=["doc_length", "n_tokens", "n_characters", "n_sentences"])
+    pca, final_df = run_PCA(metrics_df, feature_names=["doc_length", "n_tokens", "n_characters", "n_sentences"])
 
-    print(pca_df)
+    print(final_df)
+    print(pca.explained_variance_ratio_)
 
 if __name__ == "__main__":
     main()
