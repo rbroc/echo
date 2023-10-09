@@ -93,6 +93,8 @@ def plot_loadings(loadings_matrix, component:int=1, outpath=None):
     plt.xlim()
     plot.set(title=f"PC{component}")
 
+    plt.tight_layout()
+
     if outpath:
         plt.savefig(outpath / f"PC_{component}.png")
 
