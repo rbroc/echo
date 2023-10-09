@@ -14,16 +14,19 @@ def compute_distances(pca_df:pd.DataFrame, models:list=["beluga", "llama2_chat"]
     Returns
         result_df: dataframe containing columns: id, model, dataset, distance, prompt_number
     '''
-    result_rows = []
-
-    # extract PCs from human outside for loop
-    pc_human = pca_df[pca_df['model'] == 'human'][components].values
+    result_rows = []    
 
     # subset pca_df to include only the AI models
     pca_df_ai = pca_df[pca_df['model'].isin(models)]
 
     for _, row in pca_df_ai.iterrows():
-            # extract PCs
+            # extract 'id' for the current row
+            current_id = row['id']
+
+            # extract PCs for the 'human' model with the same 'id'
+            pc_human = pca_df[(pca_df['model'] == 'human') & (pca_df['id'] == current_id)][components].values
+
+            # extract PCs for model
             pc_model = row[components].values
 
             # compute euclidean distance in n-dimensions
