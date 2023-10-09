@@ -3,6 +3,9 @@ import re
 import pandas as pd
 
 def get_paths(ai_dir:pathlib.Path, human_dir:pathlib.Path, models:list, dataset:str):
+    '''
+    Get all paths pertaining to a particular dataset (e.g., mrpc)
+    '''
     # paths, access subfolder and its file in ai_dir
     ai_paths = []
 
@@ -19,27 +22,20 @@ def get_paths(ai_dir:pathlib.Path, human_dir:pathlib.Path, models:list, dataset:
 
     return ai_paths, human_path
 
+def load_dataset(ai_paths, human_path, dataset):
+    '''
+    Load all data pertaining to a dataset (e.g., mrpc)
+    '''
 
-def get_all_paths(ai_dir:pathlib.Path, human_dir:pathlib.Path, models:list, datasets:list):
-    all_ai_paths = []
-    human_paths = []
-
-    for dataset in datasets: 
-        ai_paths, human_path = get_paths(ai_dir, human_dir, models, dataset)
-        all_ai_paths.extend(ai_paths)
-        human_paths.append(human_path)
-
-    human_paths = sorted(human_paths)
-
-    return all_ai_paths, human_paths
-
-def load_data(ai_paths, human_paths):
     ai_dfs = [pd.read_json(p, lines=True) for p in ai_paths]
-    human_dfs = [pd.read_json(p, lines=True) for p in human_paths]
+    human_df = pd.read_json(human_path, lines=True)
 
-    return ai_dfs, human_dfs
+    return ai_dfs, human_df
 
-def combine_data(ai_dfs, human_dfs):
+def combine_data(ai_dfs, human_df):
+    '''
+    Return a dataframe for a particular dataset with all AI generations and human data in one.
+    '''
     # prepare data for concatenating (similar formatting)
     for idx, df in enumerate(ai_dfs): 
         # subset to only 100 vals (since some have 150 and some have 100)
@@ -56,24 +52,35 @@ def combine_data(ai_dfs, human_dfs):
 
         # replace OG df with new df 
         ai_dfs[idx] = new_df
+   
+    human_df = human_df.query('id in @ai_dfs[1]["id"]').copy()
+    human_df["model"] = "human"
+    human_df.drop(["source"], inplace=True, axis=1)
+    human_df.rename(columns={"human_completions": "completions"}, inplace=True)
 
-        for i in range (len(ai_dfs)):
-            for idx, df in enumerate(human_dfs):
-                human_df = df.query(f'id in @ai_dfs[{i}]["id"]').copy()
-                print(human_df)
+    # add human dfs
+    all_dfs = [human_df, *ai_dfs]
 
-    for idx, df in enumerate(human_dfs):
-        new_df = df
-        new_df["model"] = "human"
-        new_df.drop(["source"], inplace=True, axis=1)
-        new_df.rename(columns={"human_completions": "completions"}, inplace=True)
-        human_dfs[idx] = new_df
+    # append human to ai_dfs, concatenate all data
+    combined_data = pd.concat(all_dfs, ignore_index=True, axis=0)
 
-    # combine all data 
-    all_dfs = [*human_dfs, *ai_dfs]
-    combined_df = pd.concat(all_dfs, ignore_index=True, axis=0)
+    return combined_data
 
-    return combined_df
+def preprocess_datasets(ai_dir, human_dir, models:list, datasets:list):
+    '''Loads and prepares as many datasets as needed'''
+
+    all_dfs = []
+
+    for dataset in datasets: 
+        ai_paths, human_path = get_paths(ai_dir, human_dir, models, dataset)
+        ai_dfs, human_df = load_dataset(ai_paths, human_path, dataset)
+        dataset_df = combine_data(ai_dfs, human_df)
+
+        all_dfs.append(dataset_df)
+
+    all_dfs_combined = pd.concat(all_dfs, ignore_index=True, axis=0)
+
+    return all_dfs_combined
 
 def main(): 
     path = pathlib.Path(__file__)
@@ -83,13 +90,9 @@ def main():
     models = ["beluga", "llama2_chat"]
     datasets = ["dailymail_cnn", "stories", "mrpc", "dailydialog"]
 
-    ai_paths, human_paths = get_all_paths(ai_dir, human_dir, models, datasets)
-
-    ai_dfs, human_dfs = load_data(ai_paths, human_paths)
-
-    df = combine_data(ai_dfs, human_dfs) 
+    all_dfs = preprocess_datasets(ai_dir, human_dir, models, datasets)
     
-    #print(df)
+    print(all_dfs)
 
 
 if __name__ == "__main__":
