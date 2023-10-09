@@ -1,6 +1,9 @@
 import pathlib 
 import re
 import pandas as pd
+import numpy as np
+import seaborn as sns
+import matplotlib.pyplot as plt
 
 import spacy
 import textdescriptives as td
@@ -78,22 +81,48 @@ def get_descriptive_metrics(df:pd.DataFrame, text_column:str, id_column:str):
     
     return metrics_df 
 
-def run_PCA(metrics_df:pd.DataFrame, feature_names:list):
+def run_PCA(metrics_df:pd.DataFrame, feature_names:list, n_components:int=3):
     # normalise 
     std_scaler = StandardScaler()
     scaled_df = std_scaler.fit_transform(metrics_df[feature_names])
 
     # run pca 
-    pca = PCA(n_components=3)
+    pca = PCA(n_components=n_components)
     results = pca.fit_transform(scaled_df)
 
     # save
-    pca_df = pd.DataFrame(data = results, columns=["pca_1", "pca_2", "pca_3"])
+    column_names = [f"PC{i}" for i in range(1, n_components + 1)]
+    pca_df = pd.DataFrame(data = results)
+    pca_df.columns = column_names
 
     # add new components to overall df 
     df = pd.concat([metrics_df, pca_df],axis=1)
 
     return pca, df
+
+def get_loadings(pca, feature_names, n_components):
+    loadings =  pca.components_.T * np.sqrt(pca.explained_variance_)
+
+    column_names = [f"PC{i}" for i in range(1, n_components + 1)]
+    loadings_matrix = pd.DataFrame(loadings, index=feature_names)
+
+    loadings_matrix.columns = column_names
+
+    return loadings_matrix
+
+
+def plot_loadings(loadings_matrix, component:int=1, outpath=None):
+    reshaped_matrix = loadings_matrix.reset_index().melt(id_vars="index")
+
+    colors = sns.color_palette()[0]
+
+    sns.barplot(data=reshaped_matrix[reshaped_matrix["variable"]==f"PC{component}"], x = "index", y="value", color=colors)
+
+    if outpath:
+        plt.savefig(outpath / f"PC_{component}.png")
+
+def plot_loading_scatter(): 
+    pass
 
 def load_single_dataset(dataset, models): 
     spacy.util.fix_random_seed(129)
@@ -122,6 +151,8 @@ def pipe_all_datasets(datasets, models):
     # load data 
     path = pathlib.Path(__file__)
     ai_dir = path.parents[1] / "datasets_ai"
+    plotpath = path.parents[1] / "results" / "PCA_plots"
+    plotpath.mkdir(parents=True, exist_ok=True)
 
     all_dfs = []
     
@@ -134,10 +165,16 @@ def pipe_all_datasets(datasets, models):
 
     metrics_df = get_descriptive_metrics(combined_df, "completions", "id")
 
-    pca, final_df = run_PCA(metrics_df, feature_names=["doc_length", "n_tokens", "n_characters", "n_sentences"])
+    pca, final_df = run_PCA(metrics_df, feature_names=["doc_length", "n_tokens", "n_characters", "n_sentences"], n_components=4)
+
+    loadings_matrix = get_loadings(pca, feature_names=["doc_length", "n_tokens", "n_characters", "n_sentences"],  n_components=4)
+
+    for component in range(5):
+        plot_loadings(loadings_matrix, component, plotpath)
 
     print(final_df)
     print(pca.explained_variance_ratio_)
+    print(loadings_matrix)
 
     return pca, final_df
 
