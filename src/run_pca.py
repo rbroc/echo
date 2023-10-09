@@ -88,15 +88,15 @@ def plot_loadings(loadings_matrix, component:int=1, outpath=None):
 
     colors = sns.color_palette()[0]
 
-    plot = sns.barplot(data=reshaped_matrix[reshaped_matrix["variable"]==f"PC{component}"], x = "index", y="value", color=colors)
+    plot = sns.catplot(data=reshaped_matrix[reshaped_matrix["variable"]==f"PC{component}"],
+                       x = "index", y="value", color=colors, kind='bar')
+    plt.xlim()
     plot.set(title=f"PC{component}")
+
+    plt.tight_layout()
 
     if outpath:
         plt.savefig(outpath / f"PC_{component}.png")
-
-def plot_loading_scatter(): 
-    '''Create this plot (although with matplotlib): https://plotly.com/python/pca-visualization/'''
-    pass
 
 def main(): 
     spacy.util.fix_random_seed(129)
