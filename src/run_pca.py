@@ -98,10 +98,6 @@ def plot_loadings(loadings_matrix, component:int=1, outpath=None):
     if outpath:
         plt.savefig(outpath / f"PC_{component}.png")
 
-def plot_loading_scatter(): 
-    '''Create this plot (although with matplotlib): https://plotly.com/python/pca-visualization/'''
-    pass
-
 def main(): 
     spacy.util.fix_random_seed(129)
 
