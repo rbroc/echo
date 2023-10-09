@@ -88,7 +88,9 @@ def plot_loadings(loadings_matrix, component:int=1, outpath=None):
 
     colors = sns.color_palette()[0]
 
-    plot = sns.barplot(data=reshaped_matrix[reshaped_matrix["variable"]==f"PC{component}"], x = "index", y="value", color=colors)
+    plot = sns.catplot(data=reshaped_matrix[reshaped_matrix["variable"]==f"PC{component}"],
+                       x = "index", y="value", color=colors, kind='bar')
+    plt.xlim()
     plot.set(title=f"PC{component}")
 
     if outpath:
