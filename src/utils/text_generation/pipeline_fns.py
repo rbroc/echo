@@ -15,8 +15,8 @@ from transformers import pipeline, AutoTokenizer
 import torch
 
 # import prompting 
-from modules.prompt_fns import PromptGenerator, SpecialPromptGenerator
-from modules.logger import custom_logging
+from utils.text_generation.prompt_fns import PromptGenerator, SpecialPromptGenerator
+
 
 class BaseModel():
     '''
@@ -68,7 +68,7 @@ class BaseModel():
             completions_ds: huggingface dataset with model completions and ID 
         '''
         # intialise logger
-        logger = custom_logging("generator", loggername, loggerpath)
+       # logger = custom_logging("generator", loggername, loggerpath)
 
         # intialize mdl 
         self.initialize_model() 
@@ -82,7 +82,7 @@ class BaseModel():
         # use pipeline on dataset
         for out in tqdm(self.model(KeyDataset(ds, prompt_col), min_length=min_len, max_new_tokens=max_tokens, batch_size=batch_size)): 
             completion_txt = list(out[0].values())[0] # retrieve only the raw text 
-            logger.info(completion_txt)
+            #logger.info(completion_txt)
             completions.append(completion_txt)
 
         # make completions ds without human completions and source
