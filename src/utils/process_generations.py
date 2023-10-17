@@ -1,3 +1,7 @@
+'''
+Script for preprocessing and combining generations with human data.
+'''
+
 import pathlib 
 import re
 import pandas as pd
@@ -20,11 +24,11 @@ def get_paths(ai_dir:pathlib.Path, human_dir:pathlib.Path, models:list, dataset:
     # get human path 
     human_path = human_dir / dataset / "data.ndjson"
 
-    return ai_paths, human_path
+    return ai_paths, human_path 
 
-def load_dataset(ai_paths, human_path, dataset):
+def load_dataset(ai_paths, human_path):
     '''
-    Load all data pertaining to a dataset (e.g., mrpc)
+    Load data from paths extracted from get_paths function
     '''
 
     ai_dfs = [pd.read_json(p, lines=True) for p in ai_paths]
@@ -35,6 +39,13 @@ def load_dataset(ai_paths, human_path, dataset):
 def combine_data(ai_dfs, human_df):
     '''
     Return a dataframe for a particular dataset with all AI generations and human data in one.
+
+    Args: 
+        ai_dfs: list of dataframes
+        human_df: dataframe corresponding to the dfs in ai_dfs 
+
+    Returns: 
+        combined_df: combined dataframe
     '''
     # prepare data for concatenating (similar formatting)
     for idx, df in enumerate(ai_dfs): 
@@ -62,9 +73,9 @@ def combine_data(ai_dfs, human_df):
     all_dfs = [human_df, *ai_dfs]
 
     # append human to ai_dfs, concatenate all data
-    combined_data = pd.concat(all_dfs, ignore_index=True, axis=0)
+    combined_df = pd.concat(all_dfs, ignore_index=True, axis=0)
 
-    return combined_data
+    return combined_df
 
 def preprocess_datasets(ai_dir, human_dir, models:list, datasets:list):
     '''Loads and prepares as many datasets as needed'''
@@ -73,8 +84,11 @@ def preprocess_datasets(ai_dir, human_dir, models:list, datasets:list):
 
     for dataset in datasets: 
         ai_paths, human_path = get_paths(ai_dir, human_dir, models, dataset)
-        ai_dfs, human_df = load_dataset(ai_paths, human_path, dataset)
+        ai_dfs, human_df = load_dataset(ai_paths, human_path)
         dataset_df = combine_data(ai_dfs, human_df)
+        
+        # add dataset col 
+        dataset_df["dataset"] = dataset
 
         all_dfs.append(dataset_df)
 
@@ -84,8 +98,8 @@ def preprocess_datasets(ai_dir, human_dir, models:list, datasets:list):
 
 def main(): 
     path = pathlib.Path(__file__)
-    ai_dir = path.parents[1] / "datasets_ai"
-    human_dir = path.parents[1] / "datasets"
+    ai_dir = path.parents[2] / "datasets_ai"
+    human_dir = path.parents[2] / "datasets"
     
     models = ["beluga", "llama2_chat"]
     datasets = ["dailymail_cnn", "stories", "mrpc", "dailydialog"]
