@@ -4,7 +4,9 @@ import pickle
 import pandas as pd
 import numpy as np
 
-from modules.preprocessing.preprocess_data import preprocess_datasets
+import sys 
+sys.path.append(str(pathlib.Path(__file__).parents[2]))
+from src.utils.process_generations import preprocess_datasets
 
 import spacy
 import textdescriptives as td
@@ -103,10 +105,10 @@ def main():
 
     # paths
     path = pathlib.Path(__file__)
-    ai_dir = path.parents[1] / "datasets_ai"
-    human_dir = path.parents[1] / "datasets"
+    ai_dir = path.parents[2] / "datasets_ai"
+    human_dir = path.parents[2] / "datasets"
 
-    results_path = path.parents[1] / "results" / "PCA"
+    results_path = path.parents[2] / "results" / "PCA"
     results_path.mkdir(parents=True, exist_ok=True)
 
     # models     

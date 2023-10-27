@@ -7,10 +7,10 @@ import argparse
 import pathlib
 
 # custom functions for datasets
-from modules.data_fns import load_file, extract_min_max_tokens
+from utils.text_generation.data_fns import load_file, extract_min_max_tokens
 
 # custom function for pipeline 
-from modules.pipeline_fns import generation_pipeline
+from utils.text_generation.pipeline_fns import generation_pipeline
 
 def input_parse():
     parser = argparse.ArgumentParser()
