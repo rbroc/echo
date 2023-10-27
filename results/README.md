@@ -1,20 +1,20 @@
-# Prompt Selection
-### Euclidean Distances
+# Prompt Selection: Euclidean Distances
 To investigate differences between model completions and human completions, euclidean distances were computed between the PC components of the human generation and the model generation for each unique ID in each dataset (i.e., beluga-human, llama2_chat-human). 
 
-See [src/prompt_selection/distance.py](src/prompt_selection/) for how these are computed. 
+See [src/prompt_selection/distance.py](https://github.com/rbroc/echo/blob/main/src/prompt_selection/distance.py) for how these are computed exactly.
 
-#### Plotting
-The distances are plotted interactively in which you can hover over each point to view the completion: 
-1. [dailydialog](https://htmlpreview.github.io/?https://github.com/rbroc/echo/blob/prompt-select/results/distance/all_PC_jitterplots/interactive/dailydialog.html)
-2. [dailymail_cnn](https://htmlpreview.github.io/?https://github.com/rbroc/echo/blob/prompt-select/results/distance/all_PC_jitterplots/interactive/dailymail_cnn.html)
-3. [mrpc](https://htmlpreview.github.io/?https://github.com/rbroc/echo/blob/prompt-select/results/distance/all_PC_jitterplots/interactive/mrpc.html)
-4. [stories](https://htmlpreview.github.io/?https://github.com/rbroc/echo/blob/prompt-select/results/distance/all_PC_jitterplots/interactive/stories.html)
+## Plotting
+Interactive plots illustrate the distance scores and their corresponding completion by hovering over them:
+1. [dailydialog](https://htmlpreview.github.io/?https://github.com/rbroc/echo/blob/main/results/distance/all_PC_jitterplots/interactive/dailydialog.html)
+2. [dailymail_cnn](https://htmlpreview.github.io/?https://github.com/rbroc/echo/blob/main/results/distance/all_PC_jitterplots/interactive/dailymail_cnn.html)
+3. [mrpc](https://htmlpreview.github.io/?https://github.com/rbroc/echo/blob/main/results/distance/all_PC_jitterplots/interactive/mrpc.html)
+4. [stories](https://htmlpreview.github.io/?https://github.com/rbroc/echo/blob/main/results/distance/all_PC_jitterplots/interactive/stories.html)
 
-Static plots can also be found in this [folder](results/distance/all_PC_jitterplots/static)
+Static plots can also be found in this [folder](https://github.com/rbroc/echo/tree/main/results/distance/all_PC_jitterplots/static).
 
-### Medians
-#### Overview
+## Medians
+The medians of the euclidean distances were computed for each model and each dataset:
+
 | dataset       | model       |   1.0 |   2.0 |   3.0 |   4.0 | 5.0   | 6.0   |
 |---------------|-------------|-------|-------|-------|-------|-------|-------|
 |               | beluga      |  0.39 |  0.52 |  0.40 |  0.27 |       |       |
@@ -26,7 +26,7 @@ Static plots can also be found in this [folder](results/distance/all_PC_jitterpl
 |               | beluga      |  2.83 |  2.98 |  5.05 |  3.14 | 3.533 | 2.875 |
 | stories       | llama2_chat |  3.07 |  3.41 |  3.83 |  3.03 | 2.871 | 2.535 |
 
-#### Two lowest medians for each dataset and for each model 
+## Two lowest medians per MODEL, DATASET
 | dataset       | model       |   prompt |   median |
 |---------------|-------------|----------|----------|
 | dailydialog   | beluga      |        4 |    0.267 |
