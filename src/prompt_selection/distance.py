@@ -20,14 +20,14 @@ def compute_distances(df:pd.DataFrame, models:list=["beluga", "llama2_chat"], co
     result_rows = []    
 
     # subset df to include only the AI models
-    df_ai = df[df['model'].isin(models)]
+    df_ai = df[df["model"].isin(models)]
 
     for _, row in df_ai.iterrows():
-            # extract 'id' for the current row
-            current_id = row['id']
+            # extract "id" for the current row
+            current_id = row["id"]
 
-            # extract features for the 'human' model with the same 'id' as df_ai 
-            pc_human = df[(df['model'] == 'human') & (df['id'] == current_id)][cols].values
+            # extract features for the "human" model with the same "id" as df_ai 
+            pc_human = df[(df["model"] == "human") & (df["id"] == current_id)][cols].values
 
             # extract features for model completions
             pc_model = row[cols].values
@@ -36,11 +36,12 @@ def compute_distances(df:pd.DataFrame, models:list=["beluga", "llama2_chat"], co
             distance = np.sqrt(np.sum((pc_human - pc_model) ** 2))
 
             result_row = {
-                'id': row['id'],
-                'model': row["model"],
-                'dataset': row['dataset'],
-                'distance': distance,
-                'prompt_number': row["prompt_number"]
+                "id": row["id"],
+                "model": row["model"],
+                "dataset": row["dataset"],
+                "distance": distance,
+                "prompt_number": row["prompt_number"],
+                "completions": row["completions"]
             }
 
             result_rows.append(result_row)
@@ -50,6 +51,8 @@ def compute_distances(df:pd.DataFrame, models:list=["beluga", "llama2_chat"], co
     return result_df
 
 def main():
+    np.random.seed(seed=129)
+
     path = pathlib.Path(__file__)
 
     datapath = path.parents[2] / "results" / "PCA" / "PCA_data.csv"
