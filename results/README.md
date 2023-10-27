@@ -1,7 +1,7 @@
-# Prompt Selection: Euclidean Distances
-To investigate differences between model completions and human completions, euclidean distances were computed between the PC components of the human generation and the model generation for each unique ID in each dataset (i.e., beluga-human, llama2_chat-human). 
+# Prompt Selection
+PCA was run on low-level features `["doc_length", "n_tokens", "n_characters", "n_sentences"]` to get new PC components. See the `PCA` folder for those results.
 
-See [src/prompt_selection/distance.py](https://github.com/rbroc/echo/blob/main/src/prompt_selection/distance.py) for how these are computed exactly.
+To then investigate differences between model completions and human completions, euclidean distances were computed between the PC components of the human generation and each model generation (i.e., human-beluga, human-llama2_chat). See also [src/prompt_selection/distance.py](https://github.com/rbroc/echo/blob/main/src/prompt_selection/distance.py).
 
 ## Plotting
 Interactive plots illustrate the distance scores and their corresponding completion by hovering over them:
@@ -13,7 +13,7 @@ Interactive plots illustrate the distance scores and their corresponding complet
 Static plots can also be found in this [folder](https://github.com/rbroc/echo/tree/main/results/distance/all_PC_jitterplots/static).
 
 ## Medians
-The medians of the euclidean distances were computed for each model and each dataset:
+The medians of the distances were computed for each model, dataset and prompt number:
 
 | dataset       | model       |   1.0 |   2.0 |   3.0 |   4.0 | 5.0   | 6.0   |
 |---------------|-------------|-------|-------|-------|-------|-------|-------|
@@ -27,6 +27,7 @@ The medians of the euclidean distances were computed for each model and each dat
 | stories       | llama2_chat |  3.07 |  3.41 |  3.83 |  3.03 | 2.871 | 2.535 |
 
 ## Two lowest medians per MODEL, DATASET
+We can also group the results in the two prompts that hold the lowest median per model and dataset: 
 | dataset       | model       |   prompt |   median |
 |---------------|-------------|----------|----------|
 | dailydialog   | beluga      |        4 |    0.267 |
