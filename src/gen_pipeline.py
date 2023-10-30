@@ -6,6 +6,8 @@ Pipeline to generate AI completions with various models using Hugging Face's pip
 import argparse
 import pathlib
 
+from transformers import set_seed
+
 # custom functions for datasets
 from utils.text_generation.data_fns import load_file, extract_min_max_tokens
 
@@ -28,6 +30,9 @@ def input_parse():
     return args
 
 def main(): 
+    # seed, only really necessary if do_sample = True in generation_pipeline (set to False as default)
+    set_seed(129)
+
     # init args, define filepath 
     args = input_parse()
     path = pathlib.Path(__file__)
@@ -43,7 +48,7 @@ def main():
         outpath = path.parents[1] / "datasets_ai" / f"{args.chosen_model}" 
 
     if args.data_subset is None:
-        outpath = path.parents[1] / "datasets_ai" / "full_data" / f"{args.chosen_model}" 
+        outpath = path.parents[1] / "datasets_ai" / "FINAL_DATA" / f"{args.chosen_model}" 
 
     outpath.mkdir(parents=True, exist_ok=True)
 

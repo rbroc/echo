@@ -52,7 +52,7 @@ class BaseModel():
             self.model = pipeline(model = self.model_name, device_map = "auto")
 
 
-    def completions_generator(self, df:pd.DataFrame, prompt_col:str, min_len:int, max_tokens:int, batch_size=1, outfilepath=None):
+    def completions_generator(self, df:pd.DataFrame, prompt_col:str, min_len:int, max_tokens:int, batch_size=1, do_sample=False, outfilepath=None):
         '''
         Create completions based on source text in dataframe (df). Save to outfilepath if specified.
 
@@ -62,6 +62,7 @@ class BaseModel():
             min_len: minimum length of the completion (output)
             max_tokens: maximum new tokens to be added 
             batch_size: the amount of batches the data should be handled in (default to 1, i.e., no batching).
+            do_sample: whether the model should do greedy decoding (False) or some kind of sampling.
             outfilepath: path where the file should be saved (defaults to none, not saving anything)
 
         Returns
@@ -77,7 +78,7 @@ class BaseModel():
         completions = []
 
         # use pipeline on dataset
-        for out in tqdm(self.model(KeyDataset(ds, prompt_col), min_length=min_len, max_new_tokens=max_tokens, batch_size=batch_size)): 
+        for out in tqdm(self.model(KeyDataset(ds, prompt_col), min_length=min_len, max_new_tokens=max_tokens, batch_size=batch_size, do_sample=do_sample)): 
             completion_txt = list(out[0].values())[0] # retrieve only the raw text 
             completions.append(completion_txt)
 
@@ -139,7 +140,7 @@ class FalconModel(BaseModel):
             # allow for padding 
             self.model.tokenizer.pad_token_id = self.model.model.config.eos_token_id
 
-def generation_pipeline(chosen_model:str, df:pd.DataFrame, datafile:str, prompt_number:int, min_len:int, max_tokens:int, batch_size:int=1, outfilepath=None):
+def generation_pipeline(chosen_model:str, df:pd.DataFrame, datafile:str, prompt_number:int, min_len:int, max_tokens:int, batch_size:int=1, do_sample=False, outfilepath=None):
     '''
     Generation pipeline. Create prompts and completions from "source" column. 
 
@@ -150,6 +151,7 @@ def generation_pipeline(chosen_model:str, df:pd.DataFrame, datafile:str, prompt_
         prompt_number: int (from 1-6)
         min_len: minimum length of generation
         max_tokens: max new tokens to be generate
+        do_sample: whether the model should do greedy decoding (False) or some kind of sampling.
         outfilepath: path where the datafile with completions should be saved. Defaults to None
 
     Returns
@@ -175,6 +177,6 @@ def generation_pipeline(chosen_model:str, df:pd.DataFrame, datafile:str, prompt_
     df = pg.create_prompt(df, datafile)
 
     # create completions with completions generator from BaseModel
-    df_completions = model_instance.completions_generator(df=df, prompt_col=f"prompt_{prompt_number}", min_len=min_len, max_tokens=max_tokens, batch_size=batch_size, outfilepath=outfilepath)
+    df_completions = model_instance.completions_generator(df=df, prompt_col=f"prompt_{prompt_number}", min_len=min_len, max_tokens=max_tokens, batch_size=batch_size, do_sample=do_sample, outfilepath=outfilepath)
 
     return df_completions
