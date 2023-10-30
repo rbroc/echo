@@ -95,9 +95,6 @@ class BaseModel():
         return completions_ds 
 
 class BelugaModel(BaseModel):
-    def __init__(self):
-        super().__init__(chosen_model="beluga") # only one chosen_model, so it is specified here, inherited by BaseModel. 
-
     def initialize_model(self):
         if self.model is None: 
             self.model = pipeline(
@@ -159,8 +156,8 @@ def generation_pipeline(chosen_model:str, df:pd.DataFrame, datafile:str, prompt_
         df_completions: dataframe with completions
     '''
 
-    if chosen_model == "beluga":
-        model_instance = BelugaModel()
+    if "beluga" in chosen_model:
+        model_instance = BelugaModel(chosen_model)
     
     elif "llama2" in chosen_model:
         model_instance = Llama2Model(chosen_model)
