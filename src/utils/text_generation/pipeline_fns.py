@@ -38,6 +38,7 @@ class BaseModel():
             "falcon_instruct": "tiiuae/falcon-7b-instruct", 
             "t5":"google/flan-t5-xxl",
             "beluga":"stabilityai/StableBeluga-7B", 
+            "beluga70b":"stabilityai/StableBeluga2",
             "llama2": "meta-llama/Llama-2-7b-hf", 
             "llama2_chat":"meta-llama/Llama-2-13b-chat-hf"
         }
