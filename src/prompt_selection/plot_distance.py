@@ -48,19 +48,21 @@ def interactive_jitterplot(data:pd.DataFrame, datasets:list=["dailymail_cnn", "s
         # split text into full sentences with line breaks for hover
         dataset_data["completions"] = dataset_data["completions"].apply(split_into_sentences)
 
+        # round distance col
+        dataset_data['distance'] = dataset_data['distance'].round(3)
+
         # create a new column to represent model with different colors
         dataset_data['model'] = dataset_data['model'].astype(str)
 
         fig = px.strip(dataset_data, x="prompt_number", y="distance", color="model", title=f"{dataset.upper()}", 
-                       custom_data=["completions", "id", "model"])
+                       custom_data=["model", "id", "distance", "completions"])
 
         fig.update_traces(marker=dict(size=3), selector=dict(mode='markers'))
         fig.update_xaxes(categoryorder='total ascending')
         fig.update_layout(legend_title_text='Model')
 
-        # appearance
-        # custom hover template to display the completions text, ID, and model name
-        hovertemplate = "MODEL: %{customdata[2]}<br>ID: %{customdata[1]}<br>%{customdata[0]}"
+        # appearance (custom hover template to display the completions text, ID, and model name)
+        hovertemplate = "MODEL: %{customdata[0]}<br>ID: %{customdata[1]}<br>DISTANCE: %{customdata[2]}<br>%{customdata[3]}"
         fig.update_traces(hovertemplate=hovertemplate)
 
         # fix title
