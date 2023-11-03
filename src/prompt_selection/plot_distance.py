@@ -49,9 +49,7 @@ def interactive_jitterplot(data:pd.DataFrame, datasets:list=["dailymail_cnn", "s
         dataset_data["completions"] = dataset_data["completions"].apply(split_into_sentences)
 
         # create a new column to represent model with different colors
-        # dataset_data['model_colored'] = dataset_data['model'].apply(lambda model: f"{model}_model")
         dataset_data['model'] = dataset_data['model'].astype(str)
-
 
         fig = px.strip(dataset_data, x="prompt_number", y="distance", color="model", title=f"{dataset.upper()}", 
                        custom_data=["completions", "id", "model"])
