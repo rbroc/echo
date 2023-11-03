@@ -1,7 +1,6 @@
 '''
-Plot eucludean distances 
+Plot eucludean distances (both a static and dynamic version)
 '''
-
 import pathlib
 
 import pandas as pd
@@ -11,6 +10,7 @@ import re
 import matplotlib.pyplot as plt
 import seaborn as sns
 import plotly.express as px
+
 
 def jitterplots(data, datasets, save_path):
     for dataset in datasets:
@@ -33,30 +33,40 @@ def split_into_sentences(text):
     sentences = re.split(r'(?<=\w\.\s|\w\.\n)', text)  # Split on dots followed by space or newline
     return "<br>".join(sentences)
 
-def interactive_jitterplot(data, datasets, save_path):
+def interactive_jitterplot(data:pd.DataFrame, datasets:list=["dailymail_cnn", "stories", "mrpc", "dailydialog"], save_path=None):
+    '''
+    Create interactive plots using plotly where distances are grouped by prompt and model for each dataset 
+
+    Args
+        data: data with euclidean distances
+        datasets: list of datasets for which you want a plot
+        save_path: if unspecified, no plot is saved. Will ensure that the specified path is created if it does not exist already.
+    '''
     for dataset in datasets:
         dataset_data = data[data["dataset"] == dataset]
 
         # split text into full sentences with line breaks for hover
         dataset_data["completions"] = dataset_data["completions"].apply(split_into_sentences)
 
-        # plot
-        fig = px.strip(dataset_data, x="prompt_number", y="distance", color="model", title=f"{dataset.upper()}")
+        # create a new column to represent model with different colors
+        # dataset_data['model_colored'] = dataset_data['model'].apply(lambda model: f"{model}_model")
+        dataset_data['model'] = dataset_data['model'].astype(str)
 
-        # appearance
+
+        fig = px.strip(dataset_data, x="prompt_number", y="distance", color="model", title=f"{dataset.upper()}", 
+                       custom_data=["completions", "id", "model"])
+
         fig.update_traces(marker=dict(size=3), selector=dict(mode='markers'))
         fig.update_xaxes(categoryorder='total ascending')
         fig.update_layout(legend_title_text='Model')
 
-        # custom hover template to display the completions text and ID from the "id" column
-        fig.update_traces(hovertemplate="ID: %{customdata[1]}<br>%{customdata[0]}")
-
-        customdata = dataset_data[["completions", "id"]].values.tolist()
-        fig.update_traces(customdata=customdata)
+        # appearance
+        # custom hover template to display the completions text, ID, and model name
+        hovertemplate = "MODEL: %{customdata[2]}<br>ID: %{customdata[1]}<br>%{customdata[0]}"
+        fig.update_traces(hovertemplate=hovertemplate)
 
         # fix title
-        fig.update_layout(title_x=0.5, title_font=dict(size=24)) 
-
+        fig.update_layout(title_x=0.5, title_font=dict(size=24))
 
         if save_path:
             save_path.mkdir(parents=True, exist_ok=True)
