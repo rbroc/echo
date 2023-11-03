@@ -38,6 +38,7 @@ class BaseModel():
             "falcon_instruct": "tiiuae/falcon-7b-instruct", 
             "t5":"google/flan-t5-xxl",
             "beluga":"stabilityai/StableBeluga-7B", 
+            "beluga70b":"stabilityai/StableBeluga2",
             "llama2": "meta-llama/Llama-2-7b-hf", 
             "llama2_chat":"meta-llama/Llama-2-13b-chat-hf"
         }
@@ -52,7 +53,7 @@ class BaseModel():
             self.model = pipeline(model = self.model_name, device_map = "auto")
 
 
-    def completions_generator(self, df:pd.DataFrame, prompt_col:str, min_len:int, max_tokens:int, loggerpath, loggername:str, batch_size=1, outfilepath=None):
+    def completions_generator(self, df:pd.DataFrame, prompt_col:str, min_len:int, max_tokens:int, batch_size=1, do_sample=False, outfilepath=None):
         '''
         Create completions based on source text in dataframe (df). Save to outfilepath if specified.
 
@@ -62,14 +63,12 @@ class BaseModel():
             min_len: minimum length of the completion (output)
             max_tokens: maximum new tokens to be added 
             batch_size: the amount of batches the data should be handled in (default to 1, i.e., no batching).
+            do_sample: whether the model should do greedy decoding (False) or some kind of sampling.
             outfilepath: path where the file should be saved (defaults to none, not saving anything)
 
         Returns
             completions_ds: huggingface dataset with model completions and ID 
         '''
-        # intialise logger
-       # logger = custom_logging("generator", loggername, loggerpath)
-
         # intialize mdl 
         self.initialize_model() 
 
@@ -80,9 +79,8 @@ class BaseModel():
         completions = []
 
         # use pipeline on dataset
-        for out in tqdm(self.model(KeyDataset(ds, prompt_col), min_length=min_len, max_new_tokens=max_tokens, batch_size=batch_size)): 
+        for out in tqdm(self.model(KeyDataset(ds, prompt_col), min_length=min_len, max_new_tokens=max_tokens, batch_size=batch_size, do_sample=do_sample)): 
             completion_txt = list(out[0].values())[0] # retrieve only the raw text 
-            #logger.info(completion_txt)
             completions.append(completion_txt)
 
         # make completions ds without human completions and source
@@ -97,9 +95,6 @@ class BaseModel():
         return completions_ds 
 
 class BelugaModel(BaseModel):
-    def __init__(self):
-        super().__init__(chosen_model="beluga") # only one chosen_model, so it is specified here, inherited by BaseModel. 
-
     def initialize_model(self):
         if self.model is None: 
             self.model = pipeline(
@@ -143,7 +138,7 @@ class FalconModel(BaseModel):
             # allow for padding 
             self.model.tokenizer.pad_token_id = self.model.model.config.eos_token_id
 
-def generation_pipeline(chosen_model:str, df:pd.DataFrame, datafile:str, prompt_number:int, min_len:int, max_tokens:int, loggerpath, loggername:str, batch_size:int=1, outfilepath=None):
+def generation_pipeline(chosen_model:str, df:pd.DataFrame, datafile:str, prompt_number:int, min_len:int, max_tokens:int, batch_size:int=1, do_sample=False, outfilepath=None):
     '''
     Generation pipeline. Create prompts and completions from "source" column. 
 
@@ -154,14 +149,15 @@ def generation_pipeline(chosen_model:str, df:pd.DataFrame, datafile:str, prompt_
         prompt_number: int (from 1-6)
         min_len: minimum length of generation
         max_tokens: max new tokens to be generate
+        do_sample: whether the model should do greedy decoding (False) or some kind of sampling.
         outfilepath: path where the datafile with completions should be saved. Defaults to None
 
     Returns
         df_completions: dataframe with completions
     '''
 
-    if chosen_model == "beluga":
-        model_instance = BelugaModel()
+    if "beluga" in chosen_model:
+        model_instance = BelugaModel(chosen_model)
     
     elif "llama2" in chosen_model:
         model_instance = Llama2Model(chosen_model)
@@ -179,6 +175,6 @@ def generation_pipeline(chosen_model:str, df:pd.DataFrame, datafile:str, prompt_
     df = pg.create_prompt(df, datafile)
 
     # create completions with completions generator from BaseModel
-    df_completions = model_instance.completions_generator(df=df, prompt_col=f"prompt_{prompt_number}", min_len=min_len, max_tokens=max_tokens, batch_size=batch_size, outfilepath=outfilepath, loggerpath=loggerpath, loggername=loggername)
+    df_completions = model_instance.completions_generator(df=df, prompt_col=f"prompt_{prompt_number}", min_len=min_len, max_tokens=max_tokens, batch_size=batch_size, do_sample=do_sample, outfilepath=outfilepath)
 
     return df_completions

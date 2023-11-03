@@ -6,6 +6,8 @@ Pipeline to generate AI completions with various models using Hugging Face's pip
 import argparse
 import pathlib
 
+from transformers import set_seed
+
 # custom functions for datasets
 from utils.text_generation.data_fns import load_file, extract_min_max_tokens
 
@@ -28,27 +30,29 @@ def input_parse():
     return args
 
 def main(): 
-    # intialise arguments 
-    args = input_parse()
+    # seed, only really necessary if do_sample = True in generation_pipeline (set to False as default)
+    set_seed(129)
 
-    # define paths 
+    # init args, define filepath 
+    args = input_parse()
     path = pathlib.Path(__file__)
+
+    # load data  
     datapath = path.parents[1] / "datasets" / args.filename
     datafile = datapath / "data.ndjson"
-
-    outpath = path.parents[1] / "datasets_ai" / f"{args.chosen_model}" 
-    loggingpath = path.parents[1] / "datasets_ai" / "logs" / f"{args.chosen_model}" 
-
-    for p in [outpath, loggingpath]:
-        p.mkdir(parents=True, exist_ok=True)
-
     df = load_file(datafile)
 
-    # subset (temporary for testing)
+    # subset data for prompting. Will save to "datasets_ai" / "chosen_model". If data is not subsetted, will save data to full_data / "chosen_model"
     if args.data_subset is not None: 
         df = df[:args.data_subset]
+        outpath = path.parents[1] / "datasets_ai" / f"{args.chosen_model}" 
 
-    # define min and max length 
+    if args.data_subset is None:
+        outpath = path.parents[1] / "datasets_ai" / "FINAL_DATA" / f"{args.chosen_model}" 
+
+    outpath.mkdir(parents=True, exist_ok=True)
+
+    # define min and max generation length 
     min_len, max_tokens = extract_min_max_tokens(args.filename)
 
     if "llama2" in args.chosen_model:
@@ -70,8 +74,6 @@ def main():
         max_tokens = max_tokens, 
         batch_size=args.batch_size,
         outfilepath = outpath / f"{args.filename}_prompt_{args.prompt_number}.ndjson",
-        loggerpath = loggingpath,
-        loggername = f"{args.filename}_prompt_{args.prompt_number}"
         )
 
 
