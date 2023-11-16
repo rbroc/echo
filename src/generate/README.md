@@ -9,7 +9,7 @@ bash generate.sh
 Note that this will run text pipeline on a default dataset and model. See below for a custom pipeline.
 
 ### Custom Text Pipeline
-To run a custom text generation pipeline, type: 
+To run a custom text generation pipeline, run in the terminal (from root): 
 ```
 python src/generate/run_pipeline.py -mdl {MODELNAME} -f {FILENAME} -prompt_n {PROMPT_NUMBER} -subset {DATA_SUBSET}
 ```
