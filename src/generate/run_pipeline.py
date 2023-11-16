@@ -48,7 +48,7 @@ def main():
         outpath = path.parents[2] / "datasets_ai" / f"{args.chosen_model}" 
 
     if args.data_subset is None:
-        outpath = path.parents[2] / "datasets_ai" / "FINAL_DATA" / f"{args.chosen_model}" 
+        outpath = path.parents[2] / "datasets_ai" / "ALL_DATA" / f"{args.chosen_model}" 
 
     outpath.mkdir(parents=True, exist_ok=True)
 
