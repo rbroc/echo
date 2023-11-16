@@ -1,6 +1,6 @@
 # ECHO 
 <p align="center">
-  <b>ECHO: A Scalable and Explainable Approach to Discriminating Between Human and Artificially Generated Text</b>
+ECHO: A Scalable and Explainable Approach to Discriminating Between Human and Artificially Generated Text
 </p>
 
 See project description [here](https://cc.au.dk/en/clai/current-projects/a-scalable-and-explainable-approach-to-discriminating-between-human-and-artificially-generated-text). For running the code, please refer to the *Usage* section.
