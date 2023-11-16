@@ -15,7 +15,7 @@ do
         for prompt in "${prompts[@]}"
         do
             echo "Processing dataset: $dataset with model: $model and prompt: $prompt"
-            python src/gen_pipeline.py --filename "$dataset" --chosen_model "$model" --prompt_number "$prompt" --data_subset 100 --batch_size 10
+            python src/generate/run_pipeline.py --filename "$dataset" --chosen_model "$model" --prompt_number "$prompt" --data_subset 100 --batch_size 10
         done
     done
 done

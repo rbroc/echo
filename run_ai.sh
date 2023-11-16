@@ -11,7 +11,7 @@ do
     for model in "${models[@]}"
     do
         echo "Processing dataset: $dataset with model: $model"
-        python src/extract_metrics_ai.py --dataset "$dataset" --model "$model"
+        python src/metrics/extract_metrics_ai.py --dataset "$dataset" --model "$model"
     done
 done
 

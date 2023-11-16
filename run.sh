@@ -6,7 +6,7 @@ source ./env/bin/activate
 for dataset in dailydialog dailymail_cnn mrpc stories
 do
     echo $dataset
-    python src/extract_metrics.py --input $dataset
+    python src/metrics/extract_metrics.py --input $dataset
 done
 
 # close venv
