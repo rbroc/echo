@@ -9,10 +9,10 @@ import pathlib
 from transformers import set_seed
 
 # custom functions for datasets
-from utils.text_generation.data_fns import load_file, extract_min_max_tokens
+from data_fns import load_file, extract_min_max_tokens
 
 # custom function for pipeline 
-from utils.text_generation.pipeline_fns import generation_pipeline
+from pipeline_fns import generation_pipeline
 
 def input_parse():
     parser = argparse.ArgumentParser()
@@ -38,17 +38,17 @@ def main():
     path = pathlib.Path(__file__)
 
     # load data  
-    datapath = path.parents[1] / "datasets" / args.filename
+    datapath = path.parents[2] / "datasets" / args.filename
     datafile = datapath / "data.ndjson"
     df = load_file(datafile)
 
     # subset data for prompting. Will save to "datasets_ai" / "chosen_model". If data is not subsetted, will save data to full_data / "chosen_model"
     if args.data_subset is not None: 
         df = df[:args.data_subset]
-        outpath = path.parents[1] / "datasets_ai" / f"{args.chosen_model}" 
+        outpath = path.parents[2] / "datasets_ai" / f"{args.chosen_model}" 
 
     if args.data_subset is None:
-        outpath = path.parents[1] / "datasets_ai" / "FINAL_DATA" / f"{args.chosen_model}" 
+        outpath = path.parents[2] / "datasets_ai" / "FINAL_DATA" / f"{args.chosen_model}" 
 
     outpath.mkdir(parents=True, exist_ok=True)
 
@@ -59,7 +59,7 @@ def main():
         from huggingface_hub import login
 
         # get token from txt
-        with open(path.parents[1] / "tokens" / "hf_token.txt") as f:
+        with open(path.parents[2] / "tokens" / "hf_token.txt") as f:
             hf_token = f.read()
 
         login(hf_token)

@@ -15,7 +15,7 @@ from transformers import pipeline, AutoTokenizer
 import torch
 
 # import prompting 
-from utils.text_generation.prompt_fns import PromptGenerator, SpecialPromptGenerator
+from prompt_fns import PromptGenerator, SpecialPromptGenerator
 
 
 class BaseModel():
