@@ -17,9 +17,9 @@ python src/generate/run_pipeline.py -mdl {MODELNAME} -f {FILENAME} -prompt_n {PR
 With the arguments specified below: 
 | <div style="width:80px">Arg</div>    | Description                             | <div style="width:120px">Default</div>    |
 | :---        |:---                                                                                        |:---             |
-|```-mdl```   | Model to use for generating. Choose between `beluga`, `falcon`, `falcon_instruct`, `llama2` and `llama2_chat`. Currently these are all the smaller 7B models. See full models names at [pipeline_fns.py](src/modules/pipeline_fns.py)            | `beluga`     |
+|```-mdl```   | Model to use for generating. Choose between `beluga`, `falcon`, `falcon_instruct`, `llama2` and `llama2_chat`. Currently these are all the smaller 7B models. See full models names at [pipeline_fns.py](pipeline_fns.py)            | `beluga`     |
 |```-f```| Filename. Choose between `dailydialog`, `dailymail_cnn`, `mrpc` and `stories`  | `stories`.              |
-|```-prompt_n```   | Integer between 1 and 6 currently. See [prompt_fns.py](src/modules/prompt_fns.py) for the specific prompts to choose between for each dataset.            |    `1`            |
+|```-prompt_n```   | Integer between 1 and 6 currently. See [prompt_fns.py](prompt_fns.py) for the specific prompts to choose between for each dataset.            |    `1`            |
 |```-subset```   |   Integer how big of a subset of the data you want to use `dataset[:subset]``               | `None` (i.e., no subset)               |
 
 *arguments subject to change*
