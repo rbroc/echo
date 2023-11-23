@@ -9,7 +9,7 @@ import pathlib
 from transformers import set_seed
 
 # custom functions for datasets
-from data_fns import load_file, extract_min_max_tokens
+from data import load_file, extract_min_max_tokens
 
 # custom function for pipeline 
 from pipeline_fns import generation_pipeline
