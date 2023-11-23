@@ -1,18 +1,12 @@
 '''
 Pipeline to generate AI completions with various models using Hugging Face's pipeline() function. 
 '''
-
-# utils 
 import argparse
 import pathlib
-
 from transformers import set_seed
 
-# custom functions for datasets
-from data import load_file, extract_min_max_tokens
-
 # custom function for pipeline 
-from pipeline import generation_pipeline
+from pipeline import generation_pipeline, load_file, extract_min_max_tokens
 
 def input_parse():
     parser = argparse.ArgumentParser()
