@@ -2,6 +2,7 @@ import pandas as pd
 import spacy
 import textdescriptives as td
 from argparse import ArgumentParser
+import pathlib
 
 
 def path_loaders():
@@ -13,7 +14,6 @@ def path_loaders():
     args = parser.parse_args()
 
     return args
-
 
 def process(dataframe):
     print("[INFO] Extracting metrics from sources...")
@@ -43,14 +43,25 @@ def process(dataframe):
 
 def main():
     args = path_loaders()
-    infile = "datasets/" + args.input + '/data.ndjson'
+    
+    # define paths 
+    path = pathlib.Path(__file__)
+
+    # infile 
+    inpath = path.parents[2] / "datasets" / "human_datasets"
+    infile = inpath / args.input / 'data.ndjson'
+
     # change to required file
     data = pd.read_json(infile, lines=True)
+    
     # process with spacy
     source_results, completion_results = process(data)
+
     # get filepaths
-    source_outfile = "out/" + args.input.split()[0] + "_source.csv"
-    completion_outfile = "out/" + args.input.split()[0] + "_completions.csv"
+    outpath = path.parents[2] / "results" / "metrics" / "human_metrics"
+    source_outfile = outpath / f"{args.input.split()[0]}_source.csv"
+    completion_outfile = outpath / f"{args.input.split()[0]}_completions.csv"
+    
     # save
     source_results.to_csv(source_outfile)
     completion_results.to_csv(completion_outfile)
