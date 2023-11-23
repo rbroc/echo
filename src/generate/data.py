@@ -1,11 +1,7 @@
 '''
 Helper functions for datasets. Contains functions for loading the datasets, and extracting min/max new tokens. 
 '''
-
-# utils 
 from tqdm import tqdm
-
-# data wrangling 
 import pandas as pd 
 import ndjson
 
@@ -19,13 +15,10 @@ def load_file(filepath):
     Returns
         df: pandas dataframe 
     '''
-
-    # load data
     print("[INFO:] Loading data ...")
     with open(filepath) as f:
         data = ndjson.load(f)
     
-    # make into dataframe
     df = pd.DataFrame(data)
     
     return df 
