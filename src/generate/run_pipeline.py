@@ -12,14 +12,14 @@ from transformers import set_seed
 from data import load_file, extract_min_max_tokens
 
 # custom function for pipeline 
-from pipeline_fns import generation_pipeline
+from pipeline import generation_pipeline
 
 def input_parse():
     parser = argparse.ArgumentParser()
 
     # add arguments 
     parser.add_argument("-f", "--filename", help = "pick which dataset you want", type = str, default = "stories")
-    parser.add_argument("-mdl", "--chosen_model", help = "Choose between ...", type = str, default = "beluga")
+    parser.add_argument("-mdl", "--chosen_model", help = "Choose between ...", type = str, default = "beluga7b")
     parser.add_argument("-prompt_n", "--prompt_number", help = "choose which prompt to use", type = int, default = 1)
     parser.add_argument("-subset", "--data_subset", help = "how many rows you want to include. Useful for testing. Defaults to None.", type = int, default=None)
     parser.add_argument("-batch", "--batch_size", help = "Batching of dataset. Mainly for processing in parallel for GPU. Defaults to no batching (batch size of 1). ", type = int, default=1)
