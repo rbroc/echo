@@ -2,6 +2,7 @@
 Functions for generating prompts
 '''
 from data import load_file
+
 def get_task_prompt(dataset:str, prompt_number:int): 
     '''
     Retrieve task prompt from specified dataset
@@ -60,12 +61,23 @@ def get_task_prompt(dataset:str, prompt_number:int):
     return prompt
 
 def get_system_prompt(chosen_model):
+    '''
+    Get system prompt based on chosen model (beluga or llama2_chat)
+
+    StableBeluga follows this prompt structure: https://huggingface.co/stabilityai/StableBeluga-7B) 
+    Llama2 chat versions follow this prompt structure: https://gpus.llm-utils.org/llama-2-prompt-template/ (note that the DEFAULT system prompt is recommended to be removed https://github.com/facebookresearch/llama/commit/a971c41bde81d74f98bc2c2c451da235f1f1d37c. Custom system prompts may be useful. Regardless of whether a system prompt is used, the format below is required to produce intelligble text) 
+    '''
     system_prompts = {
             "beluga": "You are StableBeluga, an AI that follows instructions extremely well. Help as much as you can. Remember, be safe, and don't do anything illegal.\n\n",
             "llama2_chat": "You are an AI, but you do not deviate from the task prompt and you do not small talk. Never begin your response with 'Sure, here is my response: ' or anything of the like. It is important that you finish without getting cut off."
         }
-
-    # extract
+    # extract system prompt based on chosen_model (does not have to match exactly)
+    if "beluga" in chosen_model:
+        return system_prompts["beluga"]
+    elif "llama2_chat" in chosen_model:
+        return system_prompts["llama2_chat"]
+    else: 
+        raise ValueError(f"Invalid model '{chosen_model}'. Choose from {system_prompts.keys()}")
 
 def add_task_prompt(df, dataset="stories", prompt_number=1):
     '''
@@ -78,15 +90,39 @@ def add_task_prompt(df, dataset="stories", prompt_number=1):
 
     return df 
 
-def add_system_prompt(df, dataset="stories", prompt_number=1):
+def add_system_prompt(df, chosen_model:str, dataset="stories", prompt_number=1):
     '''
-    Add system prompt for beluga and llama2chat 
+    Add system prompt to task prompt and add to original df. 
     '''
-    pass
+    # retrieve prompts
+    sp = get_system_prompt(chosen_model)
+    tp = get_task_prompt(dataset, prompt_number)
+
+    formatted_prompts = []
+
+    for row in df.itertuples():
+        source_text = row.source
+        
+        # define user prompt (task prompt + text e.g., ""summarize this: 'I love language models'")
+        up = tp + source_text
+                
+        # format the final prompt depending on chosen_model 
+        if "beluga" in chosen_model:
+            final_prompt = f"### System:\n{sp}### User: {up}\n\n### Assistant:\n"
+                
+        elif "llama2_chat" in chosen_model:    
+            final_prompt = f"<s>[INST] <<SYS>>\n{sp}\n<</SYS>>\n\n{up} [/INST]"
+                
+        # add to list of formatted prompts
+        formatted_prompts.append(final_prompt)
+
+    df[f"prompt_{prompt_number}"] = formatted_prompts
+
+    return df
 
 def main():
     import pathlib
-    dataset = "dailydialog"
+    dataset = "mrpc"
     prompt_number = 2
     prompt = get_task_prompt(dataset, prompt_number)
     print(prompt)
@@ -99,6 +135,14 @@ def main():
     df = load_file(datafile)
 
     prompt_df = add_task_prompt(df, dataset, prompt_number)
+
+    print(prompt_df.head())
+
+    system_prompt = get_system_prompt("beluga70bQ")
+    print(system_prompt)
+
+    df = add_system_prompt(df, "beluga70bQ", dataset, prompt_number)
+    print(df["prompt_2"].head()[0])
 
 if __name__ == "__main__":
     main()
