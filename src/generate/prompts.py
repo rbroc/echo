@@ -1,7 +1,7 @@
 '''
 Functions for generating prompts
 '''
-from data import load_file
+import pandas as pd
 
 def get_task_prompt(dataset:str, prompt_number:int): 
     '''
@@ -60,7 +60,7 @@ def get_task_prompt(dataset:str, prompt_number:int):
 
     return prompt
 
-def get_system_prompt(chosen_model):
+def get_system_prompt(chosen_model:str):
     '''
     Get system prompt based on chosen model (beluga or llama2_chat)
 
@@ -79,7 +79,7 @@ def get_system_prompt(chosen_model):
     else: 
         raise ValueError(f"Invalid model '{chosen_model}'. Choose from {system_prompts.keys()}")
 
-def add_task_prompt(df, dataset="stories", prompt_number=1):
+def add_task_prompt(df:pd.DataFrame, dataset="stories", prompt_number=1):
     '''
     Create a task prompt without system message and add to original df.
     '''
@@ -90,7 +90,7 @@ def add_task_prompt(df, dataset="stories", prompt_number=1):
 
     return df 
 
-def add_system_prompt(df, chosen_model:str, dataset="stories", prompt_number=1):
+def add_system_prompt(df:pd.DataFrame, chosen_model:str, dataset="stories", prompt_number=1):
     '''
     Add system prompt to task prompt and add to original df. 
     '''
@@ -119,30 +119,3 @@ def add_system_prompt(df, chosen_model:str, dataset="stories", prompt_number=1):
     df[f"prompt_{prompt_number}"] = formatted_prompts
 
     return df
-
-def main():
-    import pathlib
-    dataset = "mrpc"
-    prompt_number = 2
-    prompt = get_task_prompt(dataset, prompt_number)
-    print(prompt)
-
-    path = pathlib.Path(__file__)
-
-    # load data  
-    datapath = path.parents[2] / "datasets" / dataset
-    datafile = datapath / "data.ndjson"
-    df = load_file(datafile)
-
-    prompt_df = add_task_prompt(df, dataset, prompt_number)
-
-    print(prompt_df.head())
-
-    system_prompt = get_system_prompt("beluga70bQ")
-    print(system_prompt)
-
-    df = add_system_prompt(df, "beluga70bQ", dataset, prompt_number)
-    print(df["prompt_2"].head()[0])
-
-if __name__ == "__main__":
-    main()
