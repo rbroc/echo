@@ -2,10 +2,10 @@
 Generation pipeline
 '''
 from models import FullModel, QuantizedModel
-from prompt_fns import SpecialPromptGenerator, PromptGenerator
+from prompts import add_task_prompt, add_system_prompt
 import pandas as pd
 
-def generation_pipeline(chosen_model:str, df:pd.DataFrame, datafile:str, prompt_number:int, min_len:int, max_tokens:int, batch_size:int=1, do_sample=False, outfilepath=None):
+def generation_pipeline(chosen_model:str, df:pd.DataFrame, dataset:str, prompt_number:int, min_len:int, max_tokens:int, batch_size:int=1, do_sample=False, outfilepath=None):
     '''
     Generation pipeline. Create prompts and completions from "source" column. 
 
@@ -22,18 +22,27 @@ def generation_pipeline(chosen_model:str, df:pd.DataFrame, datafile:str, prompt_
     Returns
         df_completions: dataframe with completions
     '''
+    # instantiate model
     if "Q" not in chosen_model: 
         model_instance = FullModel(chosen_model)
     else: 
         model_instance = QuantizedModel(chosen_model)
 
-    # intialise prompt generator
-    pg = SpecialPromptGenerator(prompt_number, chosen_model) if chosen_model in ["beluga", "llama2_chat"] else PromptGenerator(prompt_number)
+    # generate prompts
+    if chosen_model in ["beluga", "llama2_chat"]:
+        prompt_df = add_system_prompt(df, chosen_model, dataset, prompt_number)
+    else:
+        prompt_df = add_task_prompt(df, dataset, prompt_number)
 
-    # create prompt 
-    df = pg.create_prompt(df, datafile)
-
-    # create completions with completions generator from BaseModel
-    df_completions = model_instance.completions_generator(df=df, prompt_col=f"prompt_{prompt_number}", min_len=min_len, max_tokens=max_tokens, batch_size=batch_size, do_sample=do_sample, outfilepath=outfilepath)
+    # generate completions
+    df_completions = model_instance.completions_generator(
+                                                          df=prompt_df, 
+                                                          prompt_col=f"prompt_{prompt_number}", 
+                                                          min_len=min_len,
+                                                          max_tokens=max_tokens, 
+                                                          batch_size=batch_size, 
+                                                          do_sample=do_sample, 
+                                                          outfilepath=outfilepath
+                                                          )
 
     return df_completions

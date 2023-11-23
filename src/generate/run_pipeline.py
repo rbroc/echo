@@ -68,7 +68,7 @@ def main():
     completions_df = generation_pipeline(
         chosen_model = args.chosen_model, 
         df = df, 
-        datafile = args.filename, 
+        dataset = args.filename, 
         prompt_number = args.prompt_number, 
         min_len = min_len, 
         max_tokens = max_tokens, 
