@@ -32,17 +32,17 @@ def main():
     path = pathlib.Path(__file__)
 
     # load data  
-    datapath = path.parents[2] / "datasets" / args.filename
+    datapath = path.parents[2] / "datasets" / "human_datasets" / args.filename
     datafile = datapath / "data.ndjson"
     df = load_file(datafile)
 
     # subset data for prompting. Will save to "datasets_ai" / "chosen_model". If data is not subsetted, will save data to full_data / "chosen_model"
     if args.data_subset is not None: 
         df = df[:args.data_subset]
-        outpath = path.parents[2] / "datasets_ai" / f"{args.chosen_model}" 
+        outpath = path.parents[2] / "datasets" / "ai_datasets" / f"{args.chosen_model}" 
 
     if args.data_subset is None:
-        outpath = path.parents[2] / "datasets_ai" / "ALL_DATA" / f"{args.chosen_model}" 
+        outpath = path.parents[2] / "datasets" / "ai_datasets" / "ALL_DATA" / f"{args.chosen_model}" 
 
     outpath.mkdir(parents=True, exist_ok=True)
 
