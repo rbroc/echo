@@ -33,7 +33,7 @@ The main contents of the repository is as such:
 | `results` | Contains preliminary results for prompt selection (distance plots) and a description of the results workflow. |
 | `tokens` |Place your `.txt` token here for the HuggingFace Hub to run `llama2` models.|
 
-Note that each folder has individual READMEs with further instructions.
+Note that each folder has individual `READMEs` with further instructions.
 
 ## Usage 
 
