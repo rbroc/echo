@@ -59,6 +59,7 @@ def main():
         login(hf_token)
 
     # run pipeline 
+    models_path =  path.parents[3] / "models"
     completions_df = generation_pipeline(
         chosen_model = args.chosen_model, 
         df = df, 
@@ -68,6 +69,7 @@ def main():
         max_tokens = max_tokens, 
         batch_size=args.batch_size,
         outfilepath = outpath / f"{args.filename}_prompt_{args.prompt_number}.ndjson",
+        cache_dir = models_path
         )
 
 

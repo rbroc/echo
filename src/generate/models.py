@@ -7,6 +7,7 @@ import pandas as pd
 from datasets import Dataset
 from transformers.pipelines.pt_utils import KeyDataset
 from transformers import pipeline, AutoTokenizer, AutoModelForCausalLM
+from huggingface_hub import snapshot_download
 import torch
 
 class Model(): 
@@ -42,7 +43,7 @@ class Model():
                 f"please choose one of {all_names}"
             ) from e 
 
-    def completions_generator(self, df:pd.DataFrame, prompt_col:str, min_len:int, max_tokens:int, batch_size=1, do_sample=False, outfilepath=None):
+    def completions_generator(self, df:pd.DataFrame, prompt_col:str, min_len:int, max_tokens:int, batch_size=1, do_sample=False, outfilepath=None, cache_dir=None):
         '''
         Create completions based on source text in dataframe (df). Allows for batching inference (NB. GPU needed!).
 
@@ -54,12 +55,13 @@ class Model():
             batch_size: the amount of batches the data should be handled in (default to 1, i.e., no batching).
             do_sample: whether the model should do greedy decoding (False) or some kind of sampling.
             outfilepath: path where the file should be saved (defaults to none, not saving anything)
+            cache_dir: path where model is saved locally (defaults to None, downloading the model from the hub)
 
         Returns
             completions_ds: huggingface dataset with model completions and ID 
         '''
         # intialize mdl 
-        self.initialize_model() 
+        self.initialize_model(cache_dir=cache_dir) 
 
         # convert to HF dataset for batching/streaming option
         ds = Dataset.from_pandas(df)
@@ -84,13 +86,19 @@ class FullModel(Model):
     '''
     Full, unquantized models (Beluga and Llama2)
     '''
-    def initialize_model(self):
+    def initialize_model(self, cache_dir=None):
         if self.model is None: 
+            model = AutoModelForCausalLM.from_pretrained(self.get_model_name(), cache_dir=cache_dir)
+
+            tokenizer = AutoTokenizer.from_pretrained(self.get_model_name(), cache_dir=cache_dir)
+
             self.model = pipeline(
-                model=self.get_model_name(),  # get mdl name from base class
+                model=model,  # get mdl name from base class
                 torch_dtype=torch.bfloat16,
+                tokenizer=tokenizer,
                 device_map = "auto",
-                return_full_text=False
+                return_full_text=False,
+                task="text-generation"
             )
             
             # allow for padding 
@@ -100,16 +108,18 @@ class QuantizedModel(Model):
     '''
     Quantized GPQT models e.g., https://huggingface.co/TheBloke/Llama-2-70B-Chat-GPTQ (optimised for GPU).
     '''
-    def initialize_model(self):
+    def initialize_model(self, cache_dir=None):
         if self.model is None: 
             model_name = self.get_model_name()
 
             model = AutoModelForCausalLM.from_pretrained(model_name,
                                                 device_map="auto",
                                                 trust_remote_code=False,
-                                                revision="main")
+                                                revision="main",
+                                                cache_dir=cache_dir
+                                                )
                 
-            tokenizer = AutoTokenizer.from_pretrained(model_name, use_fast=True)
+            tokenizer = AutoTokenizer.from_pretrained(model_name, use_fast=True, cache_dir=cache_dir)
         
             self.model = pipeline(
                     model=model_name,
