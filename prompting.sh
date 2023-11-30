@@ -5,7 +5,7 @@ source ./env/bin/activate
 
 # Define the datasets, models, and prompts
 datasets=("dailydialog" "dailymail_cnn" "mrpc" "stories") 
-models=("beluga", "llama2_chat")
+models=("beluga7b" "llama2_chat13b")
 prompts=(1 2 3 4 5 6)
 
 for dataset in "${datasets[@]}"
