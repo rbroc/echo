@@ -1,10 +1,9 @@
 #!/usr/bin/env bash
-
 source ./env/bin/activate
 
 # run models and datasets sequentially
 datasets=("dailydialog" "dailymail_cnn" "mrpc") # stories should also be there, but currently left out
-models=("beluga" "falcon_instruct" "llama2_chat")
+models=("beluga7b" "llama2_chat13b")
 
 for dataset in "${datasets[@]}"
 do

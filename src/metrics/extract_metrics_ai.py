@@ -42,7 +42,7 @@ def extract_ai_metrics():
     path = pathlib.Path(__file__)
 
     for prompt in prompt_numbers:
-        infile = path.parents[1] / "datasets_ai" / args.model / f"{args.dataset}_prompt_{prompt}.ndjson"
+        infile = path.parents[2] / "datasets" / "ai_datasets" / args.model / f"{args.dataset}_prompt_{prompt}.ndjson"
         try: 
             data = pd.read_json(infile, lines=True)
             
@@ -50,7 +50,7 @@ def extract_ai_metrics():
             results = process(data, args.model)
             
             # save
-            outpath = path.parents[1] / "out_ai" / args.model 
+            outpath = path.parents[2] / "results" / "metrics" / "ai_metrics" / args.model 
             outpath.mkdir(parents=True, exist_ok=True)
             results.to_csv(outpath / f"{args.dataset}_prompt_{prompt}_completions.csv")
 
