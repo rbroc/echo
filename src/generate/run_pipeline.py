@@ -1,25 +1,19 @@
 '''
 Pipeline to generate AI completions with various models using Hugging Face's pipeline() function. 
 '''
-
-# utils 
 import argparse
 import pathlib
-
 from transformers import set_seed
 
-# custom functions for datasets
-from data_fns import load_file, extract_min_max_tokens
-
 # custom function for pipeline 
-from pipeline_fns import generation_pipeline
+from pipeline import generation_pipeline, load_file, extract_min_max_tokens
 
 def input_parse():
     parser = argparse.ArgumentParser()
 
     # add arguments 
     parser.add_argument("-f", "--filename", help = "pick which dataset you want", type = str, default = "stories")
-    parser.add_argument("-mdl", "--chosen_model", help = "Choose between ...", type = str, default = "beluga")
+    parser.add_argument("-mdl", "--chosen_model", help = "Choose between ...", type = str, default = "beluga7b")
     parser.add_argument("-prompt_n", "--prompt_number", help = "choose which prompt to use", type = int, default = 1)
     parser.add_argument("-subset", "--data_subset", help = "how many rows you want to include. Useful for testing. Defaults to None.", type = int, default=None)
     parser.add_argument("-batch", "--batch_size", help = "Batching of dataset. Mainly for processing in parallel for GPU. Defaults to no batching (batch size of 1). ", type = int, default=1)
@@ -38,17 +32,17 @@ def main():
     path = pathlib.Path(__file__)
 
     # load data  
-    datapath = path.parents[2] / "datasets" / args.filename
+    datapath = path.parents[2] / "datasets" / "human_datasets" / args.filename
     datafile = datapath / "data.ndjson"
     df = load_file(datafile)
 
     # subset data for prompting. Will save to "datasets_ai" / "chosen_model". If data is not subsetted, will save data to full_data / "chosen_model"
     if args.data_subset is not None: 
         df = df[:args.data_subset]
-        outpath = path.parents[2] / "datasets_ai" / f"{args.chosen_model}" 
+        outpath = path.parents[2] / "datasets" / "ai_datasets" / f"{args.chosen_model}" 
 
     if args.data_subset is None:
-        outpath = path.parents[2] / "datasets_ai" / "ALL_DATA" / f"{args.chosen_model}" 
+        outpath = path.parents[2] / "datasets" / "ai_datasets" / "ALL_DATA" / f"{args.chosen_model}" 
 
     outpath.mkdir(parents=True, exist_ok=True)
 
@@ -68,7 +62,7 @@ def main():
     completions_df = generation_pipeline(
         chosen_model = args.chosen_model, 
         df = df, 
-        datafile = args.filename, 
+        dataset = args.filename, 
         prompt_number = args.prompt_number, 
         min_len = min_len, 
         max_tokens = max_tokens, 

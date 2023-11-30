@@ -84,32 +84,32 @@ The medians of the distances were computed for each model, dataset and prompt nu
 
 | dataset       | model       |   1.0 |   2.0 |   3.0 |   4.0 | 5.0   | 6.0   |
 |---------------|-------------|-------|-------|-------|-------|-------|-------|
-|               | beluga      |  0.39 |  0.52 |  0.40 |  0.27 |       |       |
-| dailydialog   | llama2_chat |  1.16 |  1.38 |  1.42 |  1.07 |       |       |
-|               | beluga      |  0.61 |  0.46 |  0.49 |  0.62 | 1.11  | 0.664 |
-| dailymail_cnn | llama2_chat |  1.67 |  1.48 |  1.31 |  1.39 | 1.803 | 2.001 |
-|               | beluga      |  0.04 |  0.05 |  0.05 |  0.05 |       |       |
-| mrpc          | llama2_chat |  0.07 |  0.07 |  0.06 |  0.06 |       |       |
-|               | beluga      |  2.83 |  2.98 |  5.05 |  3.14 | 3.533 | 2.875 |
-| stories       | llama2_chat |  3.07 |  3.41 |  3.83 |  3.03 | 2.871 | 2.535 |
+|               | beluga7b      |  0.39 |  0.52 |  0.40 |  0.27 |       |       |
+| dailydialog   | llama2_chat13b |  1.16 |  1.38 |  1.42 |  1.07 |       |       |
+|               | beluga7b      |  0.61 |  0.46 |  0.49 |  0.62 | 1.11  | 0.664 |
+| dailymail_cnn | llama2_chat13b |  1.67 |  1.48 |  1.31 |  1.39 | 1.803 | 2.001 |
+|               | beluga7b      |  0.04 |  0.05 |  0.05 |  0.05 |       |       |
+| mrpc          | llama2_chat13b |  0.07 |  0.07 |  0.06 |  0.06 |       |       |
+|               | beluga7b      |  2.83 |  2.98 |  5.05 |  3.14 | 3.533 | 2.875 |
+| stories       | llama2_chat13b |  3.07 |  3.41 |  3.83 |  3.03 | 2.871 | 2.535 |
 
 ## Two lowest medians per MODEL, DATASET
 We can also group the results in the two prompts that hold the lowest median per model and dataset: 
 | dataset       | model       |   prompt |   median |
 |---------------|-------------|----------|----------|
-| dailydialog   | beluga      |        4 |    0.267 |
+| dailydialog   | beluga7b      |        4 |    0.267 |
 |               |             |        1 |    0.394 |
-|               | llama2_chat |        4 |    1.074 |
+|               | llama2_chat13b |        4 |    1.074 |
 |               |             |        1 |    1.162 |
-| dailymail_cnn | beluga      |        2 |    0.46  |
+| dailymail_cnn | beluga7b      |        2 |    0.46  |
 |               |             |        3 |    0.487 |
-|               | llama2_chat |        3 |    1.311 |
+|               | llama2_chat13b |        3 |    1.311 |
 |               |             |        4 |    1.394 |
-| mrpc          | beluga      |        1 |    0.045 |
+| mrpc          | beluga7b      |        1 |    0.045 |
 |               |             |        3 |    0.046 |
-|               | llama2_chat |        4 |    0.064 |
+|               | llama2_chat13b |        4 |    0.064 |
 |               |             |        3 |    0.064 |
-| stories       | beluga      |        1 |    2.832 |
+| stories       | beluga7b      |        1 |    2.832 |
 |               |             |        6 |    2.875 |
-|               | llama2_chat |        6 |    2.535 |
+|               | llama2_chat13b |        6 |    2.535 |
 |               |             |        5 |    2.871 |

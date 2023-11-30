@@ -3,7 +3,6 @@ import json
 from pathlib import Path
 import re
 
-
 def clean_stories_data(stories):
     for col in ["source", "human_completions"]:
         for s in stories:
@@ -51,7 +50,7 @@ def cleanup():
     path = Path(__file__)
 
     # Cleanup mrsp
-    msrpath = path.parents[1] / 'datasets' / 'mrpc' 
+    msrpath = path.parents[1] / 'datasets' / 'human_datasets' / 'mrpc' 
     msrfile = msrpath / 'raw.ndjson'
     with open(msrfile) as f:
         msrp = ndjson.load(f)
@@ -63,7 +62,7 @@ def cleanup():
         ndjson.dump(msrp, f, ensure_ascii=False)
     
     # Cleanup stories
-    storiespath = path.parents[1] / 'datasets' / 'stories' 
+    storiespath = path.parents[1] / 'datasets' / 'human_datasets' / 'stories' 
     storiesfile = storiespath / 'stories_5bins_1000tokens_al.json'
     with open(storiesfile) as f:
         stories = json.load(f)
@@ -75,7 +74,7 @@ def cleanup():
         ndjson.dump(cleaned_stories, f, ensure_ascii=False)
 
     # Cleanup dailymail
-    dmpath = path.parents[1] / 'datasets' / 'dailymail_cnn' 
+    dmpath = path.parents[1] / 'datasets' / 'human_datasets' / 'dailymail_cnn' 
     dmfile = dmpath / 'raw.ndjson'
     with open(dmfile) as f:
         dm = ndjson.load(f)
@@ -87,7 +86,7 @@ def cleanup():
 
 
     # clean dailydialog (remove EOT tokens)
-    dmpath = path.parents[1] / 'datasets' / 'dailydialog' 
+    dmpath = path.parents[1] / 'datasets' / 'human_datasets' / 'dailydialog' 
     dmfile = dmpath / 'data.ndjson'
 
     with open(dmfile) as f:

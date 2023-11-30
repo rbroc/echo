@@ -105,14 +105,14 @@ def main():
 
     # paths
     path = pathlib.Path(__file__)
-    ai_dir = path.parents[2] / "datasets_ai"
-    human_dir = path.parents[2] / "datasets"
+    ai_dir = path.parents[2] / "datasets" / "ai_datasets"
+    human_dir = path.parents[2] / "datasets" / "human_datasets"
 
     results_path = path.parents[2] / "results" / "PCA"
     results_path.mkdir(parents=True, exist_ok=True)
 
     # models     
-    models = ["beluga", "llama2_chat"]
+    models = ["beluga7b", "llama2_chat13b"]
     datasets = ["dailymail_cnn", "stories", "mrpc", "dailydialog"]
 
     print("[INFO:] PREPROCESSING DATA, COMBINING DATAFRAMES")

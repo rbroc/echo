@@ -1,5 +1,13 @@
 ## Overview
-This folder contains the following files ... 
+This folder contains the following files: 
+| <div style="width:120px"></div>| Description |
+|---------|:-----------|
+| `pipeline.py` | Functions for the generation pipeline. Relies on `prompts.py`|
+| `models.py` | Classes to intialize the LMs used. Currently supports StableBeluga and Llama-chat models (quantized and full)|
+| `prompts.py` | Functions to create task and system prompts. Used in pipeline.py|
+| `run_pipeline.py` | Functions to create task and system prompts. Used in pipeline.py|
+
+⚠️ NOTE that only `run_pipeline.py` can be run in the terminal!
 
 ## Generating Text 
 To run the generation text pipeline, run in the terminal (from root):
