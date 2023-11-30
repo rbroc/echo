@@ -5,7 +5,7 @@ import pathlib
 import numpy as np
 import pandas as pd
 
-def compute_distances(df:pd.DataFrame, models:list=["beluga", "llama2_chat"], cols:list=["PC1", "PC2", "PC3", "PC4"]):
+def compute_distances(df:pd.DataFrame, models:list=["beluga7b", "llama2_chat13b"], cols:list=["PC1", "PC2", "PC3", "PC4"]):
     '''
     Extract euclidean distances between human and model completions in n-dimensions from a list of features (cols) 
 
@@ -61,12 +61,15 @@ def main():
 
     print("[INFO:] READING CSV ...")
     df = pd.read_csv(datapath)
+    print(df)
 
-    models = ["beluga", "llama2_chat"]
+    models = ["beluga7b", "llama2_chat13b"]
     pc_cols = ["PC1", "PC2", "PC3", "PC4"]
 
     print("[INFO:] COMPUTING DISTANCES ...")
     result_df = compute_distances(df, models, pc_cols)
+
+    print(result_df)
  
     print("[INFO:] SAVING RESULTS ...")
     sorted_df = result_df.copy().sort_values(["id", "model"])

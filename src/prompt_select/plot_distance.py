@@ -16,7 +16,9 @@ def jitterplots(data, datasets, save_path):
     for dataset in datasets:
         dataset_data = data[data['dataset'] == dataset]
 
-        # create lpot
+        dataset_data['model'] = dataset_data['model'].astype(str)
+
+        # create plot
         g = sns.catplot(data=dataset_data, x="prompt_number", y="distance", hue="model", kind="strip", palette="husl", jitter=0.3)
 
         # set labels and title
