@@ -74,7 +74,7 @@ Our datasets are sampled from the following datasets:
 - `mrpc`: https://paperswithcode.com/dataset/mrpc. Paraphrase corpus, from which we extract only examples that are manually labelled as paraphrases. Currently, we have 3900 examples;
 - `stories`: prompts and completions for story generation. The dataset is described here: https://aclanthology.org/P18-1082/. Currently, we have 5000 examples.
 
-README files within each folder include further details for each dataset.
+`README` files within each folder include further details for each dataset.
 
 ### Preprocessing
 For `dailydialog`, punctuation has been standardized and irregular transcription has been normalized (see `datasets/dailydialog/utils.py`).
