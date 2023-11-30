@@ -44,7 +44,7 @@ def extract_min_max_tokens(dataset: str):
 
     return valid_datasets[dataset]
 
-def generation_pipeline(chosen_model:str, df:pd.DataFrame, dataset:str, prompt_number:int, min_len:int, max_tokens:int, batch_size:int=1, do_sample=False, outfilepath=None):
+def generation_pipeline(chosen_model:str, df:pd.DataFrame, dataset:str, prompt_number:int, min_len:int, max_tokens:int, batch_size:int=1, do_sample=False, outfilepath=None, cache_dir=None):
     '''
     Generation pipeline. Create prompts and completions from "source" column. 
 
@@ -57,12 +57,13 @@ def generation_pipeline(chosen_model:str, df:pd.DataFrame, dataset:str, prompt_n
         max_tokens: max new tokens to be generate
         do_sample: whether the model should do greedy decoding (False) or some kind of sampling.
         outfilepath: path where the datafile with completions should be saved. Defaults to None
+        cache_dir: path where model is saved locally (defaults to None, downloading the model from the hub)
 
     Returns
         df_completions: dataframe with completions
     '''
     # instantiate model
-    print(f"[INFO:] Intializing model ...")
+    print(f"[INFO:] Instantiating model ...")
     if "Q" not in chosen_model: 
         model_instance = FullModel(chosen_model)
     else: 
@@ -83,7 +84,8 @@ def generation_pipeline(chosen_model:str, df:pd.DataFrame, dataset:str, prompt_n
                                                           max_tokens=max_tokens, 
                                                           batch_size=batch_size, 
                                                           do_sample=do_sample, 
-                                                          outfilepath=outfilepath
+                                                          outfilepath=outfilepath, 
+                                                          cache_dir=cache_dir
                                                           )
 
     return df_completions
