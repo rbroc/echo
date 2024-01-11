@@ -55,7 +55,7 @@ class Model():
             batch_size: the amount of batches the data should be handled in (default to 1, i.e., no batching).
             do_sample: whether the model should do greedy decoding (False) or some kind of sampling.
             outfilepath: path where the file should be saved (defaults to none, not saving anything)
-            cache_dir: path where model is saved locally (defaults to None, downloading the model from the hub)
+            cache_dir: path to load model if saved locally (defaults to None, downloading the model from the hub)
 
         Returns
             completions_ds: huggingface dataset with model completions and ID 
@@ -87,6 +87,10 @@ class FullModel(Model):
     Full, unquantized models (Beluga and Llama2)
     '''
     def initialize_model(self, cache_dir=None):
+        '''
+        Init model and tokenizer.
+            cache_dir: if cache_dir is specified, downloads model to cache_dir (or loads it if already downloaded). In case of any bugs, delete local folder.
+        '''
         if self.model is None: 
             model = AutoModelForCausalLM.from_pretrained(self.get_model_name(), cache_dir=cache_dir)
 
@@ -110,6 +114,10 @@ class QuantizedModel(Model):
     '''
     def initialize_model(self, cache_dir=None):
         if self.model is None: 
+            '''
+            Init model and tokenizer.
+                cache_dir: if cache_dir is specified, downloads model to cache_dir (or loads it if already downloaded). In case of any bugs, delete local folder.
+            '''
             model_name = self.get_model_name()
 
             model = AutoModelForCausalLM.from_pretrained(model_name,
