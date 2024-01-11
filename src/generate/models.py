@@ -66,12 +66,12 @@ class Model():
         # convert to HF dataset for batching/streaming option
         ds = Dataset.from_pandas(df)
 
-
         completions = []        
         for out in tqdm(self.model(KeyDataset(ds, prompt_col), min_length=min_len, max_new_tokens=max_tokens, batch_size=batch_size, **sample_params)): 
             completion_txt = list(out[0].values())[0] # retrieve only raw text 
             completions.append(completion_txt)
         
+        print("[INFO]: Saving data ...")
         # remove human cols, add model completions to ds 
         completions_ds = ds.remove_columns(["human_completions", "source"])
         completions_ds = completions_ds.add_column(f"{self.chosen_model}_completions", completions)
