@@ -91,7 +91,7 @@ class FullModel(Model):
             cache_dir: if cache_dir is specified, downloads model to cache_dir (or loads it if already downloaded). In case of any bugs, delete local folder.
         '''
         if self.model is None: 
-            model = AutoModelForCausalLM.from_pretrained(self.get_model_name(), cache_dir=cache_dir)
+            model = AutoModelForCausalLM.from_pretrained(self.get_model_name(), cache_dir=cache_dir, device_map="auto")
 
             tokenizer = AutoTokenizer.from_pretrained(self.get_model_name(), cache_dir=cache_dir)
 
@@ -99,7 +99,6 @@ class FullModel(Model):
                 model=model,  # get mdl name from base class
                 torch_dtype=torch.bfloat16,
                 tokenizer=tokenizer,
-                device_map = "auto",
                 return_full_text=False,
                 task="text-generation"
             )
