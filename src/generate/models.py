@@ -43,7 +43,7 @@ class Model():
                 f"please choose one of {all_names}"
             ) from e 
 
-    def completions_generator(self, df:pd.DataFrame, prompt_col:str, min_len:int, max_tokens:int, batch_size=1, do_sample=False, outfilepath=None, cache_dir=None):
+    def completions_generator(self, df:pd.DataFrame, prompt_col:str, min_len:int, max_tokens:int, batch_size=1, sample_params:dict=None, outfilepath=None, cache_dir=None):
         '''
         Create completions based on source text in dataframe (df). Allows for batching inference (NB. GPU needed!).
 
@@ -53,7 +53,7 @@ class Model():
             min_len: minimum length of the completion (output)
             max_tokens: maximum new tokens to be added 
             batch_size: the amount of batches the data should be handled in (default to 1, i.e., no batching).
-            do_sample: whether the model should do greedy decoding (False) or some kind of sampling.
+            sample_params: if specified, will be used to do probabilistic decoding. 
             outfilepath: path where the file should be saved (defaults to none, not saving anything)
             cache_dir: path to load model if saved locally (defaults to None, downloading the model from the hub)
 
@@ -66,10 +66,9 @@ class Model():
         # convert to HF dataset for batching/streaming option
         ds = Dataset.from_pandas(df)
 
-        # use pipeline for dataset 
-        completions = []
-     
-        for out in tqdm(self.model(KeyDataset(ds, prompt_col), min_length=min_len, max_new_tokens=max_tokens, batch_size=batch_size, do_sample=do_sample)): 
+
+        completions = []        
+        for out in tqdm(self.model(KeyDataset(ds, prompt_col), min_length=min_len, max_new_tokens=max_tokens, batch_size=batch_size, **sample_params)): 
             completion_txt = list(out[0].values())[0] # retrieve only raw text 
             completions.append(completion_txt)
         

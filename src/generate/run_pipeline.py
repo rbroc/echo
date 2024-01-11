@@ -109,13 +109,15 @@ def main():
     ## INIT GEN ## 
     print(f"[INFO:] Generating completions with {model_instance.get_model_name()} ...")
 
+    prob_sampling = {"do_sample":True, "temperature":1}
+
     df_completions = model_instance.completions_generator(
                                                           df=prompt_df, 
                                                           prompt_col=f"prompt_{args.prompt_number}", 
                                                           min_len=min_len,
                                                           max_tokens=max_tokens, 
                                                           batch_size=args.batch_size, 
-                                                          do_sample=False, 
+                                                          sample_params = prob_sampling,
                                                           outfilepath=outpath, 
                                                           cache_dir=cache_models_path
                                                           )
