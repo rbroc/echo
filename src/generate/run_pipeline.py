@@ -50,7 +50,7 @@ def load_token(model_name:str):
         from huggingface_hub import login
 
         # get token from txt
-        with open(path.parents[2] / "tokens" / "hf_token.txt") as f:
+        with open(pathlib.Path(__file__).parents[2] / "tokens" / "hf_token.txt") as f:
             hf_token = f.read()
 
         login(hf_token)
