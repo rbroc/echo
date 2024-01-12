@@ -131,7 +131,7 @@ class QuantizedModel(Model):
         
             self.model = pipeline(
                     model=model_name,
-                    device_map="auto",
+                    device_map="auto", # needs to be here and not in the model arg for quantized mdl 
                     tokenizer=tokenizer,
                     return_full_text=False
                 )
