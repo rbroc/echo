@@ -131,6 +131,7 @@ class QuantizedModel(Model):
         
             self.model = pipeline(
                     model=model_name,
+                    device_map="auto",
                     tokenizer=tokenizer,
                     return_full_text=False
                 )
