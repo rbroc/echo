@@ -15,7 +15,7 @@ def input_parse():
 
     # add arguments 
     parser.add_argument("-d", "--dataset", help = "pick which dataset you want", type = str, default = "stories")
-    parser.add_argument("-mdl", "--chosen_model", help = "Choose between ...", type = str, default = "beluga7b")
+    parser.add_argument("-mdl", "--model_name", help = "Choose between models ...", type = str, default = "beluga7b")
     parser.add_argument("-prompt_n", "--prompt_number", help = "choose which prompt to use", type = int, default = 1)
     parser.add_argument("-subset", "--data_subset", help = "how many rows you want to include. Useful for testing. Defaults to None.", type = int, default=None)
     parser.add_argument("-batch", "--batch_size", help = "Batching of dataset. Mainly for processing in parallel for GPU. Defaults to no batching (batch size of 1). ", type = int, default=1)
@@ -56,7 +56,7 @@ def load_token(model_name:str):
         login(hf_token)
 
 def main(): 
-    # seed, only really necessary if prob_sampling is defined (which it is)
+    # seed, only necessary if prob_sampling params such as temperature is defined
     set_seed(129)
 
     # init args, define path 
@@ -73,20 +73,20 @@ def main():
     
     df = pd.DataFrame(data)
 
-    # subset data for prompting. saves to "datasets_ai" / "chosen_model". If data is not subsetted, will save data to full_data / "chosen_model"
+    # subset data for prompting. saves to "datasets_ai" / "model_name". If data is not subsetted, will save data to full_data / "model_name"
     if args.data_subset is not None: 
         df = df[:args.data_subset]
-        outpath = path.parents[2] / "datasets" / "ai_datasets" / f"{args.chosen_model}" 
+        outpath = path.parents[2] / "datasets" / "ai_datasets" / f"{args.model_name}" 
 
     if args.data_subset is None:
-        outpath = path.parents[2] / "datasets" / "ai_datasets" / "ALL_DATA" / f"{args.chosen_model}" 
+        outpath = path.parents[2] / "datasets" / "ai_datasets" / "ALL_DATA" / f"{args.model_name}" 
 
     # define min and max generation length for dataset (from filename)
     min_len, max_tokens = extract_min_max_tokens(args.dataset)
 
     ## LOAD MDL ##
     print(f"[INFO:] Instantiating model ...")
-    model_name = args.chosen_model
+    model_name = args.model_name
     cache_models_path =  path.parents[3] / "models"
 
     # load token (for llama2)
