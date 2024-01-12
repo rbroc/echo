@@ -56,7 +56,7 @@ def load_token(model_name:str):
         login(hf_token)
 
 def main(): 
-    # seed, only really necessary if do_sample = True in generation_pipeline (set to False as default)
+    # seed, only really necessary if prob_sampling is defined (which it is)
     set_seed(129)
 
     # init args, define path 
@@ -81,8 +81,6 @@ def main():
     if args.data_subset is None:
         outpath = path.parents[2] / "datasets" / "ai_datasets" / "ALL_DATA" / f"{args.chosen_model}" 
 
-    outpath.mkdir(parents=True, exist_ok=True)
-
     # define min and max generation length for dataset (from filename)
     min_len, max_tokens = extract_min_max_tokens(args.dataset)
 
@@ -94,7 +92,7 @@ def main():
     # load token (for llama2)
     load_token(model_name)
     
-    # load full or quantized model depending on model_name
+    # init model instance -> full or quantized model depending on mdl name (mdl will first be loaded in completions_generator). 
     if "Q" not in model_name: 
         model_instance = FullModel(model_name)
     else: 
@@ -109,6 +107,7 @@ def main():
     ## INIT GEN ## 
     print(f"[INFO:] Generating completions with {model_instance.get_model_name()} ...")
 
+    # generate
     prob_sampling = {"do_sample":True, "temperature":1}
 
     df_completions = model_instance.completions_generator(
@@ -117,10 +116,12 @@ def main():
                                                           min_len=min_len,
                                                           max_tokens=max_tokens, 
                                                           batch_size=args.batch_size, 
-                                                          sample_params = prob_sampling,
-                                                          outfilepath=outpath, 
+                                                          sample_params = prob_sampling, # can be set to NONE to do no sampling
+                                                          outfilepath=outpath / f"{args.dataset}_prompt_{args.prompt_number}.ndjson",
                                                           cache_dir=cache_models_path
                                                           )
+
+    print("[INFO:] DONE!")
 
 if __name__ == "__main__":
     main()
