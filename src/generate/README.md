@@ -2,36 +2,36 @@
 This folder contains the following files: 
 | <div style="width:120px"></div>| Description |
 |---------|:-----------|
-| `pipeline.py` | Functions for the generation pipeline. Relies on `prompts.py`|
-| `models.py` | Classes to intialize the LMs used. Currently supports StableBeluga and Llama-chat models (quantized and full)|
-| `prompts.py` | Functions to create task and system prompts. Used in pipeline.py|
-| `run_pipeline.py` | Functions to create task and system prompts. Used in pipeline.py|
+| `models.py` | Classes to intialize the LLMs used. Currently supports StableBeluga and Llama-chat models (quantized and full)|
+| `prompts.py` | Functions to create task and system prompts. 
+| `run_pipeline.py` | Generate text! Relies on `models.py` and `prompts.py`|
 
 ⚠️ NOTE that only `run_pipeline.py` can be run in the terminal!
 
 ## Generating Text 
-To run the generation text pipeline, run in the terminal (from root):
+To run a default generation text pipeline, run in the terminal (from root):
 ```
 bash generate.sh
 ```
-Note that this will run text pipeline on a default dataset and model. See below for a custom pipeline.
+This runs [stabilityai/StableBeluga-7B](https://huggingface.co/stabilityai/StableBeluga-7B) (referred to as `beluga7b`) on the `stories` dataset. 
 
-### Custom Text Pipeline
-To run a custom text generation pipeline, run in the terminal (from root): 
+### Custom Generation Pipeline
+To run a custom pipeline, run in the terminal (from root): 
 ```
-python src/generate/run_pipeline.py -mdl {MODELNAME} -f {FILENAME} -prompt_n {PROMPT_NUMBER} -subset {DATA_SUBSET}
+python src/generate/run_pipeline.py -mdl {MODELNAME} -d {DATASETNAME} -prompt_n {PROMPT_NUMBER} -subset {DATA_SUBSET}
 ```
 
-With the arguments specified below: 
+Arguments:
 
 
-| <div style="width:100px">Arg</div>    | Description                             | <div style="width:120px">Default</div>    |
-| :---        |:---                                                                                        |:---             |
-|```-mdl```   | Model name (shortened). See `models.py` for overview.          | `beluga7b`     |
-|```-d```| Name of dataset. Choose between `dailydialog`, `dailymail_cnn`, `mrpc` and `stories`  | `stories`.              |
-|```-prompt_n```   | Integer between 1 and 6 currently. See [prompts.py](prompts.py) for the specific prompts to choose between for each dataset.            |    `1`            |
-|```-subset```   |   Integer how big of a subset of the data you want to use `dataset[:subset]``               | `None` (i.e., no subset)               |
+| Argument     | Description                                                                      | Default                |
+|:-------------|:---------------------------------------------------------------------------------|:-----------------------|
+| `-d`         | Name of dataset. Options: `dailydialog`, `dailymail_cnn`, `mrpc`, `stories`.     | `stories`              |
+| `-mdl`       | Model name (shortened). See [models.py](models.py) for overview.                 | `beluga7b`             |
+| `-prompt_n`  | Integer between 1 and 6. See [prompts.py](prompts.py) for details.                | `1`                    |
+| `-subset`    | Integer specifying subset size of the data `dataset[:subset]`.                   | `None` (no subset)     |
+| `-batch`     | Batch size for dataset processing, mainly for parallel GPU processing.           | `1` (no batching)      |
 
-*arguments subject to change*
 
-Please note that these models are quite large and require 32 or 64 CPUs to run in decent time on a small subset. For running on CPU, you may want to avoid the `stories` dataset as it is a quite heavy!
+## Technical Requirements
+Note that models require a lot of compute power and should be run on a GPU. The smaller 7b models can be run on a 32/64 CPU machine on a small subset especially if `stories` is avoided. The quantized 70b models cannot be run without a GPU.
