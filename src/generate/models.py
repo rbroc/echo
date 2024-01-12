@@ -122,7 +122,9 @@ class QuantizedModel(Model):
                                                 device_map="auto",
                                                 trust_remote_code=False,
                                                 revision="main",
-                                                cache_dir=cache_dir
+                                                cache_dir=cache_dir, 
+                                                torch_dtype=torch.float16, 
+                                                low_cpu_mem_usage=True
                                                 )
                 
             tokenizer = AutoTokenizer.from_pretrained(model_name, use_fast=True, cache_dir=cache_dir)
@@ -130,7 +132,8 @@ class QuantizedModel(Model):
             self.model = pipeline(
                     model=model_name,
                     tokenizer=tokenizer,
-                    torch_dtype=torch.bfloat16,
-                    device_map = "auto",
                     return_full_text=False
                 )
+
+            # allow for padding 
+            self.model.tokenizer.pad_token_id = self.model.model.config.eos_token_id
