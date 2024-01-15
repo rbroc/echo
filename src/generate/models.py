@@ -111,11 +111,11 @@ class QuantizedModel(Model):
     Quantized GPQT models e.g., https://huggingface.co/TheBloke/Llama-2-70B-Chat-GPTQ (optimised for GPU).
     '''
     def initialize_model(self, cache_dir=None):
+        '''
+        Init model and tokenizer.
+            cache_dir: if cache_dir is specified, downloads model to cache_dir (or loads it if already downloaded). In case of any bugs, delete local folder.
+        '''
         if self.model is None: 
-            '''
-            Init model and tokenizer.
-                cache_dir: if cache_dir is specified, downloads model to cache_dir (or loads it if already downloaded). In case of any bugs, delete local folder.
-            '''
             model_name = self.get_model_name()
 
             model = AutoModelForCausalLM.from_pretrained(model_name,
@@ -130,10 +130,11 @@ class QuantizedModel(Model):
             tokenizer = AutoTokenizer.from_pretrained(model_name, use_fast=True, cache_dir=cache_dir)
         
             self.model = pipeline(
-                    model=model_name,
+                    model=model,
                     device_map="auto", # needs to be here and not in the model arg for quantized mdl 
                     tokenizer=tokenizer,
-                    return_full_text=False
+                    return_full_text=False,
+                    task="text-generation"
                 )
 
             # allow for padding 
