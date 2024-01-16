@@ -2,19 +2,16 @@
 Script for loading model pipelines
 '''
 from abc import ABC, abstractmethod
-from tqdm import tqdm
-import pandas as pd 
-from datasets import Dataset
-from transformers.pipelines.pt_utils import KeyDataset
 from transformers import pipeline, AutoTokenizer, AutoModelForCausalLM
-from huggingface_hub import snapshot_download
 import torch
+from vllm import LLM
 
 class Model(): 
-    def __init__(self, chosen_model):
-        self.chosen_model = chosen_model
-        self.model_name = self.get_model_name()
+    def __init__(self, chosen_model_name):
+        self.chosen_model_name = chosen_model_name
+        self.full_model_name = self.get_model_name()
         self.model = None
+        self.system_prompt = self.get_system_prompt()
 
     @abstractmethod
     def initialize_model(self):
@@ -34,52 +31,53 @@ class Model():
             "llama2_chat70bQ":"TheBloke/Llama-2-70B-Chat-GPTQ"
         }
 
-        try: 
-            return model_names.get(self.chosen_model)
-        except KeyError as e: 
+        if self.chosen_model_name in model_names:
+            return model_names[self.chosen_model_name]
+        else:
             all_names = ", ".join(model_names.keys())
             raise ValueError(
-                "Passed model is not supported, "
+                f"Passed model is not supported, "
                 f"please choose one of {all_names}"
-            ) from e 
+            )
 
-    def completions_generator(self, df:pd.DataFrame, prompt_col:str, min_len:int, max_tokens:int, batch_size=1, sample_params:dict=None, outfilepath=None, cache_dir=None):
+    def get_system_prompt(self):
         '''
-        Create completions based on source text in dataframe (df). Allows for batching inference (NB. GPU needed!).
+        StableBeluga follows this prompt structure: https://huggingface.co/stabilityai/StableBeluga-7B) 
+        Llama2 chat versions follow this prompt structure: https://gpus.llm-utils.org/llama-2-prompt-template/ (note that the DEFAULT system prompt is recommended to be removed https://github.com/facebookresearch/llama/commit/a971c41bde81d74f98bc2c2c451da235f1f1d37c. Custom system prompts may be useful. Regardless of whether a system prompt is used, the format below is required to produce intelligble text) 
+        '''
+        system_prompts = {
+            "beluga": "You are StableBeluga, an AI that follows instructions extremely well. Help as much as you can. Remember, be safe, and don't do anything illegal.\n\n",
+            "llama2_chat": "You are an AI, but you do not deviate from the task prompt and you do not small talk. Never begin your response with 'Sure, here is my response: ' or anything of the like. It is important that you finish without getting cut off."
+        }
+
+        if "beluga" in self.chosen_model_name:
+            return system_prompts.get("beluga", "")
+
+        elif "llama2_chat" in self.chosen_model_name:
+            return system_prompts.get("llama2_chat", "")
+
+        else:
+            # return empty string for models with no specific system prompt
+            return ""
+
+    def format_prompt(self, user_input):
+        '''
+        Format final prompt with user_input
 
         Args
-            df: dataframe with prompt col 
-            prompt_col: name of column to generate completions from 
-            min_len: minimum length of the completion (output)
-            max_tokens: maximum new tokens to be added 
-            batch_size: the amount of batches the data should be handled in (default to 1, i.e., no batching).
-            sample_params: if specified, will be used to do probabilistic decoding. 
-            outfilepath: path where the file should be saved (defaults to none, not saving anything)
-            cache_dir: path to load model if saved locally (defaults to None, downloading the model from the hub)
+            user_input: should include task prompt and source text e.g., ""summarize this: 'I love language models'"
 
-        Returns
-            completions_ds: huggingface dataset with model completions and ID 
+        Returns 
+            Formatted prompt 
         '''
-        # intialize mdl 
-        self.initialize_model(cache_dir=cache_dir) 
+        if "beluga" in self.chosen_model_name:
+            return f"### System:\n{self.system_prompt}### User: {user_input}\n\n### Assistant:\n"
 
-        # convert to HF dataset for batching/streaming option
-        ds = Dataset.from_pandas(df)
-
-        completions = []        
-        for out in tqdm(self.model(KeyDataset(ds, prompt_col), min_length=min_len, max_new_tokens=max_tokens, batch_size=batch_size, **sample_params)): 
-            completion_txt = list(out[0].values())[0] # retrieve only raw text 
-            completions.append(completion_txt)
+        elif "llama2_chat" in self.chosen_model_name:
+            return f"<s>[INST] <<SYS>>\n{self.system_prompt}\n<</SYS>>\n\n{user_input} [/INST]"
         
-        print("[INFO]: Saving data ...")
-        # remove human cols, add model completions to ds 
-        completions_ds = ds.remove_columns(["human_completions", "source"])
-        completions_ds = completions_ds.add_column(f"{self.chosen_model}_completions", completions)
-        
-        if outfilepath is not None:
-            completions_ds.to_json(outfilepath, orient="records", lines=True, force_ascii=False)
-
-        return completions_ds 
+        else:
+            return user_input
 
 class FullModel(Model):
     '''
@@ -90,19 +88,19 @@ class FullModel(Model):
         Init model and tokenizer.
             cache_dir: if cache_dir is specified, downloads model to cache_dir (or loads it if already downloaded). In case of any bugs, delete local folder.
         '''
-        if self.model is None: 
-            model = AutoModelForCausalLM.from_pretrained(self.get_model_name(), cache_dir=cache_dir, device_map="auto")
+        if self.model is None:
+            model = AutoModelForCausalLM.from_pretrained(self.full_model_name, cache_dir=cache_dir, device_map="auto")
 
-            tokenizer = AutoTokenizer.from_pretrained(self.get_model_name(), cache_dir=cache_dir)
+            tokenizer = AutoTokenizer.from_pretrained(self.full_model_name, cache_dir=cache_dir)
 
             self.model = pipeline(
-                model=model,  # get mdl name from base class
-                torch_dtype=torch.bfloat16,
-                tokenizer=tokenizer,
-                return_full_text=False,
-                task="text-generation"
-            )
-            
+                    model=model,  # get mdl name from base class
+                    torch_dtype=torch.bfloat16,
+                    tokenizer=tokenizer,
+                    return_full_text=False,
+                    task="text-generation"
+                )
+                
             # allow for padding 
             self.model.tokenizer.pad_token_id = self.model.model.config.eos_token_id
 
@@ -116,9 +114,7 @@ class QuantizedModel(Model):
             cache_dir: if cache_dir is specified, downloads model to cache_dir (or loads it if already downloaded). In case of any bugs, delete local folder.
         '''
         if self.model is None: 
-            model_name = self.get_model_name()
-
-            model = AutoModelForCausalLM.from_pretrained(model_name,
+            model = AutoModelForCausalLM.from_pretrained(self.full_model_name,
                                                 device_map="auto",
                                                 trust_remote_code=False,
                                                 revision="main",
@@ -127,7 +123,7 @@ class QuantizedModel(Model):
                                                 low_cpu_mem_usage=True
                                                 )
                 
-            tokenizer = AutoTokenizer.from_pretrained(model_name, use_fast=True, cache_dir=cache_dir)
+            tokenizer = AutoTokenizer.from_pretrained(self.full_model_name, use_fast=True, cache_dir=cache_dir)
         
             self.model = pipeline(
                     model=model,
@@ -139,3 +135,16 @@ class QuantizedModel(Model):
 
             # allow for padding 
             self.model.tokenizer.pad_token_id = self.model.model.config.eos_token_id
+
+class vLLM_Model(Model):
+    '''
+    vLLM model https://github.com/vllm-project/vllm
+
+    Wraps a HF model 
+    '''
+    def initialize_model(self, cache_dir=None, seed=129):
+        if self.model is None:
+            # get available gpus
+            available_gpus = len([torch.cuda.device(i) for i in range(torch.cuda.device_count())])
+
+            self.model = LLM(self.full_model_name, download_dir=cache_dir, tensor_parallel_size=available_gpus, seed=seed)
