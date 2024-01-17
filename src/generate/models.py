@@ -147,4 +147,4 @@ class vLLM_Model(Model):
             # get available gpus
             available_gpus = len([torch.cuda.device(i) for i in range(torch.cuda.device_count())])
 
-            self.model = LLM(self.full_model_name, download_dir=cache_dir, tensor_parallel_size=available_gpus, seed=seed)
+            self.model = LLM(self.full_model_name, download_dir=cache_dir, tensor_parallel_size=available_gpus, seed=seed, enforce_eager=True)
