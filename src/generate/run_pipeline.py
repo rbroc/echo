@@ -3,7 +3,6 @@ Pipeline to generate AI completions with various models using Hugging Face's pip
 '''
 import argparse
 import pathlib
-import ndjson, pandas as pd
 from transformers import set_seed
 
 # custom 
