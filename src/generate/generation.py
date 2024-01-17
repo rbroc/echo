@@ -58,8 +58,8 @@ def load_json_data(datafilepath:pathlib.Path(), n_subset:int=None):
     df = pd.DataFrame(data)
     
     if n_subset: 
-        print(f"[INFO:] Data subsetted to size n = {subset}")
-        df = df[:subset_n]
+        print(f"[INFO:] Data subsetted to size n = {n_subset}")
+        df = df[:n_subset]
 
     return df 
 
