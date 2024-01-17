@@ -99,7 +99,6 @@ def hf_generate(hf_model, df:pd.DataFrame, prompt_col:str="prompt_1", min_len:in
         
     if outfilepath is not None:
         print(f"[INFO]: Saving data to {outfilepath}...")
-        outfilepath.mkdir(parents=True, exist_ok=True)
         completions_ds.to_json(outfilepath, orient="records", lines=True, force_ascii=False)
 
     return completions_ds 
@@ -141,5 +140,4 @@ def vllm_generate(vllm_model, df:pd.DataFrame, prompt_col:str="prompt_1", max_to
       
     if outfilepath is not None:
         print(f"[INFO]: Saving data to {outfilepath}...")
-        outfilepath.mkdir(parents=True, exist_ok=True)
         df.to_json(outfilepath, orient="records", lines=True, force_ascii=False)

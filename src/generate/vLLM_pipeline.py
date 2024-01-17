@@ -43,6 +43,8 @@ def main():
     else:
         outpath = path.parents[2] / "datasets" / "ai_vllm_datasets" / "ALL_DATA" / f"{args.model_name}" 
 
+    outpath.mkdir(parents=True, exist_ok=True)
+
     ## LOAD MDL ##
     print(f"[INFO:] Instantiating model ...")
     chosen_model_name = args.model_name
