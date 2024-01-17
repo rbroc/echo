@@ -119,7 +119,7 @@ class QuantizedModel(Model):
                                                 trust_remote_code=False,
                                                 revision="main",
                                                 cache_dir=cache_dir, 
-                                                torch_dtype=torch.float16, 
+                                                torch_dtype=torch.bfloat16, # changed to bfloat16
                                                 low_cpu_mem_usage=True
                                                 )
                 
@@ -147,4 +147,4 @@ class vLLM_Model(Model):
             # get available gpus
             available_gpus = len([torch.cuda.device(i) for i in range(torch.cuda.device_count())])
 
-            self.model = LLM(self.full_model_name, download_dir=cache_dir, tensor_parallel_size=available_gpus, seed=seed, enforce_eager=True)
+            self.model = LLM(self.full_model_name, download_dir=cache_dir, tensor_parallel_size=available_gpus, seed=seed, enforce_eager=True, dtype="bfloat16")
