@@ -87,21 +87,33 @@ def hf_generate(hf_model, df:pd.DataFrame, prompt_col:str="prompt_1", min_len:in
     # convert to HF dataset for batching/streaming option
     ds = Dataset.from_pandas(df)
 
-    completions = []       
+    completions = []    
+    temp_counter = 0
+    temp_threshold = batch_size*2 # threshold for amount of completions before it saves a remp file 
 
     for out in tqdm(hf_model.model(KeyDataset(ds, prompt_col), min_length=min_len, max_new_tokens=max_tokens, batch_size=batch_size, **sample_params)): 
         completion_txt = list(out[0].values())[0] # retrieve only raw text 
         completions.append(completion_txt)
         
-    # remove human cols, add model completions to ds 
-    completions_ds = ds.remove_columns(["human_completions", "source"])
-    completions_ds = completions_ds.add_column(f"{hf_model.chosen_model_name}_completions", completions)
-        
-    if outfilepath is not None:
-        print(f"[INFO]: Saving data to {outfilepath}...")
-        completions_ds.to_json(outfilepath, orient="records", lines=True, force_ascii=False)
+        if outfilepath: 
+            temp_counter += 1
+            if temp_counter % temp_threshold == 0:
+                print("[INFO]: Saving temp file...")
+                temp_df = df.iloc[:len(completions)].copy()
+                temp_df = temp_df.drop(columns=["human_completions", "source"], errors='ignore')
+                temp_df[f"{hf_model.chosen_model_name}_completions"] = completions
 
-    return completions_ds 
+                temp_df.to_json(outfilepath, orient="records", lines=True, force_ascii=False)
+
+    # add completions 
+    df[f"{hf_model.chosen_model_name}_completions"] = completions
+    final_df = df.drop(columns=["human_completions", "source"])
+
+    if outfilepath:
+        print(f"[INFO]: Saving data to {outfilepath}...")
+        final_df.to_json(outfilepath, orient="records", lines=True, force_ascii=False)
+
+    return final_df  
 
 def vllm_generate(vllm_model, df:pd.DataFrame, prompt_col:str="prompt_1", max_tokens:int=1055, sample_params=None, outfilepath=None, cache_dir=None):
     '''
