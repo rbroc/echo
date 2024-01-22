@@ -52,7 +52,7 @@ def combine_data(ai_dfs, human_df, subset=None):
     for idx, df in enumerate(ai_dfs): 
         # subset to only 100 vals (since some have 150 and some have 100)
         if subset:
-            new_df = df.loc[:ai_subset].copy()
+            new_df = df.loc[:subset].copy()
         else: 
             new_df = df.copy()
         
@@ -81,7 +81,7 @@ def combine_data(ai_dfs, human_df, subset=None):
 
     return combined_df
 
-def preprocess_datasets(ai_dir, human_dir, models:list, datasets:list):
+def preprocess_datasets(ai_dir, human_dir, models:list, datasets:list, subset=None):
     '''Loads and prepares as many datasets as needed'''
 
     all_dfs = []
@@ -89,7 +89,7 @@ def preprocess_datasets(ai_dir, human_dir, models:list, datasets:list):
     for dataset in datasets: 
         ai_paths, human_path = get_paths(ai_dir, human_dir, models, dataset)
         ai_dfs, human_df = load_dataset(ai_paths, human_path)
-        dataset_df = combine_data(ai_dfs, human_df)
+        dataset_df = combine_data(ai_dfs, human_df, subset=subset)
         
         # add dataset col 
         dataset_df["dataset"] = dataset
