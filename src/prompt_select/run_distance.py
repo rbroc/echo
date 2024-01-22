@@ -5,7 +5,7 @@ import pathlib
 import numpy as np
 import pandas as pd
 
-def compute_distances(df:pd.DataFrame, models:list=["beluga7b", "llama2_chat13b"], cols:list=["PC1", "PC2", "PC3", "PC4"]):
+def compute_distances(df:pd.DataFrame, models:list=["beluga7b", "llama2_chat13b"], cols:list=["PC1", "PC2", "PC3", "PC4"], baseline="human"):
     '''
     Extract euclidean distances between human and model completions in n-dimensions from a list of features (cols) 
 
@@ -13,6 +13,7 @@ def compute_distances(df:pd.DataFrame, models:list=["beluga7b", "llama2_chat13b"
         df: dataframe with features columns (e.g., PC components)
         models: list of models present in the model column in the dataframe
         cols: list of feature cols present in the dataframe (e.g., PC components)
+        baseline: model which the euclidean distance is computed between for all other models. Defaults to human completions.
 
     Returns
         result_df: dataframe containing columns: id, model, dataset, distance, prompt_number
@@ -27,7 +28,7 @@ def compute_distances(df:pd.DataFrame, models:list=["beluga7b", "llama2_chat13b"
             current_id = row["id"]
 
             # extract features for the "human" model with the same "id" as df_ai 
-            pc_human = df[(df["model"] == "human") & (df["id"] == current_id)][cols].values
+            pc_human = df[(df["model"] == baseline) & (df["id"] == current_id)][cols].values
 
             # extract features for model completions
             pc_model = row[cols].values
