@@ -12,6 +12,7 @@ pip install -r requirements.txt
 #pip install --upgrade auto-gptq
 
 # for text descriptives 
+python -m spacy download en_core_web_sm
 python -m spacy download en_core_web_md
 python -m spacy download en_core_web_lg
 
