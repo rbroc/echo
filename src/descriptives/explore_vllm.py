@@ -3,6 +3,7 @@ import pandas as pd
 import spacy
 import seaborn as sns
 import matplotlib.pyplot as plt
+import matplotlib.ticker as ticker
 
 import sys 
 sys.path.append(str(pathlib.Path(__file__).parents[2]))
@@ -21,13 +22,15 @@ def load_data(model="beluga7b", file="stories_prompt_1.ndjson", vllm=False, root
 
     return df 
 
-def plot_distribution(df, col="doc_length", hue_col='model', bins=30, figsize=(10, 6), title='Doc Lengths by Framework', save_path=None):
-    # Set the style for a prettier plot
+def plot_distribution(df, col="doc_length", hue_col='model', bins=30, figsize=(10, 6), title='Doc Lengths by Framework \n (Beluga 7B, Stories Dataset (total: 2000 generations))', save_path=None):
     sns.set(style="whitegrid")
 
-    # Plotting the histogram
+    # plot
     plt.figure(figsize=figsize)
     sns.histplot(data=df, x='doc_length', hue=hue_col, kde=False, bins=bins, palette='viridis')
+
+    # adjust
+    plt.gca().xaxis.set_major_locator(ticker.MultipleLocator(100))
     plt.title(title)
     plt.xlabel('Length of Documents (SpaCy doc length)')
     plt.ylabel('Frequency')
@@ -66,10 +69,6 @@ def main():
     df["dataset"] = "stories"
     df["prompt_number"] = 1
 
-    # models     
-    models = ["vllm", "hf"]
-    datasets = ["stories"]
-
     print("[INFO:] EXTRACTING LOW LEVEL METRICS")
     metrics_df = get_descriptive_metrics(df, "completions", "id")
 
@@ -96,8 +95,10 @@ def main():
 
     print("[INFO:] COMPUTING & PLOTTING DISTANCES ...")
     distance_df = compute_distances(final_df, models=["vllm"], baseline="hf")
-    g = sns.catplot(data=distance_df, x="prompt_number", y="distance", kind="strip", jitter=0.3)
+    sns.set(style="whitegrid")
+    g = sns.catplot(data=distance_df, x="prompt_number", y="distance", kind="strip", jitter=0.3, palette="viridis", hue="prompt_number")
     g.set(xlabel=None, xticklabels=[])
+    g._legend.remove()
     plt.title("Distance between VLLM and HF \n Stories dataset, Completions below 112 doc length removed")
     g.savefig(path.parents[0] / "vllm_hf_distance_stories.png", dpi=600)
 
