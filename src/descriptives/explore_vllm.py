@@ -7,7 +7,7 @@ def explore_data(model="beluga7b", file="stories_prompt_1.ndjson", vllm=False, r
     if vllm:
         datapath = root_data_path / "ai_vllm_datasets" / "ALL_DATA"
     else: 
-        datapath = root_data_path / "ai_datasets" / "ALL_DATA"
+        datapath = root_data_path / "ai_datasets" / "prob_decoding"
 
     # load data 
     filepath = datapath / model / file 
@@ -39,8 +39,6 @@ def plot_string_length_distribution_from_df(df, model="beluga7b", col="completio
     if save_path:
         plt.savefig(save_path, bbox_inches='tight')
 
-    plt.show()
-
 def main(): 
     path = pathlib.Path(__file__)
 
@@ -49,6 +47,10 @@ def main():
     # plot 
     vllm = explore_data(vllm=True)
     hf = explore_data(vllm=False)
+
+
+    vllm = vllm[:900]
+    hf = hf[:900]
 
     # add framework 
     vllm["framework"] = "vllm"
