@@ -116,7 +116,7 @@ def main():
     datasets = ["dailymail_cnn", "stories", "mrpc", "dailydialog"]
 
     print("[INFO:] PREPROCESSING DATA, COMBINING DATAFRAMES")
-    df = preprocess_datasets(ai_dir, human_dir, models, datasets)
+    df = preprocess_datasets(ai_dir, human_dir, models, datasets, subset=99)
 
     print("[INFO:] EXTRACTING LOW LEVEL METRICS")
     metrics_df = get_descriptive_metrics(df, "completions", "id")

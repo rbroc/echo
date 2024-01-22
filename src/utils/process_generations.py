@@ -36,13 +36,14 @@ def load_dataset(ai_paths, human_path):
 
     return ai_dfs, human_df
 
-def combine_data(ai_dfs, human_df):
+def combine_data(ai_dfs, human_df, subset=None):
     '''
     Return a dataframe for a particular dataset with all AI generations and human data in one.
 
     Args: 
         ai_dfs: list of dataframes
         human_df: dataframe corresponding to the dfs in ai_dfs 
+        subset: whether datasets should be subsetted (subsets ai datasets to n first rows, and subsequently matches the human completions on completion id). For prompt selection, this was set to 99.
 
     Returns: 
         combined_df: combined dataframe
@@ -50,7 +51,10 @@ def combine_data(ai_dfs, human_df):
     # prepare data for concatenating (similar formatting)
     for idx, df in enumerate(ai_dfs): 
         # subset to only 100 vals (since some have 150 and some have 100)
-        new_df = df.loc[:99].copy()
+        if subset:
+            new_df = df.loc[:ai_subset].copy()
+        else: 
+            new_df = df.copy()
         
         # standardise prompt and completions cols 
         prompt_colname = [col for col in new_df.columns if col.startswith("prompt_")][0] # get column name that starts with prompt_ (e.g., prompt_1, prompt_2, ...)
@@ -104,7 +108,7 @@ def main():
     models = ["beluga", "llama2_chat"]
     datasets = ["dailymail_cnn", "stories", "mrpc", "dailydialog"]
 
-    all_dfs = preprocess_datasets(ai_dir, human_dir, models, datasets)
+    all_dfs = preprocess_datasets(ai_dir, human_dir, models, datasets, subset=99)
     
     print(all_dfs)
 
