@@ -28,7 +28,9 @@ class Model():
             "beluga70b":"stabilityai/StableBeluga2",
             "llama2_chat13b":"meta-llama/Llama-2-13b-chat-hf",
             "beluga70bQ":"TheBloke/StableBeluga2-70B-GPTQ", # GPTQ optimized for GPU
-            "llama2_chat70bQ":"TheBloke/Llama-2-70B-Chat-GPTQ"
+            "llama2_chat70bQ":"TheBloke/Llama-2-70B-Chat-GPTQ",
+            "mistral7b":"mistralai/Mistral-7B-Instruct-v0.2",
+            "mistral8x7b":"mistralai/Mixtral-8x7B-Instruct-v0.1"
         }
 
         if self.chosen_model_name in model_names:
@@ -75,6 +77,9 @@ class Model():
 
         elif "llama2_chat" in self.chosen_model_name:
             return f"<s>[INST] <<SYS>>\n{self.system_prompt}\n<</SYS>>\n\n{user_input} [/INST]"
+
+        elif "mistral" in self.chosen_model_name:
+            return f"<s>[INST] {user_input} [/INST]"
         
         else:
             return user_input
