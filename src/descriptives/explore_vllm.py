@@ -1,7 +1,13 @@
 import pathlib
 import pandas as pd 
+import spacy
 import seaborn as sns
 import matplotlib.pyplot as plt
+
+import sys 
+sys.path.append(str(pathlib.Path(__file__).parents[2]))
+from src.utils.pca import get_descriptive_metrics, run_PCA
+from src.utils.distance import compute_distances, jitterplots
 
 def explore_data(model="beluga7b", file="stories_prompt_1.ndjson", vllm=False, root_data_path=pathlib.Path(__file__).parents[2] / "datasets"):
     if vllm:
@@ -48,7 +54,6 @@ def main():
     vllm = explore_data(vllm=True)
     hf = explore_data(vllm=False)
 
-
     vllm = vllm[:900]
     hf = hf[:900]
 
@@ -61,12 +66,37 @@ def main():
         df.drop(columns=["prompt_1"], inplace=True)
 
     # concatenate 
-    df = pd.concat([vllm, hf], axis=0)
+    df = pd.concat([vllm, hf], axis=0, ignore_index=True)
 
     # plot 
     plot_string_length_distribution_from_df(df, save_path=path.parents[2] / "results" / "string_length_distribution.png")
 
-    print(df)
+    ## PCA ## 
+    spacy.util.fix_random_seed(129)
+
+    # rename framework col to model
+    df.rename(columns={"framework": "model"}, inplace=True)
+    df.rename(columns={"beluga7b_completions": "completions"}, inplace=True)
+    df["dataset"] = "stories"
+    df["prompt_number"] = 1
+
+    # models     
+    models = ["vllm", "hf"]
+    datasets = ["stories"]
+
+    print("[INFO:] EXTRACTING LOW LEVEL METRICS")
+    metrics_df = get_descriptive_metrics(df, "completions", "id")
+
+    print("[INFO:] RUNNING PCA ...")
+    pca, final_df = run_PCA(metrics_df, feature_names=["doc_length", "n_tokens", "n_characters", "n_sentences"], n_components=4)
+
+    print(final_df)
+    print(pca.explained_variance_ratio_)
+
+    print("[INFO:] COMPUTING & PLOTTING DISTABCES ...")
+    distance_df = compute_distances(final_df, models=["vllm"], baseline="hf")
+    jitterplots(distance_df, ["stories"], save_path= path.parents[0])
+
 
 if __name__ == "__main__":
     main()
