@@ -61,7 +61,7 @@ def main():
     prompt_df = add_prompts_to_df(model_obj, df, dataset=dataset, prompt_number=args.prompt_number) 
 
     ## INIT GEN ##
-    print(f"[INFO:] Generating completions with {model_obj.get_model_name()} ...")
+    print(f"[INFO:] Generating completions with {model_obj.full_model_name} ...")
     prob_sampling = SamplingParams(temperature=1, top_k=50, top_p=1, presence_penalty=0, frequency_penalty=0, repetition_penalty=1, max_tokens=1055)
 
     # generate
