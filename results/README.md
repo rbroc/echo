@@ -72,12 +72,12 @@ To then investigate differences between model completions and human completions,
 
 ## Plotting
 Interactive plots illustrate the distance scores and their corresponding completion by hovering over them:
-1. [dailydialog](https://htmlpreview.github.io/?https://github.com/rbroc/echo/blob/main/results/distance/all_PC_jitterplots/interactive/dailydialog.html)
-2. [dailymail_cnn](https://htmlpreview.github.io/?https://github.com/rbroc/echo/blob/main/results/distance/all_PC_jitterplots/interactive/dailymail_cnn.html)
-3. [mrpc](https://htmlpreview.github.io/?https://github.com/rbroc/echo/blob/main/results/distance/all_PC_jitterplots/interactive/mrpc.html)
-4. [stories](https://htmlpreview.github.io/?https://github.com/rbroc/echo/blob/main/results/distance/all_PC_jitterplots/interactive/stories.html)
+1. [dailydialog](https://htmlpreview.github.io/?https://github.com/rbroc/echo/blob/main/results/prompt_select/distance/all_PC_jitterplots/interactive/dailydialog.html)
+2. [dailymail_cnn](https://htmlpreview.github.io/?https://github.com/rbroc/echo/blob/main/results/prompt_select/distance/all_PC_jitterplots/interactive/dailymail_cnn.html)
+3. [mrpc](https://htmlpreview.github.io/?https://github.com/rbroc/echo/blob/main/results/prompt_select/distance/all_PC_jitterplots/interactive/mrpc.html)
+4. [stories](https://htmlpreview.github.io/?https://github.com/rbroc/echo/blob/main/results/prompt_select/distance/all_PC_jitterplots/interactive/stories.html)
 
-Static plots can also be found in this [folder](https://github.com/rbroc/echo/tree/main/results/distance/all_PC_jitterplots/static).
+Static plots can also be found in this [folder](https://github.com/rbroc/echo/tree/main/results/prompt_select/distance/all_PC_jitterplots/static).
 
 ## Medians
 The medians of the distances were computed for each model, dataset and prompt number:
