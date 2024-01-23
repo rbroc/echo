@@ -12,7 +12,7 @@ def main():
 
     # paths
     path = pathlib.Path(__file__)
-    ai_dir = path.parents[2] / "datasets" / "ai_datasets"
+    ai_dir = path.parents[2] / "datasets" / "ai_datasets" / "HF" / "prompt_select"
     human_dir = path.parents[2] / "datasets" / "human_datasets"
 
     results_path = path.parents[2] / "results" / "prompt_select" / "PCA"
