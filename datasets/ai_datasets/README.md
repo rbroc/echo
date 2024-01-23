@@ -10,7 +10,7 @@
     ├── FULL_DATA     <--- complete datasets 
 
 ```
-`FULL_DATA` contains full length datasets whereas `SUBSET_DATA` is used for testing and therefore contains datasets of varying length (e.g., 1000 generations). Some initial phases of the project required playing with prompting. All files related to this phase are found in `prompt_select`.
+`FULL_DATA` contains full length datasets whereas `SUBSET_DATA` is used for testing and therefore contains datasets of varying length (e.g., 1000 generations). Some initial phases of the project required playing with prompting. All files related to this phase are found in `HF/prompt_select`.
 
 Within each folder, folders denote all datasets generated with a particular dataset e.g.,: 
 ```
