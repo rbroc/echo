@@ -10,11 +10,11 @@ sys.path.append(str(pathlib.Path(__file__).parents[2]))
 from src.utils.pca import get_descriptive_metrics, run_PCA
 from src.utils.distance import compute_distances
 
-def load_data(model="beluga7b", file="stories_prompt_1.ndjson", vllm=False, root_data_path=pathlib.Path(__file__).parents[2] / "datasets"):
+def load_data(model="beluga7b", file="stories_prompt_1.ndjson", vllm=False, root_data_path=pathlib.Path(__file__).parents[2] / "datasets" / "ai_datasets"):
     if vllm:
-        datapath = root_data_path / "ai_vllm_datasets" / "ALL_DATA"
+        datapath = root_data_path / "vLLM" / "FULL_DATA"
     else: 
-        datapath = root_data_path / "ai_datasets" / "prob_decoding"
+        datapath = root_data_path / "HF" / "prob_decoding"
 
     # load data 
     filepath = datapath / model / file 
