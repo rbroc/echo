@@ -87,6 +87,9 @@ def hf_pipeline(args, df, min_len, max_tokens, path, cache_models_path=None, cho
         cache_models_path: path to cache models (if None, will redownload models)
         chosen_model_name: name of the model to use
         sample_params: dictionary of sampling params to use
+
+    Returns
+        df_completions: dataframe with completions
     '''
     if args.data_subset is None:
         outpath = path.parents[2] / "ai_datasets" / "HF" / "FULL_DATA" / f"{args.model_name}"
@@ -127,6 +130,8 @@ def hf_pipeline(args, df, min_len, max_tokens, path, cache_models_path=None, cho
     )
     print("[INFO:] HF Pipeline DONE!")
 
+    return df_completions
+
 def vllm_pipeline(args, df, max_tokens, path, cache_models_path=None, chosen_model_name, sample_params:dict=None):
     '''
     Generation steps specific to a model implementation with vLLM (https://github.com/vllm-project/vllm)
@@ -139,6 +144,9 @@ def vllm_pipeline(args, df, max_tokens, path, cache_models_path=None, chosen_mod
         cache_models_path: path to cache models (if None, will redownload models)
         chosen_model_name: name of the model to use
         sample_params: dictionary of sampling params to use. 
+
+    Returns
+        df_completions: dataframe with completions
     '''
     if args.data_subset is None:
         outpath = path.parents[2] / "ai_datasets" / "vLLM" / "FULL_DATA" / f"{args.model_name}"
@@ -173,6 +181,8 @@ def vllm_pipeline(args, df, max_tokens, path, cache_models_path=None, chosen_mod
         cache_dir=cache_models_path
     )
     print("[INFO:] vLLM Pipeline DONE!")
+
+    return df_completions
 
 if __name__ == "__main__":
     main()
