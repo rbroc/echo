@@ -95,6 +95,9 @@ def main():
 
     print("[INFO:] COMPUTING & PLOTTING DISTANCES ...")
     distance_df = compute_distances(final_df, models=["vllm"], baseline="hf")
+
+    distance_df.to_csv(path.parents[0] / "vllm_versus_hf.csv")
+
     sns.set(style="whitegrid")
     g = sns.catplot(data=distance_df, x="prompt_number", y="distance", kind="strip", jitter=0.3, palette="viridis", hue="prompt_number")
     g.set(xlabel=None, xticklabels=[])
