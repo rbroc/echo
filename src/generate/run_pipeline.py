@@ -18,6 +18,7 @@ NOTE: the -batch argument which allows processing in parallel with HF (vLLM does
 import argparse
 import pathlib
 from transformers import set_seed
+from vllm import SamplingParams
 
 # custom 
 from models import FullModel, QuantizedModel, vLLM_Model
@@ -69,12 +70,12 @@ def main():
 
     # run pipeline
     if args.use_hf_pipeline:
-        hf_pipeline(args, df, min_len=min_len, max_tokens=max_tokens, path, cache_models_path, chosen_model_name, sample_params=params)
+        hf_pipeline(args, df, min_len, max_tokens, path, chosen_model_name, cache_models_path, sample_params=params)
     else: 
-        vllm_pipeline(args, df, max_tokens, path, cache_models_path, chosen_model_name, sample_params=params)
+        vllm_pipeline(args, df, max_tokens, path, chosen_model_name, cache_models_path, sample_params=params)
     
 
-def hf_pipeline(args, df, min_len, max_tokens, path, cache_models_path=None, chosen_model_name, sample_params:dict=None):    
+def hf_pipeline(args, df, min_len, max_tokens, path, chosen_model_name, cache_models_path=None, sample_params:dict=None):    
     '''
     Generation steps specific to a model implementation in HF
 
@@ -92,9 +93,9 @@ def hf_pipeline(args, df, min_len, max_tokens, path, cache_models_path=None, cho
         df_completions: dataframe with completions
     '''
     if args.data_subset is None:
-        outpath = path.parents[2] / "ai_datasets" / "HF" / "FULL_DATA" / f"{args.model_name}"
+        outpath = path.parents[2] / "datasets" / "ai_datasets" / "HF" / "FULL_DATA" / chosen_model_name
     else:
-        outpath = path.parents[2] / "ai_datasets" / "HF" / "SUBSET_DATA" / f"{args.model_name}"
+        outpath = path.parents[2] / "datasets" / "ai_datasets" / "HF" / "SUBSET_DATA" / chosen_model_name
 
     outpath.mkdir(parents=True, exist_ok=True)
 
@@ -106,7 +107,7 @@ def hf_pipeline(args, df, min_len, max_tokens, path, cache_models_path=None, cho
         model_obj = QuantizedModel(chosen_model_name)
 
     # format prompts depending on model # 
-    prompt_df = add_prompts_to_df(model_obj, df, dataset=dataset, prompt_number=args.prompt_number) 
+    prompt_df = add_prompts_to_df(model_obj, df, dataset=args.dataset, prompt_number=args.prompt_number) 
 
     # set prob_sampling 
     all_params=None
@@ -125,14 +126,14 @@ def hf_pipeline(args, df, min_len, max_tokens, path, cache_models_path=None, cho
         max_tokens=max_tokens, 
         batch_size=args.batch_size, 
         sample_params = all_params,
-        outfilepath=outpath / f"{dataset}_prompt_{args.prompt_number}.ndjson",
+        outfilepath=outpath / f"{args.dataset}_prompt_{args.prompt_number}.ndjson",
         cache_dir=cache_models_path
     )
     print("[INFO:] HF Pipeline DONE!")
 
     return df_completions
 
-def vllm_pipeline(args, df, max_tokens, path, cache_models_path=None, chosen_model_name, sample_params:dict=None):
+def vllm_pipeline(args, df, max_tokens, path, chosen_model_name, cache_models_path=None, sample_params:dict=None):
     '''
     Generation steps specific to a model implementation with vLLM (https://github.com/vllm-project/vllm)
 
@@ -149,9 +150,9 @@ def vllm_pipeline(args, df, max_tokens, path, cache_models_path=None, chosen_mod
         df_completions: dataframe with completions
     '''
     if args.data_subset is None:
-        outpath = path.parents[2] / "ai_datasets" / "vLLM" / "FULL_DATA" / f"{args.model_name}"
+        outpath = path.parents[2] / "datasets" / "ai_datasets" / "vLLM" / "FULL_DATA" / chosen_model_name
     else:
-        outpath = path.parents[2] / "ai_datasets" / "vLLM" / "SUBSET_DATA" / f"{args.model_name}"
+        outpath = path.parents[2] / "datasets" / "ai_datasets" / "vLLM" / "SUBSET_DATA" / chosen_model_name
 
     outpath.mkdir(parents=True, exist_ok=True)
 
@@ -159,13 +160,13 @@ def vllm_pipeline(args, df, max_tokens, path, cache_models_path=None, chosen_mod
     model_obj = vLLM_Model(chosen_model_name)
 
     # format prompts depending on the model 
-    prompt_df = add_prompts_to_df(model_obj, df, dataset=dataset, prompt_number=args.prompt_number) 
+    prompt_df = add_prompts_to_df(model_obj, df, dataset=args.dataset, prompt_number=args.prompt_number) 
 
     # setup 
     all_params_obj=None
 
     if sample_params: 
-        vllm_params = {"presence_penalty":0, "frequency_penalty":0} # set to 0 as they do not exist in HF framework
+        vllm_params = {"presence_penalty":0, "frequency_penalty":0, "max_tokens": max_tokens} # penalties set to 0 as they do not exist in HF framework. Max tokens is defined in sample params here unlike HF.
         all_params = {**vllm_params, **sample_params}
         print(f"Decoding params: {all_params}")
         all_params_obj = SamplingParams(**all_params)
@@ -177,7 +178,7 @@ def vllm_pipeline(args, df, max_tokens, path, cache_models_path=None, chosen_mod
         prompt_col=f"prompt_{args.prompt_number}", 
         max_tokens=max_tokens, 
         sample_params = all_params_obj,
-        outfilepath=outpath / f"{dataset}_prompt_{args.prompt_number}.ndjson",
+        outfilepath=outpath / f"{args.dataset}_prompt_{args.prompt_number}.ndjson",
         cache_dir=cache_models_path
     )
     print("[INFO:] vLLM Pipeline DONE!")
