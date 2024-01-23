@@ -94,7 +94,7 @@ def main():
     print(len(final_df))
 
     print("[INFO:] COMPUTING & PLOTTING DISTANCES ...")
-    distance_df = compute_distances(final_df, models=["vllm"], baseline="hf")
+    distance_df = compute_distances(final_df, models=["vllm"], baseline="hf", include_baseline_completions=True)
 
     distance_df.to_csv(path.parents[0] / "vllm_versus_hf.csv")
 

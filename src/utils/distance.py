@@ -11,47 +11,58 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import plotly.express as px
 
-def compute_distances(df:pd.DataFrame, models:list=["beluga7b", "llama2_chat13b"], cols:list=["PC1", "PC2", "PC3", "PC4"], baseline="human"):
+def compute_distances(df: pd.DataFrame, models: list = ["beluga7b", "llama2_chat13b"], cols: list = ["PC1", "PC2", "PC3", "PC4"], baseline: str = "human", include_baseline_completions:bool=False):
     '''
     Extract euclidean distances between human and model completions in n-dimensions from a list of features (cols) 
 
-    Args
+    Args:
         df: dataframe with features columns (e.g., PC components)
         models: list of models present in the model column in the dataframe
         cols: list of feature cols present in the dataframe (e.g., PC components)
-        baseline: model which the euclidean distance is computed between for all other models. Defaults to human completions.
+        baseline: model which the euclidean distance is computed between for all other models (e.g., human-llama2, human-beluga7b and never llama2-beluga7b). Defaults to human completions.
 
-    Returns
+    Returns:
         result_df: dataframe containing columns: id, model, dataset, distance, prompt_number
     '''
-    result_rows = []    
+    result_rows = []
 
     # subset df to include only the AI models
-    df_ai = df[df["model"].isin(models)]
+    df_other = df[df["model"].isin(models)]
 
-    for _, row in df_ai.iterrows():
-            # extract "id" for the current row
-            current_id = row["id"]
+    # subset for baseline
+    df_baseline = df[df["model"] == baseline]
 
-            # extract features for the "human" model with the same "id" as df_ai 
-            pc_human = df[(df["model"] == baseline) & (df["id"] == current_id)][cols].values
+    for _, row in df_other.iterrows():
+        current_id = row["id"]
 
-            # extract features for model completions
-            pc_model = row[cols].values
+        # extract features for the "baseline" model with the same "id" as df_other 
+        pc_baseline = df_baseline[df_baseline["id"] == current_id][cols].values
 
-            # compute euclidean distance in n-dimensions
-            distance = np.sqrt(np.sum((pc_human - pc_model) ** 2))
+        # extract features for model completions
+        pc_model = row[cols].values
 
-            result_row = {
-                "id": row["id"],
-                "model": row["model"],
-                "dataset": row["dataset"],
-                "distance": distance,
-                "prompt_number": row["prompt_number"],
-                "completions": row["completions"]
-            }
+        # compute euclidean distance in n-dimensions
+        distance = np.sqrt(np.sum((pc_baseline - pc_model) ** 2))
 
-            result_rows.append(result_row)
+        result_row = {
+            "id": row["id"],
+            "model": row["model"],
+            "dataset": row["dataset"],
+            "distance": distance,
+            "prompt_number": row["prompt_number"],
+            "completions": row["completions"],
+        }
+        if include_baseline_completions:
+            # extract baseline completion
+            baseline_completions = df_baseline[df_baseline["id"] == current_id]["completions"].values
+            
+            # unpack list (if there is one)
+            baseline_completion = baseline_completions[0] if len(baseline_completions) > 0 else None
+
+            # add to results
+            result_row[f"{baseline}_completions"] = baseline_completion
+
+        result_rows.append(result_row)
 
     result_df = pd.DataFrame(result_rows)
 
