@@ -1,21 +1,37 @@
+'''
+Streamline human datasets
+'''
 import ndjson
 import json
-from pathlib import Path
+import pathlib
 import re
 
-def clean_stories_data(stories):
+def load_raw_data(data_rootdir:pathlib.Path=pathlib.Path(__file__).parents[1] / "datasets" / "human_datasets", dataset:str="stories"):
+    '''
+    load raw data 
+    '''
+    if dataset == "stories": 
+        raw_filepath = data_rootdir / dataset / "stories_5bins_1000tokens_al.json"
+        with open(raw_filepath) as f:
+            data = json.load(f)
+    else: 
+        raw_filepath = data_rootdir / dataset / "raw.ndjson"
+        with open(raw_filepath) as f:
+            data = ndjson.load(f)
+
+    return data
+
+def clean_stories(stories, data_rootdir):
     for col in ["source", "human_completions"]:
         for s in stories:
             # lowercase the text
             s[col] = s[col].lower()
 
-            # Remove patterns enclosed by square brackets
+            # remove patterns enclosed by square brackets
             s[col] = re.sub(r'\[[^\]]+\]', '', s[col])
 
-            # Remove all consecutive backticks (`)
+            # remove all consecutive backticks (`)
             s[col] = re.sub(r'`+', '', s[col])
-
-            # The rest of your cleaning steps go here...
 
             # replace multiple spaces with a single space
             s[col] = re.sub(r'\s+', ' ', s[col])
@@ -41,67 +57,106 @@ def clean_stories_data(stories):
             # remove extra space before the last quotation mark
             s[col] = s[col].strip()
 
+    # save 
+    savepath = data_rootdir / "stories" / "data.ndjson"
+
+    with open(savepath, 'w') as f:
+        ndjson.dump(stories, f, ensure_ascii=False)
+
     return stories
 
-
-def cleanup():
-    ''' Standardizes datasets by lowercasing and removing irregular format '''
-
-    path = Path(__file__)
-
-    # Cleanup mrsp
-    msrpath = path.parents[1] / 'datasets' / 'human_datasets' / 'mrpc' 
-    msrfile = msrpath / 'raw.ndjson'
-    with open(msrfile) as f:
-        msrp = ndjson.load(f)
-    for m in msrp:
+def clean_mrpc(mrpc, data_rootdir):
+    for m in mrpc:
         m['human_completions'] = m['human_completions'][0][0].lower()
         m['source'] = m['source'].lower()
         m['id'] = 'mrpc' + m['id'][4:]
-    with open(msrpath / 'data.ndjson', 'w') as f:
-        ndjson.dump(msrp, f, ensure_ascii=False)
-    
-    # Cleanup stories
-    storiespath = path.parents[1] / 'datasets' / 'human_datasets' / 'stories' 
-    storiesfile = storiespath / 'stories_5bins_1000tokens_al.json'
-    with open(storiesfile) as f:
-        stories = json.load(f)
-   
-    # clean data 
-    cleaned_stories = clean_stories_data(stories)
 
-    with open(storiespath / 'data.ndjson', 'w') as f:
-        ndjson.dump(cleaned_stories, f, ensure_ascii=False)
+    # save 
+    savepath = data_rootdir / "mrpc" / "data.ndjson"
 
-    # Cleanup dailymail
-    dmpath = path.parents[1] / 'datasets' / 'human_datasets' / 'dailymail_cnn' 
-    dmfile = dmpath / 'raw.ndjson'
-    with open(dmfile) as f:
-        dm = ndjson.load(f)
-    for d in dm:
+    with open(savepath, 'w') as f:
+        ndjson.dump(mrpc, f, ensure_ascii=False)
+
+    return mrpc
+
+def clean_dailymail_cnn(dailymail_cnn, data_rootdir):
+    for d in dailymail_cnn:
         d['human_completions'] = d['human_completions'].lower()
         d['source'] = d['source'].lower()
-    with open(dmpath / 'data.ndjson', 'w') as f:
-        ndjson.dump(dm, f, ensure_ascii=False)
+    
+    # save 
+    savepath = data_rootdir / "dailymail_cnn" / "data.ndjson"
+    
+    with open(savepath, 'w') as f:
+        ndjson.dump(dailymail_cnn, f, ensure_ascii=False)
 
+    return dailymail_cnn
 
-    # clean dailydialog (remove EOT tokens)
-    dmpath = path.parents[1] / 'datasets' / 'human_datasets' / 'dailydialog' 
-    dmfile = dmpath / 'data.ndjson'
+def replace_eot_with_speakers(text):
+    '''
+    Replace EOT with speaker 1 and speaker 2: 
 
-    with open(dmfile) as f:
-        dm = ndjson.load(f)
+    (for dailydialog)
+    '''
+    # alternate between speaker 1 and 2
+    def speaker_replacer(match):
+        speaker_replacer.counter = (speaker_replacer.counter + 1) % 2
+        return f"speaker {speaker_replacer.counter + 1}:"
 
+    speaker_replacer.counter = 0
+    return re.sub(r'\[EOT\]', speaker_replacer, text)
+
+def clean_dailydialog(dailydialog, data_rootdir):
     for col in ["source", "human_completions"]:
-        for d in dm:
-            # remove EOT token
-            d[col] = re.sub(r'\s*\[EOT\]\s*', '', d[col])
+        for d in dailydialog:
+            # replace EOT token with speaker 1 and 2
+            d[col] = replace_eot_with_speakers(d[col])
+    
+    # save 
+    savepath = data_rootdir / "dailydialog" / "data.ndjson"
 
-            # replace multiple spaces with a single space
-            d[col] = re.sub(r'\s+', ' ', d[col])
+    with open(savepath, 'w') as f:
+        ndjson.dump(dailydialog, f, ensure_ascii=False)
 
-    with open(dmpath / 'data.ndjson', 'w') as f:
-        ndjson.dump(dm, f, ensure_ascii=False)
+    return dailydialog
+
+def cleanup(datasets:list=["mrpc", "stories", "dailydialog", "dailymail_cnn"]):
+    '''
+    Standardize datasets by lowercasing and removing irregular format 
+
+    Cleans and saves the following datasets:
+        mrpc
+        stories
+        dailydialog
+        dailymail_cnn
+    '''
+    # load raw data
+    path = pathlib.Path(__file__)
+    data_rootdir = path.parents[1] / "datasets" / "human_datasets"
+
+    cleaning_functions = {
+        "mrpc": clean_mrpc,
+        "stories": clean_stories,
+        "dailydialog": clean_dailydialog,
+        "dailymail_cnn": clean_dailymail_cnn
+    }
+
+    # check for invalid dataset names 
+    invalid_datasets = [d for d in datasets if d not in cleaning_functions.keys()]
+
+    if invalid_datasets:
+        raise ValueError(f"Invalid dataset names: {invalid_datasets}. Choose from {list(cleaning_functions.keys())}")
+
+    # load and clean
+    path = pathlib.Path(__file__)
+    data_rootdir = path.parents[1] / "datasets" / "human_datasets"
+    cleaned_data = {}
+
+    for dataset in datasets:
+        data = load_raw_data(data_rootdir, dataset)
+        cleaned_data[dataset] = cleaning_functions[dataset](data, data_rootdir)
+
+    return cleaned_data
 
 if __name__ == '__main__':
     cleanup()
