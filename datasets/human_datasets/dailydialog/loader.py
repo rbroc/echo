@@ -36,7 +36,7 @@ def create_dataset(n=5000, sep="[EOT]", seed=42):
         out.append(sdict)
 
     # Save as ndjson
-    with open('data.ndjson', 'w') as f:
+    with open('raw.ndjson', 'w') as f:
         ndjson.dump(out, f)
 
 
