@@ -33,6 +33,7 @@ def input_parse():
     parser.add_argument("-mdl", "--model_name", help = "Choose between models ...", type = str, default = "beluga7b")
     parser.add_argument("-prompt_n", "--prompt_number", help = "choose which prompt to use", type = int, default = 1)
     parser.add_argument("-subset", "--data_subset", help = "how many rows you want to include. Useful for testing. Defaults to None.", type = int, default=None)
+    parser.add_argument("-temp", "--temperature", help = "temperature for decoding. Defaults to 1.", type = float, default=1)
     parser.add_argument("-batch", "--batch_size", help = "Batching of dataset. Only for HF for processing in parallel for GPU. Defaults to no batching (batch size of 1). ", type = int, default=1)
     parser.add_argument("-hf", "--use_hf_pipeline", help="Use HF pipeline if set, otherwise use vLLM", action='store_true')
 
@@ -65,8 +66,8 @@ def main():
     if "llama2_chat" in chosen_model_name: 
         login_hf_token()
 
-    # define sampling params
-    params = {"temperature":1, "top_k":50, "top_p":1, "repetition_penalty":1, "length_penalty":1}
+    # define sampling params (temp defaults to 1)
+    params = {"temperature":args.temperature, "top_k":50, "top_p":1, "repetition_penalty":1, "length_penalty":1} 
 
     # run pipeline
     if args.use_hf_pipeline:
@@ -126,7 +127,7 @@ def hf_pipeline(args, df, min_len, max_tokens, path, chosen_model_name, cache_mo
         max_tokens=max_tokens, 
         batch_size=args.batch_size, 
         sample_params = all_params,
-        outfilepath=outpath / f"{args.dataset}_prompt_{args.prompt_number}.ndjson",
+        outfilepath=outpath / f"{args.dataset}_prompt_{args.prompt_number}_temp{args.temperature}.ndjson",
         cache_dir=cache_models_path
     )
     print("[INFO:] HF Pipeline DONE!")
@@ -178,7 +179,7 @@ def vllm_pipeline(args, df, max_tokens, path, chosen_model_name, cache_models_pa
         prompt_col=f"prompt_{args.prompt_number}", 
         max_tokens=max_tokens, 
         sample_params = all_params_obj,
-        outfilepath=outpath / f"{args.dataset}_prompt_{args.prompt_number}.ndjson",
+        outfilepath=outpath / f"{args.dataset}_prompt_{args.prompt_number}_temp{args.temperature}.ndjson",
         cache_dir=cache_models_path
     )
     print("[INFO:] vLLM Pipeline DONE!")

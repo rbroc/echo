@@ -4,7 +4,7 @@ Functions for generating data with HF pipeline and vLLM
 import ndjson
 import pathlib
 from tqdm import tqdm
-import pandas as pd 
+import pandas as pd
 from datasets import Dataset
 from transformers.pipelines.pt_utils import KeyDataset
 
@@ -149,6 +149,7 @@ def vllm_generate(vllm_model, df:pd.DataFrame, prompt_col:str="prompt_1", max_to
 
     # add col
     df[f"{vllm_model.chosen_model_name}_completions"] = completions
+    df["sample_params"] = str(sample_params)
       
     if outfilepath is not None:
         print(f"[INFO]: Saving data to {outfilepath}...")
