@@ -4,4 +4,4 @@ The dataset contains a number of manual annotations, which could be useful throu
 - emotion: a list of classification labels, with possible values including no emotion (0), anger (1), disgust (2), fear (3), happiness (4), sadness (5) and surprise (6).
 
 ## Note on `raw.ndjson`
-Please note that the `raw.ndjson` has already been processed slightly in `loader.py` but is named as such to match the file structure of the other datasets. The file `data.ndjson` thus refers to the standardized version (lowercasing etc.) that is performed on all datasets. 
+Please note that the `raw.ndjson` has already been processed slightly in `loader.py` but is named as such to match the file structure of the other datasets. The file `data.ndjson` thus refers to the standardized version (lowercasing etc.) that is performed on all datasets. This also includes some final processing that is particular to the datasets.
