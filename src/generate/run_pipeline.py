@@ -18,7 +18,6 @@ NOTE: the -batch argument which allows processing in parallel with HF (vLLM does
 import argparse
 import pathlib
 from transformers import set_seed
-from vllm import SamplingParams
 
 # custom 
 from models import FullModel, QuantizedModel, vLLM_Model
@@ -164,13 +163,12 @@ def vllm_pipeline(args, df, max_tokens, path, chosen_model_name, cache_models_pa
     prompt_df = add_prompts_to_df(model_obj, df, dataset=args.dataset, prompt_number=args.prompt_number) 
 
     # setup 
-    all_params_obj=None
+    all_params=None
 
     if sample_params: 
         vllm_params = {"presence_penalty":0, "frequency_penalty":0, "max_tokens": max_tokens} # penalties set to 0 as they do not exist in HF framework. Max tokens is defined in sample params here unlike HF.
         all_params = {**vllm_params, **sample_params}
         print(f"Decoding params: {all_params}")
-        all_params_obj = SamplingParams(**all_params)
 
     print(f"[INFO:] Generating completions with {model_obj.full_model_name} ...")
     df_completions = vllm_generate(
@@ -178,7 +176,7 @@ def vllm_pipeline(args, df, max_tokens, path, chosen_model_name, cache_models_pa
         df=prompt_df, 
         prompt_col=f"prompt_{args.prompt_number}", 
         max_tokens=max_tokens, 
-        sample_params = all_params_obj,
+        sample_params = all_params,
         outfilepath=outpath / f"{args.dataset}_prompt_{args.prompt_number}_temp{args.temperature}.ndjson",
         cache_dir=cache_models_path
     )
