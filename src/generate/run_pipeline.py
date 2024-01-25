@@ -2,13 +2,14 @@
 Pipeline to generate AI completions with various models. 
 
 Run the script in the terminal by typing:
-    python src/generate/run_pipeline.py -d {DATASET} -mdl {MODEL_NAME} -prompt_n {PROMPT_NUMBER} -subset {DATA_SUBSET} 
+    python src/generate/run_pipeline.py -d {DATASET} -mdl {MODEL_NAME} -prompt_n {PROMPT_NUMBER} -subset {DATA_SUBSET} -temperature {TEMPERATURE}
 
 Args
     -d -> dataset, choose between "stories", "dailymail_cnn", "mrpc" and "dailydialog"
     -mdl -> model name, choose between "beluga7b", "beluga70b", "beluga70bQ", "llama2_chat13b", "llama2_chat70bQ", "mistral7b", "mistral8x7b"
     -prompt_n -> task prompt defined in prompts.py for each dataset. Choose between 1 to 6.
     -subset -> how many rows to include in the generations. Defaults to None (i.e., all rows). Otherwise takes the n first rows. Mainly for testing. 
+    -temperature -> decoding param (controls stochasticity of the generations)
 
 The additional flag -hf will trigger an Hugging Face implmentation of the model as opposed to vLLM: 
     python src/generate/run_pipeline.py -hf -batch {BATCH_SIZE}
@@ -32,7 +33,7 @@ def input_parse():
     parser.add_argument("-mdl", "--model_name", help = "Choose between models ...", type = str, default = "beluga7b")
     parser.add_argument("-prompt_n", "--prompt_number", help = "choose which prompt to use", type = int, default = 1)
     parser.add_argument("-subset", "--data_subset", help = "how many rows you want to include. Useful for testing. Defaults to None.", type = int, default=None)
-    parser.add_argument("-temp", "--temperature", help = "temperature for decoding. Defaults to 1.", type = float, default=1)
+    parser.add_argument("-temperature", "--temperature", help = "temperature for decoding. Defaults to 1.", type = float, default=1)
     parser.add_argument("-batch", "--batch_size", help = "Batching of dataset. Only for HF for processing in parallel for GPU. Defaults to no batching (batch size of 1). ", type = int, default=1)
     parser.add_argument("-hf", "--use_hf_pipeline", help="Use HF pipeline if set, otherwise use vLLM", action='store_true')
 
@@ -117,6 +118,8 @@ def hf_pipeline(args, df, min_len, max_tokens, path, chosen_model_name, cache_mo
         all_params = {**hf_params, **sample_params}
         print(f"Decoding params: {all_params}")
 
+    temperature = int(args.temperature) if args.temperature % 1 == 0 else args.temperature 
+
     print(f"[INFO:] Generating completions with {model_obj.full_model_name} ...")
     df_completions = hf_generate(
         hf_model=model_obj,
@@ -126,7 +129,7 @@ def hf_pipeline(args, df, min_len, max_tokens, path, chosen_model_name, cache_mo
         max_tokens=max_tokens, 
         batch_size=args.batch_size, 
         sample_params = all_params,
-        outfilepath=outpath / f"{args.dataset}_prompt_{args.prompt_number}_temp{args.temperature}.ndjson",
+        outfilepath=outpath / f"{args.dataset}_prompt_{args.prompt_number}_temp{temperature}.ndjson",
         cache_dir=cache_models_path
     )
     print("[INFO:] HF Pipeline DONE!")
@@ -170,6 +173,8 @@ def vllm_pipeline(args, df, max_tokens, path, chosen_model_name, cache_models_pa
         all_params = {**vllm_params, **sample_params}
         print(f"Decoding params: {all_params}")
 
+    temperature = int(args.temperature) if args.temperature % 1 == 0 else args.temperature 
+
     print(f"[INFO:] Generating completions with {model_obj.full_model_name} ...")
     df_completions = vllm_generate(
         vllm_model=model_obj, 
@@ -177,7 +182,7 @@ def vllm_pipeline(args, df, max_tokens, path, chosen_model_name, cache_models_pa
         prompt_col=f"prompt_{args.prompt_number}", 
         max_tokens=max_tokens, 
         sample_params = all_params,
-        outfilepath=outpath / f"{args.dataset}_prompt_{args.prompt_number}_temp{args.temperature}.ndjson",
+        outfilepath=outpath / f"{args.dataset}_prompt_{args.prompt_number}_temp{temperature}.ndjson",
         cache_dir=cache_models_path
     )
     print("[INFO:] vLLM Pipeline DONE!")
