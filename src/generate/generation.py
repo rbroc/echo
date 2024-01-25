@@ -4,9 +4,10 @@ Functions for generating data with HF pipeline and vLLM
 import ndjson
 import pathlib
 from tqdm import tqdm
-import pandas as pd 
+import pandas as pd
 from datasets import Dataset
 from transformers.pipelines.pt_utils import KeyDataset
+from vllm import SamplingParams
 
 def extract_min_max_tokens(dataset: str):
     '''
@@ -102,11 +103,13 @@ def hf_generate(hf_model, df:pd.DataFrame, prompt_col:str="prompt_1", min_len:in
                 temp_df = df.iloc[:len(completions)].copy()
                 temp_df = temp_df.drop(columns=["human_completions", "source"], errors='ignore')
                 temp_df[f"{hf_model.chosen_model_name}_completions"] = completions
+                temp_df["sample_params"] = str(sample_params)
 
                 temp_df.to_json(outfilepath, orient="records", lines=True, force_ascii=False)
 
-    # add completions 
+    # add completions + sample params
     df[f"{hf_model.chosen_model_name}_completions"] = completions
+    df["sample_params"] = str(sample_params)
     final_df = df.drop(columns=["human_completions", "source"])
 
     if outfilepath:
@@ -137,7 +140,8 @@ def vllm_generate(vllm_model, df:pd.DataFrame, prompt_col:str="prompt_1", max_to
     prompts = df[prompt_col].tolist()
 
     # generate outputs 
-    outputs = vllm_model.model.generate(prompts, sample_params)
+    sample_params_obj = SamplingParams(**sample_params)
+    outputs = vllm_model.model.generate(prompts, sample_params_obj)
 
     # save outputs
     for output in outputs: 
@@ -149,6 +153,7 @@ def vllm_generate(vllm_model, df:pd.DataFrame, prompt_col:str="prompt_1", max_to
 
     # add col
     df[f"{vllm_model.chosen_model_name}_completions"] = completions
+    df["sample_params"] = str(sample_params)
       
     if outfilepath is not None:
         print(f"[INFO]: Saving data to {outfilepath}...")

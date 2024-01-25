@@ -24,7 +24,7 @@ This runs [stabilityai/StableBeluga-7B](https://huggingface.co/stabilityai/Stabl
 ### Custom Generation Pipeline
 To run a custom pipeline, run in the terminal (from root and with `env` active): 
 ```
-python src/generate/run_pipeline.py -mdl {MODELNAME} -d {DATASETNAME} -prompt_n {PROMPT_NUMBER} -subset {DATA_SUBSET} 
+python src/generate/run_pipeline.py -mdl {MODELNAME} -d {DATASETNAME} -prompt_n {PROMPT_NUMBER} -subset {DATA_SUBSET} -temperature {TEMPERATURE}
 ```
 
 
@@ -36,8 +36,9 @@ python src/generate/run_pipeline.py -mdl {MODELNAME} -d {DATASETNAME} -prompt_n 
 | `-mdl`       | Model name (shortened). See [models.py](models.py) for overview.                 | `beluga7b`             |
 | `-prompt_n`  | Integer between 1 and 6. See [prompts.py](prompts.py) for details.                | `1`                    |
 | `-subset`    | Integer specifying subset size of the data `dataset[:subset]`.                   | `None` (no subset)     |
+| `-temperature`    | Float specifying the stochasticity of the generations                  | `1` |
 | `-batch`     | Batch size for dataset processing, mainly for parallel GPU processing.           | `1` (no batching)      |
-| `-hf`     | Bool. If specified, model will run a  the model should be run using a Hugging Face implementation         | `1` (no batching)      |
+| `-hf`     | Bool. If specified, model is be run using a Hugging Face implementation instead of vLLM        |     |
 
 Note the additional `-batch` and `-hf` that are only relevant if you wish to run a pipeline using Hugging Face's own implementation:
 ```
