@@ -161,10 +161,10 @@ def vllm_generate(vllm_model, df:pd.DataFrame, prompt_col:str="prompt_1", min_to
     if min_tokens:
         print("[INFO]: Checking length of completions...")
         nlp = spacy.blank("en")
-        df["completion_length"] = df[f"{vllm_model.chosen_model_name}_completions"].apply(lambda x: len(nlp(x)))
+        df["doc_length"] = df[f"{vllm_model.chosen_model_name}_completions"].apply(lambda x: len(nlp(x)))
 
         # Initially, check all rows for too short completions
-        too_short_ids = df[df["completion_length"] < min_tokens]["id"].tolist()
+        too_short_ids = df[df["doc_length"] < min_tokens]["id"].tolist()
 
         sample_params["n"] = 2  # Starting value for 'n'
         while too_short_ids and sample_params["n"] <= 30:
@@ -181,11 +181,11 @@ def vllm_generate(vllm_model, df:pd.DataFrame, prompt_col:str="prompt_1", min_to
                     random_completion = random.choice(valid_completions)
                     completion_id = too_short_ids[idx]
                     df.loc[df["id"] == completion_id, f"{vllm_model.chosen_model_name}_completions"] = random_completion
-                    df.loc[df["id"] == completion_id, "completion_length"] = len(nlp(random_completion))
+                    df.loc[df["id"] == completion_id, "doc_length"] = len(nlp(random_completion))
 
             # Check if there are still too short completions left
-            df["completion_length"] = df[f"{vllm_model.chosen_model_name}_completions"].apply(lambda x: len(nlp(x)))
-            too_short_ids = df[df["completion_length"] < min_tokens]["id"].tolist()
+            df["doc_length"] = df[f"{vllm_model.chosen_model_name}_completions"].apply(lambda x: len(nlp(x)))
+            too_short_ids = df[df["doc_length"] < min_tokens]["id"].tolist()
 
             sample_params["n"] += 1  # Increment 'n' for the next iteration
 
