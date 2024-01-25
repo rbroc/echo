@@ -73,7 +73,7 @@ def main():
     if args.use_hf_pipeline:
         hf_pipeline(args, df, min_len, max_tokens, path, chosen_model_name, cache_models_path, sample_params=params)
     else: 
-        vllm_pipeline(args, df, max_tokens, path, chosen_model_name, cache_models_path, sample_params=params)
+        vllm_pipeline(args, df, min_len, max_tokens, path, chosen_model_name, cache_models_path, sample_params=params)
     
 
 def hf_pipeline(args, df, min_len, max_tokens, path, chosen_model_name, cache_models_path=None, sample_params:dict=None):    
@@ -136,7 +136,7 @@ def hf_pipeline(args, df, min_len, max_tokens, path, chosen_model_name, cache_mo
 
     return df_completions
 
-def vllm_pipeline(args, df, max_tokens, path, chosen_model_name, cache_models_path=None, sample_params:dict=None):
+def vllm_pipeline(args, df, min_tokens, max_tokens, path, chosen_model_name, cache_models_path=None, sample_params:dict=None):
     '''
     Generation steps specific to a model implementation with vLLM (https://github.com/vllm-project/vllm)
 
@@ -180,6 +180,7 @@ def vllm_pipeline(args, df, max_tokens, path, chosen_model_name, cache_models_pa
         vllm_model=model_obj, 
         df=prompt_df, 
         prompt_col=f"prompt_{args.prompt_number}", 
+        min_tokens=min_tokens,
         max_tokens=max_tokens, 
         sample_params = all_params,
         outfilepath=outpath / f"{args.dataset}_prompt_{args.prompt_number}_temp{temperature}.ndjson",

@@ -8,6 +8,8 @@ import pandas as pd
 from datasets import Dataset
 from transformers.pipelines.pt_utils import KeyDataset
 from vllm import SamplingParams
+import spacy
+import random
 
 def extract_min_max_tokens(dataset: str):
     '''
@@ -118,7 +120,7 @@ def hf_generate(hf_model, df:pd.DataFrame, prompt_col:str="prompt_1", min_len:in
 
     return final_df  
 
-def vllm_generate(vllm_model, df:pd.DataFrame, prompt_col:str="prompt_1", max_tokens:int=1055, sample_params=None, outfilepath=None, cache_dir=None):
+def vllm_generate(vllm_model, df:pd.DataFrame, prompt_col:str="prompt_1", min_tokens:int=None, max_tokens:int=1055, sample_params=None, outfilepath=None, cache_dir=None):
     '''
     Generate data with instantiated vllm model 
 
@@ -126,6 +128,7 @@ def vllm_generate(vllm_model, df:pd.DataFrame, prompt_col:str="prompt_1", max_to
         vllm_model: VLLMMODEL object
         df: dataframe with prompt col 
         prompt_col: name of column to generate completions from 
+        min_tokens: minimum length of the completion (output). If specified, will generate new completions for rows that are too short (as vllm has no min_len param)
         max_tokens: maximum new tokens to be added 
         sample_params: SampleParms Object
         outfilepath: path where the file should be saved (defaults to none, not saving anything)
@@ -154,7 +157,42 @@ def vllm_generate(vllm_model, df:pd.DataFrame, prompt_col:str="prompt_1", max_to
     # add col
     df[f"{vllm_model.chosen_model_name}_completions"] = completions
     df["sample_params"] = str(sample_params)
+
+    if min_tokens:
+        print("[INFO]: Checking length of completions...")
+        nlp = spacy.blank("en")
+        df["completion_length"] = df[f"{vllm_model.chosen_model_name}_completions"].apply(lambda x: len(nlp(x)))
+
+        # Initially, check all rows for too short completions
+        too_short_ids = df[df["completion_length"] < min_tokens]["id"].tolist()
+
+        sample_params["n"] = 2  # Starting value for 'n'
+        while too_short_ids and sample_params["n"] <= 30:
+            print(f"[INFO]: Generating new completions for {len(too_short_ids)} too short rows with n = {sample_params['n']}...")
+            new_df = df[df["id"].isin(too_short_ids)]
+            new_prompts = new_df[prompt_col].tolist()
+
+            sample_params_obj = SamplingParams(**sample_params)
+            too_short_outputs = vllm_model.model.generate(new_prompts, sample_params_obj)
+
+            for idx, output in enumerate(too_short_outputs):
+                valid_completions = [comp.text for comp in output.outputs if len(nlp(comp.text)) >= min_tokens]
+                if valid_completions:
+                    random_completion = random.choice(valid_completions)
+                    completion_id = too_short_ids[idx]
+                    df.loc[df["id"] == completion_id, f"{vllm_model.chosen_model_name}_completions"] = random_completion
+                    df.loc[df["id"] == completion_id, "completion_length"] = len(nlp(random_completion))
+
+            # Check if there are still too short completions left
+            df["completion_length"] = df[f"{vllm_model.chosen_model_name}_completions"].apply(lambda x: len(nlp(x)))
+            too_short_ids = df[df["completion_length"] < min_tokens]["id"].tolist()
+
+            sample_params["n"] += 1  # Increment 'n' for the next iteration
+
+        if too_short_ids:
+            print(f"[WARNING]: Some completions still too short after max iterations.")
       
     if outfilepath is not None:
         print(f"[INFO]: Saving data to {outfilepath}...")
         df.to_json(outfilepath, orient="records", lines=True, force_ascii=False)
+
