@@ -6,11 +6,11 @@ import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 
 import sys 
-sys.path.append(str(pathlib.Path(__file__).parents[2]))
+sys.path.append(str(pathlib.Path(__file__).parents[3]))
 from src.utils.pca import get_descriptive_metrics, run_PCA
 from src.utils.distance import compute_distances
 
-def load_data(model="beluga7b", file="stories_prompt_1.ndjson", vllm=False, root_data_path=pathlib.Path(__file__).parents[2] / "datasets" / "ai_datasets"):
+def load_data(model="beluga7b", file="stories_prompt_1.ndjson", vllm=False, root_data_path=pathlib.Path(__file__).parents[3] / "datasets" / "ai_datasets"):
     if vllm:
         datapath = root_data_path / "vLLM" / "FULL_DATA"
     else: 
