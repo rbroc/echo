@@ -13,7 +13,7 @@ def main():
     ai_dir = path.parents[3] / "datasets" / "ai_datasets" / "vLLM" / "FULL_DATA"
     human_dir = path.parents[3] / "datasets" / "human_datasets"
 
-    results_path = path.parents[2] / "results" / "descriptives"
+    results_path = path.parents[3] / "results" / "descriptives"
     pca_path = results_path / "PCA"
     distance_path = results_path / "distance"
 
@@ -27,23 +27,27 @@ def main():
     df = preprocess_datasets(ai_dir, human_dir, models, datasets)
 
     # run pca
-    print("[INFO:] Running PCA ...")
-    metrics_df = get_descriptive_metrics(df, "completions", "id")
-    pca, pca_df = run_PCA(df, "completions", "id")
+    print("[INFO:] Extracting Metrics ...")
+    df = df.drop("doc_length", axis=1)
 
-    # save pca
+    metrics_df = get_descriptive_metrics(df, "completions", "id")
+
+    print("[INFO:] Running PCA ...")
+    pca, pca_df = run_PCA(metrics_df, feature_names=["doc_length", "n_tokens", "n_characters", "n_sentences"], n_components=4)
+
     print("[INFO:] Saving PCA results ...")
     save_PCA_results(pca, pca_path)
+    pca_df.to_csv(pca_path/"PCA_DATA")
 
-    # plot pca
-    print("[INFO:] PLOTTING PCA")
+    print("[INFO:] Plotting PCA")
     loadings_matrix = get_loadings(pca, feature_names=["doc_length", "n_tokens", "n_characters", "n_sentences"],  n_components=4)
 
     for component in range(1, 5):
         plot_loadings(loadings_matrix, component, pca_path)
 
     # run distance
-    distances = compute_distances(pca_df, "completions", "id", distance_path)
+    print("[INFO]: Computing distances")
+    distances = compute_distances(pca_df, models=models, save_path=distance_path, include_baseline_completions=True)
 
 if __name__ == "__main__":
     main()
