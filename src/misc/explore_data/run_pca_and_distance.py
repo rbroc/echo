@@ -31,13 +31,14 @@ def main():
     df = df.drop("doc_length", axis=1)
 
     metrics_df = get_descriptive_metrics(df, "completions", "id")
+    metrics_df.to_csv(pca_path/"metrics_data.csv")
 
     print("[INFO:] Running PCA ...")
     pca, pca_df = run_PCA(metrics_df, feature_names=["doc_length", "n_tokens", "n_characters", "n_sentences"], n_components=4)
 
     print("[INFO:] Saving PCA results ...")
     save_PCA_results(pca, pca_path)
-    pca_df.to_csv(pca_path/"PCA_DATA")
+    pca_df.to_csv(pca_path/"PCA_data.csv")
 
     print("[INFO:] Plotting PCA")
     loadings_matrix = get_loadings(pca, feature_names=["doc_length", "n_tokens", "n_characters", "n_sentences"],  n_components=4)
