@@ -52,6 +52,9 @@ def compute_distances(df: pd.DataFrame, models: list = ["beluga7b", "llama2_chat
             "prompt_number": row["prompt_number"],
             "completions": row["completions"],
         }
+        if "sample_params" in df.columns: 
+            result_rows[f"sample_params"] = row["sample_params"]
+
         if include_baseline_completions:
             # extract baseline completion
             baseline_completions = df_baseline[df_baseline["id"] == current_id]["completions"].values
