@@ -53,7 +53,7 @@ def compute_distances(df: pd.DataFrame, models: list = ["beluga7b", "llama2_chat
             "completions": row["completions"],
         }
         if "sample_params" in df.columns: 
-            result_rows[f"sample_params"] = row["sample_params"]
+            result_row[f"sample_params"] = row["sample_params"]
 
         if include_baseline_completions:
             # extract baseline completion
@@ -70,6 +70,7 @@ def compute_distances(df: pd.DataFrame, models: list = ["beluga7b", "llama2_chat
     result_df = pd.DataFrame(result_rows)
 
     # sort by id and model
+    print(result_df)
     sorted_df = result_df.copy().sort_values(["id", "model"])
 
     if save_path:
