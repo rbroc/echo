@@ -6,7 +6,7 @@ import json
 import pathlib
 import re
 
-def load_raw_data(data_rootdir:pathlib.Path=pathlib.Path(__file__).parents[1] / "datasets" / "human_datasets", dataset:str="stories"):
+def load_raw_data(data_rootdir:pathlib.Path=pathlib.Path(__file__).parents[2] / "datasets" / "human_datasets", dataset:str="stories"):
     '''
     load raw data 
     '''
@@ -94,27 +94,35 @@ def clean_dailymail_cnn(dailymail_cnn, data_rootdir):
 
 def replace_eot_with_speakers(text):
     '''
-    Replace EOT with speaker 1 and speaker 2: 
-
-    (for dailydialog)
+    Add "A" to first text, replace [EOT] for subsequent dialogue, starting with "B:"
     '''
-    # alternate between speaker 1 and 2
+    # add "A:" to the first piece of dialogue
+    text = "A: " + text
+    # alternate between speaker B and A for each [EOT]
     def speaker_replacer(match):
-        speaker_replacer.counter = (speaker_replacer.counter + 1) % 2
-        return f"speaker {speaker_replacer.counter + 1}:"
+        speaker_replacer.counter = (speaker_replacer.counter + 1) % 2 # alternate between values 0 and 1 
+        return "B: " if speaker_replacer.counter == 0 else "A: "
 
-    speaker_replacer.counter = 0
+    speaker_replacer.counter = 0  # start with 0 so the first replacement results in "B: "
     return re.sub(r'\[EOT\]', speaker_replacer, text)
+
+def add_newline_before_speakers(text):
+    '''
+    add a newline before each "A:" and "B:" to separate dialogues (except before first speaker)
+    '''
+    # find "A: " or "B: " with regex, add a newline before it, except for the first time
+    text = re.sub(r'(?<!^)(A: |B: )', r'\n\1', text)
+    return text
 
 def clean_dailydialog(dailydialog, data_rootdir):
     for col in ["source", "human_completions"]:
         for d in dailydialog:
-            # replace EOT token with speaker 1 and 2
+            # replace [EOT] and format dialogue
             d[col] = replace_eot_with_speakers(d[col])
+            d[col] = add_newline_before_speakers(d[col])
     
-    # save 
+    # save
     savepath = data_rootdir / "dailydialog" / "data.ndjson"
-
     with open(savepath, 'w') as f:
         ndjson.dump(dailydialog, f, ensure_ascii=False)
 
@@ -132,7 +140,7 @@ def cleanup(datasets:list=["mrpc", "stories", "dailydialog", "dailymail_cnn"]):
     '''
     # load raw data
     path = pathlib.Path(__file__)
-    data_rootdir = path.parents[1] / "datasets" / "human_datasets"
+    data_rootdir = path.parents[2] / "datasets" / "human_datasets"
 
     cleaning_functions = {
         "mrpc": clean_mrpc,
@@ -148,8 +156,6 @@ def cleanup(datasets:list=["mrpc", "stories", "dailydialog", "dailymail_cnn"]):
         raise ValueError(f"Invalid dataset names: {invalid_datasets}. Choose from {list(cleaning_functions.keys())}")
 
     # load and clean
-    path = pathlib.Path(__file__)
-    data_rootdir = path.parents[1] / "datasets" / "human_datasets"
     cleaned_data = {}
 
     for dataset in datasets:
