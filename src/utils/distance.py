@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import plotly.express as px
 
-def compute_distances(df: pd.DataFrame, models: list = ["beluga7b", "llama2_chat13b"], cols: list = ["PC1", "PC2", "PC3", "PC4"], baseline: str = "human", include_baseline_completions:bool=False):
+def compute_distances(df: pd.DataFrame, models: list = ["beluga7b", "llama2_chat13b"], cols: list = ["PC1", "PC2", "PC3", "PC4"], baseline: str = "human", include_baseline_completions:bool=False, save_path=None):
     '''
     Extract euclidean distances between human and model completions in n-dimensions from a list of features (cols) 
 
@@ -52,6 +52,9 @@ def compute_distances(df: pd.DataFrame, models: list = ["beluga7b", "llama2_chat
             "prompt_number": row["prompt_number"],
             "completions": row["completions"],
         }
+        if "sample_params" in df.columns: 
+            result_row[f"sample_params"] = row["sample_params"]
+
         if include_baseline_completions:
             # extract baseline completion
             baseline_completions = df_baseline[df_baseline["id"] == current_id]["completions"].values
@@ -66,7 +69,17 @@ def compute_distances(df: pd.DataFrame, models: list = ["beluga7b", "llama2_chat
 
     result_df = pd.DataFrame(result_rows)
 
-    return result_df
+    # sort by id and model
+    print(result_df)
+    sorted_df = result_df.copy().sort_values(["id", "model"])
+
+    if save_path:
+        save_path.mkdir(parents=True, exist_ok=True)
+        save_file = save_path / "distances_PC_cols.csv"
+        
+        sorted_df.to_csv(save_file, index=False)
+
+    return sorted_df
 
 # plotting # 
 def jitterplots(data:pd.DataFrame, datasets:list, save_path:pathlib.Path):

@@ -64,13 +64,16 @@ def combine_data(ai_dfs, human_df, subset=None):
         mdl_colname = [col for col in new_df.columns if col.endswith("_completions")][0] 
         new_df["model"] = re.sub(r"_completions$", "", mdl_colname)  # remove "_completions" from e.g., "beluga_completions"
         new_df.rename(columns={mdl_colname: "completions"}, inplace=True)
+        
+        # add source col 
+        new_df = new_df.merge(human_df[["id", "source"]], on="id", how="left")
 
         # replace OG df with new df 
         ai_dfs[idx] = new_df
    
     human_df = human_df.query('id in @ai_dfs[1]["id"]').copy()
     human_df["model"] = "human"
-    human_df.drop(["source"], inplace=True, axis=1)
+    #human_df.drop(["source"], inplace=True, axis=1)
     human_df.rename(columns={"human_completions": "completions"}, inplace=True)
 
     # add human dfs
