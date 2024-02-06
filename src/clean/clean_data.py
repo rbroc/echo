@@ -103,7 +103,7 @@ def replace_eot_with_speakers(text):
         speaker_replacer.counter = (speaker_replacer.counter + 1) % 2 # alternate between values 0 and 1 
         return "B: " if speaker_replacer.counter == 0 else "A: "
 
-    speaker_replacer.counter = 0  # start with 0 so the first replacement results in "B: "
+    speaker_replacer.counter = -1  # start with 0 so the first replacement results in "B: "
     return re.sub(r'\[EOT\] ', speaker_replacer, text)
 
 def add_newline_before_speakers(text):
@@ -114,13 +114,31 @@ def add_newline_before_speakers(text):
     text = re.sub(r'(?<!^)(A: |B: )', r'\n\1', text)
     return text
 
+def prepend_next_speaker_label(source_text, completion_text):
+    '''
+    determine the next speaker based on the last speaker in the source text and
+    prepend the correct speaker label to the completion text. (assumes that all convos start with speaker A - which they do in the way we have formatted them). 
+    '''
+    # count each speaker to determine the last speaker
+    a_count = source_text.count("A: ")
+    b_count = source_text.count("B: ")
+
+    # if there are more "A: " than "B: ", the last speaker was "A", so the next speaker is "B". NB assumption!!
+    # otherwise, the next speaker is "A"
+    next_speaker = "B: " if a_count > b_count else "A: "
+
+    # add the determined next speaker label to the completion text
+    return next_speaker + completion_text
+
 def clean_dailydialog(dailydialog, data_rootdir):
-    for col in ["source", "human_completions"]:
-        for d in dailydialog:
-            # replace [EOT] and format dialogue
-            d[col] = replace_eot_with_speakers(d[col])
-            d[col] = add_newline_before_speakers(d[col])
-    
+    for d in dailydialog:
+        # replace [EOT] and format dialogue
+        d["source"] = replace_eot_with_speakers(d["source"])
+        d["source"] = add_newline_before_speakers(d["source"])
+
+    for d in dailydialog: 
+        d["human_completions"] = prepend_next_speaker_label(d["source"], d["human_completions"])
+
     # save
     savepath = data_rootdir / "dailydialog" / "data.ndjson"
     with open(savepath, 'w') as f:
