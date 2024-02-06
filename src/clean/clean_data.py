@@ -27,10 +27,13 @@ def clean_stories(stories, data_rootdir):
             # lowercase the text
             s[col] = s[col].lower()
 
-            # remove patterns enclosed by square brackets
+            # rm patterns enclosed by square brackets
             s[col] = re.sub(r'\[[^\]]+\]', '', s[col])
 
-            # remove all consecutive backticks (`)
+            # rm <newline> from text
+            s[col] = re.sub(r'<newline>', '', s[col])
+
+            # rm all consecutive backticks (`)
             s[col] = re.sub(r'`+', '', s[col])
 
             # replace multiple spaces with a single space
@@ -48,7 +51,7 @@ def clean_stories(stories, data_rootdir):
             # handle spaces around contractions (apostrophes)
             s[col] = re.sub(r'\s*’\s*', r'’', s[col])
 
-            # remove space before the apostrophe in contractions
+            # rm space before the apostrophe in contractions
             s[col] = re.sub(r'\s+(?=\')', '', s[col])
 
             # handle spaces inside contractions like "doesn't"
