@@ -104,7 +104,7 @@ def replace_eot_with_speakers(text):
         return "B: " if speaker_replacer.counter == 0 else "A: "
 
     speaker_replacer.counter = 0  # start with 0 so the first replacement results in "B: "
-    return re.sub(r'\[EOT\]', speaker_replacer, text)
+    return re.sub(r'\[EOT\] ', speaker_replacer, text)
 
 def add_newline_before_speakers(text):
     '''
