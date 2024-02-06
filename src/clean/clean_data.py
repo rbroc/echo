@@ -83,9 +83,12 @@ def clean_mrpc(mrpc, data_rootdir):
     return mrpc
 
 def clean_dailymail_cnn(dailymail_cnn, data_rootdir):
-    for d in dailymail_cnn:
-        d['human_completions'] = d['human_completions'].lower()
-        d['source'] = d['source'].lower()
+    for col in ["source", "human_completions"]:
+        for d in dailymail_cnn:
+            d[col] = d[col].lower()
+            
+            # rm whitespace between dot and word
+            d[col] = re.sub(r'\s+\.', '.', d[col])
     
     # save 
     savepath = data_rootdir / "dailymail_cnn" / "data.ndjson"
