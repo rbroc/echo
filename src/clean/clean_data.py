@@ -27,10 +27,13 @@ def clean_stories(stories, data_rootdir):
             # lowercase the text
             s[col] = s[col].lower()
 
-            # remove patterns enclosed by square brackets
+            # rm patterns enclosed by square brackets
             s[col] = re.sub(r'\[[^\]]+\]', '', s[col])
 
-            # remove all consecutive backticks (`)
+            # rm <newline> from text
+            s[col] = re.sub(r'<newline>', '', s[col])
+
+            # rm all consecutive backticks (`)
             s[col] = re.sub(r'`+', '', s[col])
 
             # replace multiple spaces with a single space
@@ -48,7 +51,7 @@ def clean_stories(stories, data_rootdir):
             # handle spaces around contractions (apostrophes)
             s[col] = re.sub(r'\s*’\s*', r'’', s[col])
 
-            # remove space before the apostrophe in contractions
+            # rm space before the apostrophe in contractions
             s[col] = re.sub(r'\s+(?=\')', '', s[col])
 
             # handle spaces inside contractions like "doesn't"
@@ -80,9 +83,12 @@ def clean_mrpc(mrpc, data_rootdir):
     return mrpc
 
 def clean_dailymail_cnn(dailymail_cnn, data_rootdir):
-    for d in dailymail_cnn:
-        d['human_completions'] = d['human_completions'].lower()
-        d['source'] = d['source'].lower()
+    for col in ["source", "human_completions"]:
+        for d in dailymail_cnn:
+            d[col] = d[col].lower()
+            
+            # rm whitespace between dot and word
+            d[col] = re.sub(r'\s+\.', '.', d[col])
     
     # save 
     savepath = data_rootdir / "dailymail_cnn" / "data.ndjson"
