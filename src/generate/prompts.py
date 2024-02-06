@@ -46,7 +46,13 @@ def get_task_prompt(dataset:str, prompt_number:int):
         "dailydialog_5": "write a single response to the last speaker in the following dialog while avoiding beginning with a speaker label: ",
         "dailydialog_6": "continue the conversation by writing a SINGLE response to the last speaker without using a label like 'speaker 1:' please: ",
         "dailydialog_7": "act as a speaker by responding to the latest speaker in the dialogue: ",
-        "dailydialog_8": "continue the following conversation by writing a single response to the last speaker. write only a concise response and nothing else: "
+        "dailydialog_8": "continue the following conversation by writing a single response to the last speaker. write only a concise response and nothing else: ",
+
+        # 2.0 prompts
+        "dailymail_cnn_21": "summarize this in a few sentences: ",
+        "mrpc_21": "paraphrase this: ",
+        "stories_21": "write a story from this: ",
+        "dailydialog_21": "continue the conversation between A and B by writing a response to the latest speaker", 
     }
 
     valid_datasets = ["dailymail_cnn", "stories", "mrpc", "dailydialog"]
