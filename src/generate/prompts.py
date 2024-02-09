@@ -51,7 +51,7 @@ def get_task_prompt(dataset:str, prompt_number:int):
         # 2.0 prompts
         "dailymail_cnn_21": "summarize this in a few sentences: ",
         "mrpc_21": "paraphrase this: ",
-        "stories_21": "write a story from this: ",
+        "stories_21": "write a story based on this: ", 
         "dailydialog_21": "continue the conversation between A and B by writing a single response to the latest speaker. write only a concise response and nothing else: ", 
     }
 
