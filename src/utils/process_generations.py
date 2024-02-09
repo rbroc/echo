@@ -6,25 +6,24 @@ import pathlib
 import re
 import pandas as pd
 
-def get_paths(ai_dir:pathlib.Path, human_dir:pathlib.Path, models:list, dataset:str):
+def get_paths(ai_dir: pathlib.Path, human_dir: pathlib.Path, models: list, dataset: str, temp: str = "temp1", prompt_n: int = None):
     '''
     Get all paths pertaining to a particular dataset (e.g., mrpc)
     '''
-    # paths, access subfolder and its file in ai_dir
     ai_paths = []
 
-    for p in ai_dir.iterdir():
-        if p.name in models: # access models folder 
-            for f in p.iterdir(): 
-                if dataset in f.name: # take only the dataset that is specified from mdl folder
-                    ai_paths.append(f)
+    for model_name in models:
+        model_path = ai_dir / model_name
 
-    ai_paths = sorted(ai_paths)
+        if model_path.is_dir(): # if it is a directory then iterate over it 
+            for file_path in model_path.iterdir():
+                if file_path.is_file() and dataset in file_path.name and (temp is None or temp in file_path.name):
+                    if prompt_n is None or str(prompt_n) in file_path.name:
+                        ai_paths.append(file_path)
+        
+    human_path =  human_dir / dataset / "data.ndjson"
 
-    # get human path 
-    human_path = human_dir / dataset / "data.ndjson"
-
-    return ai_paths, human_path 
+    return ai_paths, human_path
 
 def load_dataset(ai_paths, human_path):
     '''
@@ -84,20 +83,38 @@ def combine_data(ai_dfs, human_df, subset=None):
 
     return combined_df
 
-def preprocess_datasets(ai_dir, human_dir, models:list, datasets:list, subset=None):
-    '''Loads and prepares as many datasets as needed'''
+def preprocess_datasets(ai_dir: pathlib.Path, human_dir: pathlib.Path, models: list, datasets: list, subset=None, temp: str = None, prompt_n: int = None):
+    '''
+    Loads and prepares as many datasets as needed
+    
+    Args:
+        ai_dir: path to directory with AI datasets
+        human_dir: path to directory with human datasets
+        models: list of models to include
+        datasets: list of datasets to include
+        subset: whether datasets should be subsetted (subsets ai datasets to n first rows, and subsequently matches the human completions
+        temp: temperature in file name (e.g., temp1, temp2, temp3 or temp1.4)
+        prompt_n: prompt number (e.g., 21)
+
+    Returns:
+        all_dfs_combined: combined dataframe with all datasets
+    '''
 
     all_dfs = []
 
     for dataset in datasets: 
-        ai_paths, human_path = get_paths(ai_dir, human_dir, models, dataset)
-        ai_dfs, human_df = load_dataset(ai_paths, human_path)
-        dataset_df = combine_data(ai_dfs, human_df, subset=subset)
+        try:
+            ai_paths, human_path = get_paths(ai_dir, human_dir, models, dataset, temp=temp, prompt_n=prompt_n)
+            ai_dfs, human_df = load_dataset(ai_paths, human_path)
+            dataset_df = combine_data(ai_dfs, human_df, subset=subset)
         
-        # add dataset col 
-        dataset_df["dataset"] = dataset
+            # add dataset col 
+            dataset_df["dataset"] = dataset
 
-        all_dfs.append(dataset_df)
+            all_dfs.append(dataset_df)
+        
+        except Exception as e:
+            continue
 
     all_dfs_combined = pd.concat(all_dfs, ignore_index=True, axis=0)
 
