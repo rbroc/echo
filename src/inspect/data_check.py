@@ -37,15 +37,13 @@ def main():
     datasets = ["dailymail_cnn", "stories", "mrpc", "dailydialog"]
 
     print("[INFO:] Preprocessing datasets ...")
-    df = preprocess_datasets(ai_dir, human_dir, models, datasets)
+    df = preprocess_datasets(ai_dir = ai_dir, human_dir = human_dir, models=models, datasets=datasets, temp = "temp1", prompt_n = 21)
 
     # filter on prompt_number = 21 (but keep human model which has nan prompt_number)
     dataset = args.dataset
-    filtered_df = df[(df["prompt_number"] == "21") | (df["model"] == "human") & (df["dataset"] == dataset)]
-
     indices = [20, 500, 1000, 3600]
 
-    print_example_from_each_model(filtered_df, dataset, row_indices=indices, print_source=True)
+    print_example_from_each_model(df, dataset, row_indices=indices, print_source=True)
     
 if __name__ == "__main__":
     main()
