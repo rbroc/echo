@@ -6,7 +6,7 @@ import pathlib
 import re
 import pandas as pd
 
-def get_paths(ai_dir: pathlib.Path, human_dir: pathlib.Path, models: list, dataset: str, temp: str = "temp1", prompt_n: int = None):
+def get_paths(ai_dir: pathlib.Path, human_dir: pathlib.Path, models: list, dataset: str, temp: str = "temp1"):
     '''
     Get all paths pertaining to a particular dataset (e.g., mrpc)
     '''
@@ -18,7 +18,6 @@ def get_paths(ai_dir: pathlib.Path, human_dir: pathlib.Path, models: list, datas
         if model_path.is_dir(): # if it is a directory then iterate over it 
             for file_path in model_path.iterdir():
                 if file_path.is_file() and dataset in file_path.name and (temp is None or temp in file_path.name):
-                    if prompt_n is None or str(prompt_n) in file_path.name:
                         ai_paths.append(file_path)
         
     human_path =  human_dir / dataset / "data.ndjson"
@@ -83,7 +82,7 @@ def combine_data(ai_dfs, human_df, subset=None):
 
     return combined_df
 
-def preprocess_datasets(ai_dir: pathlib.Path, human_dir: pathlib.Path, models: list, datasets: list, subset=None, temp: str = None, prompt_n: int = None):
+def preprocess_datasets(ai_dir: pathlib.Path, human_dir: pathlib.Path, models: list, datasets: list, subset=None, temp: str = None):
     '''
     Loads and prepares as many datasets as needed
     
@@ -103,22 +102,22 @@ def preprocess_datasets(ai_dir: pathlib.Path, human_dir: pathlib.Path, models: l
     all_dfs = []
 
     for dataset in datasets: 
-        try:
-            ai_paths, human_path = get_paths(ai_dir, human_dir, models, dataset, temp=temp, prompt_n=prompt_n)
-            ai_dfs, human_df = load_dataset(ai_paths, human_path)
-            dataset_df = combine_data(ai_dfs, human_df, subset=subset)
+        ai_paths, human_path = get_paths(ai_dir, human_dir, models, dataset, temp=temp)
+        ai_dfs, human_df = load_dataset(ai_paths, human_path)
+        dataset_df = combine_data(ai_dfs, human_df, subset=subset)
         
-            # add dataset col 
-            dataset_df["dataset"] = dataset
+        # add dataset col 
+        dataset_df["dataset"] = dataset
 
-            all_dfs.append(dataset_df)
+        all_dfs.append(dataset_df)
         
-        except Exception as e:
-            continue
+    if len(datasets) > 1:  
+        final_df = pd.concat(all_dfs, ignore_index=True, axis=0)
+    
+    else:
+        final_df = all_dfs[0]
 
-    all_dfs_combined = pd.concat(all_dfs, ignore_index=True, axis=0)
-
-    return all_dfs_combined
+    return final_df
 
 def main(): 
     path = pathlib.Path(__file__)
