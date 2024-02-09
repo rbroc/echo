@@ -9,7 +9,7 @@ from src.utils.process_generations import preprocess_datasets
 
 def input_parse():
     parser = argparse.ArgumentParser(description='Inspect data')
-    parser.add_argument('--dataset', type=str, help='dataset to inspect', default="dailydialog")
+    parser.add_argument('--dataset', "-d", type=str, help='dataset to inspect', default="dailydialog")
     args = parser.parse_args()
     return args
 
@@ -34,16 +34,15 @@ def main():
     args = input_parse()
 
     models = ["beluga7b", "llama2_chat13b", "mistral7b"]
-    datasets = ["dailymail_cnn", "stories", "mrpc", "dailydialog"]
 
     print("[INFO:] Preprocessing datasets ...")
-    df = preprocess_datasets(ai_dir = ai_dir, human_dir = human_dir, models=models, datasets=datasets, temp = "temp1", prompt_n = 21)
+    df = preprocess_datasets(ai_dir = ai_dir, human_dir = human_dir, models=models, datasets=[args.dataset], temp = "temp1")
 
-    # filter on prompt_number = 21 (but keep human model which has nan prompt_number)
-    dataset = args.dataset
+    # filtered df 
+    ds = args.dataset
     indices = [20, 500, 1000, 3600]
-
-    print_example_from_each_model(df, dataset, row_indices=indices, print_source=True)
+    filtered_df = df[(df["prompt_number"] == "21") | (df["model"] == "human") & (df["dataset"] == ds)]
+    print_example_from_each_model(filtered_df, ds, row_indices=indices, print_source=True)
     
 if __name__ == "__main__":
     main()
