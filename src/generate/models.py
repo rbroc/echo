@@ -49,7 +49,7 @@ class Model():
         '''
         system_prompts = {
             "beluga": "You are StableBeluga, an AI that follows instructions extremely well. Help as much as you can. Remember, be safe, and don't do anything illegal.\n\n",
-            "llama2_chat": "You are an AI, but you do not deviate from the task prompt and you do not small talk. Never begin your response with 'Sure, here is my response: ' or anything of the like. It is important that you finish without getting cut off."
+            #"llama2_chat": "You are an AI, but you do not deviate from the task prompt and you do not small talk. Never begin your response with 'Sure, here is my response: ' or anything of the like. It is important that you finish without getting cut off."
         }
 
         if "beluga" in self.chosen_model_name:
