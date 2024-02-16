@@ -6,21 +6,39 @@ import pathlib
 import re
 import pandas as pd
 
-def get_paths(ai_dir: pathlib.Path, human_dir: pathlib.Path, models: list, dataset: str, temp: str = "temp1"):
+def get_paths(ai_dir: pathlib.Path, human_dir: pathlib.Path, models: list, dataset: str, temp:float=1, prompt_number:int=None):
     '''
     Get all paths pertaining to a particular dataset (e.g., mrpc)
     '''
     ai_paths = []
 
+    # get ai paths based on args 
     for model_name in models:
         model_path = ai_dir / model_name
 
-        if model_path.is_dir(): # if it is a directory then iterate over it 
-            for file_path in model_path.iterdir():
-                if file_path.is_file() and dataset in file_path.name and (temp is None or temp in file_path.name):
-                        ai_paths.append(file_path)
-        
+        if prompt_number:
+            file_identifier = f"{dataset}_prompt_{prompt_number}"
+            paths = [file for file in model_path.iterdir() if file.name.startswith(file_identifier)]
+            ai_paths.extend(paths)
+
+        elif temp: 
+            file_identifier = f"{temp}.ndjson"
+            paths = [file for file in model_path.iterdir() if file.name.endswith(file_identifier)]
+            ai_paths.extend(paths)
+
+        elif prompt_number and temp: 
+            file_identifier = f"{dataset}_prompt_{prompt_number}_temp{temp}.ndjson"
+            paths = [file for file in model_path.iterdir() if file.name.startswith(file_identifier)]
+            ai_paths.extend(paths)
+
+        else:
+            ai_paths.extend([file for file in model_path.iterdir()])
+
+    # get human paths 
     human_path =  human_dir / dataset / "data.ndjson"
+
+    if len(ai_paths) == 0: 
+        print(f"[WARNING:] Length of ai paths is zero. Ensure that you have valid arguments.")
 
     return ai_paths, human_path
 
@@ -121,15 +139,20 @@ def preprocess_datasets(ai_dir: pathlib.Path, human_dir: pathlib.Path, models: l
 
 def main(): 
     path = pathlib.Path(__file__)
-    ai_dir = path.parents[2] / "datasets_ai"
-    human_dir = path.parents[2] / "datasets"
+    ai_dir = path.parents[2] / "datasets" / "ai_datasets" / "vLLM" / "FULL_DATA"
+    human_dir = path.parents[2] / "datasets" / "human_datasets"
     
-    models = ["beluga", "llama2_chat"]
+    models = ["beluga7b", "llama2_chat13b", "mistral7b"]
     datasets = ["dailymail_cnn", "stories", "mrpc", "dailydialog"]
 
-    all_dfs = preprocess_datasets(ai_dir, human_dir, models, datasets, subset=99)
+    ai_paths, human_paths = get_paths(ai_dir, human_dir, models, dataset="stories", temp=1.5, prompt_number=22)
+
+    for p in ai_paths: 
+        print(p)
+
+    #all_dfs = preprocess_datasets(ai_dir, human_dir, models, datasets, subset=99)
     
-    print(all_dfs)
+    #print(all_dfs)
 
 
 if __name__ == "__main__":
