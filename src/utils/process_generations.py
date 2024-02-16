@@ -6,11 +6,33 @@ import pathlib
 import re
 import pandas as pd
 
-def get_paths(ai_dir: pathlib.Path, human_dir: pathlib.Path, models: list, dataset: str, temp:float=1, prompt_number:int=None):
+def get_paths(ai_dir: pathlib.Path, human_dir: pathlib.Path, models: list, dataset: str, temp:float|int=1, prompt_number:int=None):
     '''
-    Get all paths pertaining to a particular dataset (e.g., mrpc)
+    Get all paths pertaining to a particular dataset (e.g., mrpc, dailymail_cnn, stories, dailydialog, etc.)
+
+    Args:
+        ai_dir: path to directory with AI datasets of particular dataset
+        human_dir: path to directory with human datasets
+        models: list of models to include
+        dataset: name of dataset to include
+        temp: temperature in file name (e.g., 1 if temp1, 1.4 if temp1.4)
+        prompt_number: prompt number (e.g., 21)
+
+    Returns:
+        ai_paths: list of paths to AI datasets
+        human_path: path to human dataset
     '''
     ai_paths = []
+
+    # check valid datasets and type of temp and prompt_number
+    valid_datasets = [d.name for d in human_dir.iterdir()]
+    if dataset not in valid_datasets:
+        raise ValueError(f"Dataset {dataset} not found in {human_dir}")
+
+    if temp and not isinstance(temp, (int, float)):
+        raise ValueError(f"Temperature must be a int or float, not {type(temp)}")
+    if prompt_number and not isinstance(prompt_number, int):
+        raise ValueError(f"Prompt number must be an int, not {type(prompt_number)}")
 
     # get ai paths based on args 
     for model_name in models:
@@ -45,8 +67,14 @@ def get_paths(ai_dir: pathlib.Path, human_dir: pathlib.Path, models: list, datas
 def load_dataset(ai_paths, human_path):
     '''
     Load data from paths extracted from get_paths function
-    '''
 
+    Args:
+        ai_paths: list of paths to AI datasets (of particular dataset)
+        human_path: path to human dataset
+    Returns:
+        ai_dfs: list of dataframes
+        human_df: dataframe
+    '''
     ai_dfs = [pd.read_json(p, lines=True) for p in ai_paths]
     human_df = pd.read_json(human_path, lines=True)
 
@@ -100,7 +128,7 @@ def combine_data(ai_dfs, human_df, subset=None):
 
     return combined_df
 
-def preprocess_datasets(ai_dir: pathlib.Path, human_dir: pathlib.Path, models: list, datasets: list, subset=None, temp: str = None):
+def preprocess_datasets(ai_dir: pathlib.Path, human_dir: pathlib.Path, models: list, datasets: list, subset=None, temp: int | float = None, prompt_number: int=None):
     '''
     Loads and prepares as many datasets as needed
     
@@ -110,8 +138,8 @@ def preprocess_datasets(ai_dir: pathlib.Path, human_dir: pathlib.Path, models: l
         models: list of models to include
         datasets: list of datasets to include
         subset: whether datasets should be subsetted (subsets ai datasets to n first rows, and subsequently matches the human completions
-        temp: temperature in file name (e.g., temp1, temp2, temp3 or temp1.4)
-        prompt_n: prompt number (e.g., 21)
+        temp: temperature in file name (e.g., 1 if temp1, 1.4 if temp1.4)
+        prompt_n: prompt number (e.g., 3 or 21)
 
     Returns:
         all_dfs_combined: combined dataframe with all datasets
@@ -120,7 +148,7 @@ def preprocess_datasets(ai_dir: pathlib.Path, human_dir: pathlib.Path, models: l
     all_dfs = []
 
     for dataset in datasets: 
-        ai_paths, human_path = get_paths(ai_dir, human_dir, models, dataset, temp=temp)
+        ai_paths, human_path = get_paths(ai_dir, human_dir, models, dataset, temp, prompt_number)
         ai_dfs, human_df = load_dataset(ai_paths, human_path)
         dataset_df = combine_data(ai_dfs, human_df, subset=subset)
         
@@ -145,14 +173,9 @@ def main():
     models = ["beluga7b", "llama2_chat13b", "mistral7b"]
     datasets = ["dailymail_cnn", "stories", "mrpc", "dailydialog"]
 
-    ai_paths, human_paths = get_paths(ai_dir, human_dir, models, dataset="stories", temp=1.5, prompt_number=22)
-
-    for p in ai_paths: 
-        print(p)
-
-    #all_dfs = preprocess_datasets(ai_dir, human_dir, models, datasets, subset=99)
+    all_dfs = preprocess_datasets(ai_dir, human_dir, models, datasets, subset=None, temp = 1.5, prompt_number=21)
     
-    #print(all_dfs)
+    print(all_dfs)
 
 
 if __name__ == "__main__":
