@@ -1,15 +1,28 @@
-source ../../env/bin/activate
+#!/bin/bash
 
-# change directory 
-cd "$(dirname "$0")" 
+# get the dir 
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
-echo -e "[INFO:] RUNNING BELUGA ..."
-python run_pipeline.py -mdl "beluga7b" -prompt_n 22 -d "stories"
+# venv 
+source "$SCRIPT_DIR/../../env/bin/activate"
 
-echo -e "[INFO:] RUNNING LLAMA ..."
-python run_pipeline.py -mdl "llama2chat_13b" -prompt_n 22 -d "stories"
+# change script dir 
+cd "$SCRIPT_DIR"
 
-echo -e "[INFO:] RUNNING MISTRAL ..."
-python run_pipeline.py -mdl "mistral7b" -prompt_n 22 -d "stories"
+# datasets and models
+datasets=("dailydialog" "dailymail_cnn" "mrpc" "stories") 
+models=("beluga7b")
+prompt=21
+temp=2
+
+# over datasets and models
+for dataset in "${datasets[@]}"
+do
+    for model in "${models[@]}"
+    do
+        echo "Processing dataset: $dataset with model: $model, prompt: $prompt and temperature $temp"
+        python run_pipeline.py --dataset "$dataset" --model_name "$model" --prompt_number "$prompt" --temperature "$temp"
+    done
+done
 
 deactivate
