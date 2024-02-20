@@ -1,12 +1,12 @@
 '''
 Script for preprocessing and combining generations with human data.
 '''
-
 import pathlib 
 import re
 import pandas as pd
+import ast
 
-def get_paths(ai_dir: pathlib.Path, human_dir: pathlib.Path, models: list, dataset: str, temp:float|int=1, prompt_number:int=None):
+def get_paths(ai_dir: pathlib.Path, human_dir: pathlib.Path, models: list, dataset: str, temp:float|int=None, prompt_numbers:list=None):
     '''
     Get all paths pertaining to a particular dataset (e.g., mrpc, dailymail_cnn, stories, dailydialog, etc.)
 
@@ -16,7 +16,7 @@ def get_paths(ai_dir: pathlib.Path, human_dir: pathlib.Path, models: list, datas
         models: list of models to include
         dataset: name of dataset to include
         temp: temperature in file name (e.g., 1 if temp1, 1.4 if temp1.4)
-        prompt_number: prompt number (e.g., 21)
+        prompt_numbers: list of prompt numbers (can be a single prompt number e.g., 21 or 22)
 
     Returns:
         ai_paths: list of paths to AI datasets
@@ -24,33 +24,36 @@ def get_paths(ai_dir: pathlib.Path, human_dir: pathlib.Path, models: list, datas
     '''
     ai_paths = []
 
-    # check valid datasets and type of temp and prompt_number
+    # check valid datasets + type checking
     valid_datasets = [d.name for d in human_dir.iterdir()]
+    
     if dataset not in valid_datasets:
         raise ValueError(f"Dataset {dataset} not found in {human_dir}")
 
     if temp and not isinstance(temp, (int, float)):
         raise ValueError(f"Temperature must be a int or float, not {type(temp)}")
-    if prompt_number and not isinstance(prompt_number, int):
-        raise ValueError(f"Prompt number must be an int, not {type(prompt_number)}")
+    if prompt_numbers and not isinstance(prompt_numbers, list):
+        raise ValueError(f"Prompt number must be an list, not {type(prompt_numbers)}")
 
     # get ai paths based on args 
     for model_name in models:
         model_path = ai_dir / model_name
 
-        if prompt_number:
-            file_identifier = f"{dataset}_prompt_{prompt_number}"
-            paths = [file for file in model_path.iterdir() if file.name.startswith(file_identifier)]
-            ai_paths.extend(paths)
+        if prompt_numbers and temp: 
+            for prompt_number in prompt_numbers:
+                file_identifier = f"{dataset}_prompt_{prompt_number}_temp{temp}.ndjson"
+                paths = [file for file in model_path.iterdir() if file.name.startswith(file_identifier)]
+                ai_paths.extend(paths)
+
+        elif prompt_numbers:
+            for prompt_number in prompt_numbers:
+                file_identifier = f"{dataset}_prompt_{prompt_number}"
+                paths = [file for file in model_path.iterdir() if file.name.startswith(file_identifier)]
+                ai_paths.extend(paths)
 
         elif temp: 
             file_identifier = f"{temp}.ndjson"
             paths = [file for file in model_path.iterdir() if file.name.endswith(file_identifier)]
-            ai_paths.extend(paths)
-
-        elif prompt_number and temp: 
-            file_identifier = f"{dataset}_prompt_{prompt_number}_temp{temp}.ndjson"
-            paths = [file for file in model_path.iterdir() if file.name.startswith(file_identifier)]
             ai_paths.extend(paths)
 
         else:
@@ -102,12 +105,15 @@ def combine_data(ai_dfs, human_df, subset=None):
         
         # standardise prompt and completions cols 
         prompt_colname = [col for col in new_df.columns if col.startswith("prompt_")][0] # get column name that starts with prompt_ (e.g., prompt_1, prompt_2, ...)
-        new_df["prompt_number"] = prompt_colname.split("_")[1] # extract numbers 1 to 6
+        new_df["prompt_number"] = prompt_colname.split("_")[1] # extract numbers 
         new_df.rename(columns={prompt_colname: "prompt"}, inplace=True)
 
         mdl_colname = [col for col in new_df.columns if col.endswith("_completions")][0] 
         new_df["model"] = re.sub(r"_completions$", "", mdl_colname)  # remove "_completions" from e.g., "beluga_completions"
         new_df.rename(columns={mdl_colname: "completions"}, inplace=True)
+
+        if "sample_params" in df.columns: 
+            new_df["temperature"] = df.sample_params.apply(lambda x: ast.literal_eval(x).get("temperature") if pd.notna(x) else None)
         
         # add source col 
         new_df = new_df.merge(human_df[["id", "source"]], on="id", how="left")
@@ -115,7 +121,7 @@ def combine_data(ai_dfs, human_df, subset=None):
         # replace OG df with new df 
         ai_dfs[idx] = new_df
    
-    human_df = human_df.query('id in @ai_dfs[1]["id"]').copy()
+    human_df = human_df.query('id in @ai_dfs[0]["id"]').copy()
     human_df["model"] = "human"
     #human_df.drop(["source"], inplace=True, axis=1)
     human_df.rename(columns={"human_completions": "completions"}, inplace=True)
@@ -128,7 +134,7 @@ def combine_data(ai_dfs, human_df, subset=None):
 
     return combined_df
 
-def preprocess_datasets(ai_dir: pathlib.Path, human_dir: pathlib.Path, models: list, datasets: list, subset=None, temp: int | float = None, prompt_number: int=None):
+def preprocess_datasets(ai_dir: pathlib.Path, human_dir: pathlib.Path, models: list, datasets: list, subset=None, temp: int | float = None, prompt_numbers: list=None):
     '''
     Loads and prepares as many datasets as needed
     
@@ -148,7 +154,7 @@ def preprocess_datasets(ai_dir: pathlib.Path, human_dir: pathlib.Path, models: l
     all_dfs = []
 
     for dataset in datasets: 
-        ai_paths, human_path = get_paths(ai_dir, human_dir, models, dataset, temp, prompt_number)
+        ai_paths, human_path = get_paths(ai_dir, human_dir, models, dataset, temp, prompt_numbers)
         ai_dfs, human_df = load_dataset(ai_paths, human_path)
         dataset_df = combine_data(ai_dfs, human_df, subset=subset)
         
@@ -173,10 +179,9 @@ def main():
     models = ["beluga7b", "llama2_chat13b", "mistral7b"]
     datasets = ["dailymail_cnn", "stories", "mrpc", "dailydialog"]
 
-    all_dfs = preprocess_datasets(ai_dir, human_dir, models, datasets, subset=None, temp = 1.5, prompt_number=21)
-    
-    print(all_dfs)
+    combined_df = preprocess_datasets(ai_dir, human_dir, models, datasets, subset=None, temp=1, prompt_numbers=[21, 22])
 
+    print(combined_df)
 
 if __name__ == "__main__":
     main()
