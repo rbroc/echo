@@ -18,19 +18,30 @@ def input_parse():
     args = parser.parse_args()
     return args
 
-def plot_distribution(df, col="doc_length", hue_col='model', bins=30, figsize=(10, 6), title='Doc Lengths by Framework \n (Beluga 7B, Stories Dataset (total: 2000 generations))', save_path=None):
+def plot_distribution(df, col="doc_length", hue_col='model', bins=30, figsize=(10, 6), title='Doc Lengths by Framework', save_path=None):
     sns.set(style="whitegrid")
 
-    # plot
-    plt.figure(figsize=figsize)
-    sns.histplot(data=df, x='doc_length', hue=hue_col, kde=False, bins=bins, palette='viridis')
+    unique_datasets = df['dataset'].unique()
+    num_datasets = len(unique_datasets)
+    fig, axes = plt.subplots(2, 2, figsize=figsize)
+    axes = axes.flatten()
 
-    # adjust
-    plt.gca().xaxis.set_major_locator(ticker.MultipleLocator(100))
-    plt.title(title)
-    plt.xlabel('Length of Documents (SpaCy doc length)')
-    plt.ylabel('Frequency')
+    for i, dataset in enumerate(unique_datasets):
+        # filter dataframe for current dataset
+        dataset_df = df[df['dataset'] == dataset]
 
+        # plot
+        sns.histplot(data=dataset_df, x=col, hue=hue_col, kde=False, bins=bins, palette='viridis', ax=axes[i])
+
+        # adjust
+        axes[i].xaxis.set_major_locator(ticker.MultipleLocator(100))
+        axes[i].set_title(f'{dataset}')
+    
+    fig.text(0.5, 0.04, 'Length of Documents (SpaCy doc length)', ha='center')
+    fig.text(0.04, 0.5, 'Frequency', va='center', rotation='vertical')
+
+    fig.suptitle(title)
+    
     if save_path:
         plt.savefig(save_path, bbox_inches='tight', dpi=300)
 
@@ -42,33 +53,31 @@ def main():
     args = input_parse()
 
     models = ["beluga7b", "llama2_chat13b", "mistral7b"]
+    datasets = ["dailydialog", "dailymail_cnn", "mrpc", "stories"]
+    temperature = 1
 
     print("[INFO:] Preprocessing datasets ...")
-    df = preprocess_datasets(ai_dir = ai_dir, human_dir = human_dir, models=models, datasets=[args.dataset], temp = "temp1")
-
-    # filtered df 
-    filtered_df = df[(df["prompt_number"] == "21") | (df["model"] == "human") & (df["dataset"] == args.dataset)]
+    df = preprocess_datasets(ai_dir = ai_dir, human_dir = human_dir, models=models, datasets=datasets, temp = temperature, prompt_numbers=[21, 22])
 
     # identify NA doc lengths and fill them in with spacy
     nlp = spacy.blank("en")
 
-    for i, row in filtered_df.iterrows():
+    for i, row in df.iterrows():
         if pd.isna(row["doc_length"]):
             doc = nlp(row["completions"])
-            filtered_df.at[i, "doc_length"] = len(doc)
+            df.at[i, "doc_length"] = len(doc)
 
     # plot
     plot_distribution(
-                    filtered_df, 
+                    df, 
                     col="doc_length", 
                     hue_col='model', 
-                    bins=30, 
+                    bins=50, 
                     figsize=(10, 6), 
-                    title=f'Doc Lengths by Framework \n ({args.dataset.upper()} Dataset (total: {len(filtered_df)} generations))', 
-                    save_path=path.parents[0] / f"{args.dataset}_doc_lengths.png"
+                    save_path=path.parents[0] / f"temp{temperature}_doc_lengths.png"
                     )                 
 
-    print(filtered_df[["model", "completions", "doc_length"]])
+    print(df[["model", "completions", "doc_length"]])
     
 
 if __name__ == "__main__":
