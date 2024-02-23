@@ -159,38 +159,43 @@ def vllm_generate(vllm_model, df:pd.DataFrame, prompt_col:str="prompt_1", min_to
     df["sample_params"] = str(sample_params)
 
     if min_tokens:
-        print("[INFO]: Checking length of completions...")
-        nlp = spacy.blank("en")
-        df["doc_length"] = df[f"{vllm_model.chosen_model_name}_completions"].apply(lambda x: len(nlp(x)))
-
-        # Initially, check all rows for too short completions
-        too_short_ids = df[df["doc_length"] < min_tokens]["id"].tolist()
-
-        sample_params["n"] = 2  # Starting value for 'n'
-        while too_short_ids and sample_params["n"] <= 30:
-            print(f"[INFO]: Generating new completions for {len(too_short_ids)} too short rows with n = {sample_params['n']}...")
-            new_df = df[df["id"].isin(too_short_ids)]
-            new_prompts = new_df[prompt_col].tolist()
-
-            sample_params_obj = SamplingParams(**sample_params)
-            too_short_outputs = vllm_model.model.generate(new_prompts, sample_params_obj)
-
-            for idx, output in enumerate(too_short_outputs):
-                valid_completions = [comp.text for comp in output.outputs if len(nlp(comp.text)) >= min_tokens]
-                if valid_completions:
-                    random_completion = random.choice(valid_completions)
-                    completion_id = too_short_ids[idx]
-                    df.loc[df["id"] == completion_id, f"{vllm_model.chosen_model_name}_completions"] = random_completion
-                    df.loc[df["id"] == completion_id, "doc_length"] = len(nlp(random_completion))
-
-            # Check if there are still too short completions left
+        try: 
+            print("[INFO]: Checking length of completions...")
+            nlp = spacy.blank("en")
             df["doc_length"] = df[f"{vllm_model.chosen_model_name}_completions"].apply(lambda x: len(nlp(x)))
+
+            # Initially, check all rows for too short completions
             too_short_ids = df[df["doc_length"] < min_tokens]["id"].tolist()
 
-            sample_params["n"] += 1  # Increment 'n' for the next iteration
+            sample_params["n"] = 2  # Starting value for 'n'
+            while too_short_ids and sample_params["n"] <= 30:
+                print(f"[INFO]: Generating new completions for {len(too_short_ids)} too short rows with n = {sample_params['n']}...")
+                new_df = df[df["id"].isin(too_short_ids)]
+                new_prompts = new_df[prompt_col].tolist()
+
+                sample_params_obj = SamplingParams(**sample_params)
+                too_short_outputs = vllm_model.model.generate(new_prompts, sample_params_obj)
+
+                for idx, output in enumerate(too_short_outputs):
+                    valid_completions = [comp.text for comp in output.outputs if len(nlp(comp.text)) >= min_tokens]
+                    
+                    if valid_completions:
+                        random_completion = random.choice(valid_completions)
+                        completion_id = too_short_ids[idx]
+                        df.loc[df["id"] == completion_id, f"{vllm_model.chosen_model_name}_completions"] = random_completion
+                        df.loc[df["id"] == completion_id, "doc_length"] = len(nlp(random_completion))
+
+                # Check if there are still too short completions left
+                df["doc_length"] = df[f"{vllm_model.chosen_model_name}_completions"].apply(lambda x: len(nlp(x)))
+                too_short_ids = df[df["doc_length"] < min_tokens]["id"].tolist()
+
+                sample_params["n"] += 1  # Increment 'n' for the next iteration
+            
+        except: 
+            print("[WARNING]: Error Occured. Likely CUDA problems.")
 
         if too_short_ids:
-            print(f"[WARNING]: Some completions still too short after max iterations.")
+            print(f"[WARNING]: len({len(too_short_ids)}) completions still too short after max iterations.")
       
     if outfilepath is not None:
         print(f"[INFO]: Saving data to {outfilepath}...")

@@ -2,7 +2,7 @@ import pathlib
 import pandas as pd
 import json, ndjson 
 
-def load_clean_data(data_rootdir:pathlib.Path(), dataset:str="stories"):
+def load_clean_data(data_rootdir:pathlib.Path, dataset:str="stories"):
     human_path = data_rootdir / dataset / "data.ndjson"
     human_df = pd.read_json(human_path, lines=True)
 
