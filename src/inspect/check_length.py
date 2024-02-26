@@ -105,6 +105,15 @@ def main():
                 doc = nlp(row["completions"])
                 df.at[i, "doc_length"] = len(doc)
 
+        # get min max for each dataset only for model = human
+        human_df = df[df["model"] == "human"]
+        
+        for dataset in datasets:
+            dataset_df = human_df[human_df["dataset"] == dataset]
+            min_doc_length = dataset_df["doc_length"].min()
+            max_doc_length = dataset_df["doc_length"].max()
+            print(f"[INFO:] Dataset: {dataset}, min doc length: {min_doc_length}, max doc length: {max_doc_length}")
+
         # plot
         print("[INFO:] Plotting data ...")
         plot_distribution_per_dataset(
