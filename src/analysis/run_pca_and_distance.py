@@ -13,7 +13,7 @@ def main():
     ai_dir = path.parents[3] / "datasets" / "ai_datasets" / "vLLM" / "FULL_DATA"
     human_dir = path.parents[3] / "datasets" / "human_datasets"
 
-    results_path = path.parents[3] / "results" / "descriptives"
+    results_path = path.parents[3] / "results" / "analysis"
     pca_path = results_path / "PCA"
     distance_path = results_path / "distance"
 
