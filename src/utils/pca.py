@@ -23,7 +23,7 @@ def get_descriptive_metrics(df:pd.DataFrame, text_column:str, id_column:str):
     textcol = df[text_column]
     idcol = df[id_column]
 
-    metrics = td.extract_metrics(text=textcol, spacy_model="en_core_web_lg", metrics=["descriptive_stats", "quality"])
+    metrics = td.extract_metrics(text=textcol, spacy_model="en_core_web_md", metrics=["descriptive_stats", "quality"])
     subset_metrics = metrics[["doc_length", "n_tokens", "n_characters", "n_sentences"]]
     
     metrics_df = pd.concat([df, subset_metrics], axis=1)
