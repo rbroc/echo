@@ -24,7 +24,7 @@ def main():
     datasets = ["dailymail_cnn", "stories", "mrpc", "dailydialog"]
 
     print("[INFO:] Preprocessing datasets ...")
-    df = preprocess_datasets(ai_dir, human_dir, models, datasets)
+    df = preprocess_datasets(ai_dir, human_dir, models, datasets, prompt_numbers=[21, 22])
 
     # run pca
     print("[INFO:] Extracting Metrics ...")
