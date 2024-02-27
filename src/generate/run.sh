@@ -11,17 +11,20 @@ cd "$SCRIPT_DIR"
 
 # datasets and models
 datasets=("dailydialog" "dailymail_cnn" "mrpc" "stories") 
-models=("beluga7b")
+models=("llama2_chat7b" "llama2_chat13b" "beluga7b" "mistral7b")
 prompt=21
-temp=2
+temperatures=(1 1.5 2)
 
-# over datasets and models
+# over datasets, models, temp
 for dataset in "${datasets[@]}"
 do
     for model in "${models[@]}"
     do
-        echo "Processing dataset: $dataset with model: $model, prompt: $prompt and temperature $temp"
-        python run_pipeline.py --dataset "$dataset" --model_name "$model" --prompt_number "$prompt" --temperature "$temp"
+        for temp in "${temperatures[@]}"
+        do  
+            echo "Processing dataset: $dataset with model: $model, prompt: $prompt and temperature $temp"
+            python run_pipeline.py --dataset "$dataset" --model_name "$model" --prompt_number "$prompt" --temperature "$temp"
+        done
     done
 done
 
