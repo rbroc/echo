@@ -5,6 +5,7 @@ import pathlib
 import re
 import pandas as pd
 import ast
+from tqdm import tqdm
 
 def get_paths(ai_dir: pathlib.Path, human_dir: pathlib.Path, models: list, dataset: str, temp:float|int=None, prompt_numbers:list=None):
     '''
@@ -153,7 +154,7 @@ def preprocess_datasets(ai_dir: pathlib.Path, human_dir: pathlib.Path, models: l
 
     all_dfs = []
 
-    for dataset in datasets: 
+    for dataset in tqdm(datasets): 
         ai_paths, human_path = get_paths(ai_dir, human_dir, models, dataset, temp, prompt_numbers)
         ai_dfs, human_df = load_dataset(ai_paths, human_path)
         dataset_df = combine_data(ai_dfs, human_df, subset=subset)
