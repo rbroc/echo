@@ -20,7 +20,7 @@ def main():
     for p in [pca_path, distance_path]:
         p.mkdir(parents=True, exist_ok=True)
     
-    models = ["beluga7b", "llama2_chat13b", "mistral7b"]
+    models = ["llama2_chat13b", "beluga7b", "llama2_chat13b", "mistral7b"]
     datasets = ["dailymail_cnn", "stories", "mrpc", "dailydialog"]
 
     print("[INFO:] Preprocessing datasets ...")
@@ -52,4 +52,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

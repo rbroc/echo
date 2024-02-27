@@ -57,10 +57,7 @@ def main():
     datapath = path.parents[3] / "results" / "descriptives" / "distance"
 
     df = pd.read_csv(datapath / "distances_PC_cols.csv")
-    
-    models = ["beluga7b", "llama2_chat13b", "mistral7b"]
 
-    # create interactive plots 
     interactive_jitterplot(df, datapath)
 
 if __name__ == "__main__":
