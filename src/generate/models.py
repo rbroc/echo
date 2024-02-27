@@ -26,6 +26,7 @@ class Model():
         model_names = {
             "beluga7b":"stabilityai/StableBeluga-7B", 
             "beluga70b":"stabilityai/StableBeluga2",
+            "llama2_chat7b": "meta-llama/Llama-2-7b-chat-hf",
             "llama2_chat13b":"meta-llama/Llama-2-13b-chat-hf",
             "beluga70bQ":"TheBloke/StableBeluga2-70B-GPTQ", # GPTQ optimized for GPU
             "llama2_chat70bQ":"TheBloke/Llama-2-70B-Chat-GPTQ",
