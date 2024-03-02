@@ -7,30 +7,23 @@ import pandas as pd
 import ast
 from tqdm import tqdm
 
-def get_paths(ai_dir: pathlib.Path, human_dir: pathlib.Path, models: list, dataset: str, temp:float|int=None, prompt_numbers:list=None):
+def get_ai_paths(ai_dir: pathlib.Path, models: list, dataset: str, temp:float|int=None, prompt_numbers:list=None):
     '''
-    Get all paths pertaining to a particular dataset (e.g., mrpc, dailymail_cnn, stories, dailydialog, etc.)
-
+    Get all paths pertaining to a particular dataset (e.g., mrpc, dailymail_cnn, stories, dailydialog, etc.) for specified models
+    
     Args:
         ai_dir: path to directory with AI datasets of particular dataset
-        human_dir: path to directory with human datasets
         models: list of models to include
         dataset: name of dataset to include
         temp: temperature in file name (e.g., 1 if temp1, 1.4 if temp1.4)
         prompt_numbers: list of prompt numbers (can be a single prompt number e.g., 21 or 22)
-
+    
     Returns:
         ai_paths: list of paths to AI datasets
-        human_path: path to human dataset
     '''
     ai_paths = []
 
-    # check valid datasets + type checking
-    valid_datasets = [d.name for d in human_dir.iterdir()]
-    
-    if dataset not in valid_datasets:
-        raise ValueError(f"Dataset {dataset} not found in {human_dir}")
-
+    # check if temp and prompt_numbers are valid
     if temp and not isinstance(temp, (int, float)):
         raise ValueError(f"Temperature must be a int or float, not {type(temp)}")
     if prompt_numbers and not isinstance(prompt_numbers, list):
@@ -60,11 +53,37 @@ def get_paths(ai_dir: pathlib.Path, human_dir: pathlib.Path, models: list, datas
         else:
             ai_paths.extend([file for file in model_path.iterdir()])
 
-    # get human paths 
-    human_path =  human_dir / dataset / "data.ndjson"
-
     if len(ai_paths) == 0: 
         print(f"[WARNING:] Length of ai paths is zero. Ensure that you have valid arguments.")
+
+    return ai_paths
+
+def get_paths(ai_dir: pathlib.Path, human_dir: pathlib.Path, models: list, dataset: str, temp:float|int=None, prompt_numbers:list=None):
+    '''
+    Get all paths pertaining to a particular dataset (e.g., mrpc, dailymail_cnn, stories, dailydialog, etc.)
+
+    Args:
+        ai_dir: path to directory with AI datasets of particular dataset
+        human_dir: path to directory with human datasets
+        models: list of models to include
+        dataset: name of dataset to include
+        temp: temperature in file name (e.g., 1 if temp1, 1.4 if temp1.4)
+        prompt_numbers: list of prompt numbers (can be a single prompt number e.g., 21 or 22)
+
+    Returns:
+        ai_paths: list of paths to AI datasets
+        human_path: path to human dataset
+    '''
+    valid_datasets = [d.name for d in human_dir.iterdir()]
+    
+    if dataset not in valid_datasets:
+        raise ValueError(f"Dataset {dataset} not found in {human_dir}")
+
+    # get ai paths
+    ai_paths = get_ai_paths(ai_dir=ai_dir, models=models, dataset=dataset, temp=temp, prompt_numbers=prompt_numbers)
+
+    # get human paths 
+    human_path =  human_dir / dataset / "data.ndjson"
 
     return ai_paths, human_path
 
