@@ -7,7 +7,7 @@ sys.path.append(str(pathlib.Path(__file__).parents[2]))
 
 from src.utils.process_generations import preprocess_datasets
 from src.utils.get_metrics import get_descriptive_metrics
-from src.utils.pca import get_descriptive_metrics, run_PCA, save_PCA_results, get_loadings, plot_loadings
+from src.utils.pca import run_PCA, save_PCA_results, get_loadings, plot_loadings
 from src.utils.distance import compute_distances, jitterplots, interactive_jitterplot
 
 def main(): 
@@ -34,7 +34,7 @@ def main():
 
     metrics_df = get_descriptive_metrics(df, "completions", "en_core_web_md")
     metrics_df.to_csv(pca_path/"metrics_data.csv")
-
+    
     print("[INFO:] Running PCA ...")
     pca, pca_df = run_PCA(metrics_df, feature_names=["doc_length", "n_tokens", "n_characters", "n_sentences"], n_components=4)
 
@@ -51,6 +51,6 @@ def main():
     # run distance
     print("[INFO]: Computing distances")
     distances = compute_distances(pca_df, models=models, save_path=distance_path, include_baseline_completions=True)
-
+    
 if __name__ == "__main__":
     main()
