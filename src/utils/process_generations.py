@@ -103,17 +103,17 @@ def load_dataset(ai_paths, human_path):
 
     return ai_dfs, human_df
 
-def combine_data(ai_dfs, human_df, subset=None):
+def format_ai_data(ai_dfs, human_df=None, subset=None):
     '''
-    Return a dataframe for a particular dataset with all AI generations and human data in one.
+    Format AI data to match human data. Alternatively, if human data is provided, add source column to AI data.
 
-    Args: 
+    Args:
         ai_dfs: list of dataframes
         human_df: dataframe corresponding to the dfs in ai_dfs 
-        subset: whether datasets should be subsetted (subsets ai datasets to n first rows, and subsequently matches the human completions on completion id). For prompt selection, this was set to 99.
+        subset: whether datasets should be subsetted (subsets ai datasets to n first rows, and subsequently matches the human completions
 
-    Returns: 
-        combined_df: combined dataframe
+    Returns:
+        ai_dfs: list of dataframes
     '''
     # prepare data for concatenating (similar formatting)
     for idx, df in enumerate(ai_dfs): 
@@ -132,14 +132,32 @@ def combine_data(ai_dfs, human_df, subset=None):
         new_df["model"] = re.sub(r"_completions$", "", mdl_colname)  # remove "_completions" from e.g., "beluga_completions"
         new_df.rename(columns={mdl_colname: "completions"}, inplace=True)
 
-        if "sample_params" in df.columns: 
+        if "sample_params" in df.columns:
             new_df["temperature"] = df.sample_params.apply(lambda x: ast.literal_eval(x).get("temperature") if pd.notna(x) else None)
         
-        # add source col 
-        new_df = new_df.merge(human_df[["id", "source"]], on="id", how="left")
+        # add source col
+        if human_df is not None:
+            new_df = new_df.merge(human_df[["id", "source"]], on="id", how="left")
 
         # replace OG df with new df 
         ai_dfs[idx] = new_df
+
+    return ai_dfs
+
+def combine_data(ai_dfs, human_df, subset=None):
+    '''
+    Return a dataframe for a particular dataset with all AI generations and human data in one.
+
+    Args: 
+        ai_dfs: list of dataframes
+        human_df: dataframe corresponding to the dfs in ai_dfs 
+        subset: whether datasets should be subsetted (subsets ai datasets to n first rows, and subsequently matches the human completions on completion id). For prompt selection, this was set to 99.
+
+    Returns: 
+        combined_df: combined dataframe
+    '''
+    # prepare data for concatenating (similar formatting)
+    ai_dfs = format_ai_data(ai_dfs, human_df, subset=subset)
    
     human_df = human_df.query('id in @ai_dfs[0]["id"]').copy()
     human_df["model"] = "human"
