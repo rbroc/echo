@@ -1,5 +1,5 @@
 '''
-Functions to get low-level descriptive metrics (doc length, n_tokens, n_characters, n_sentences) and compute PCA components.
+Functions to compute and plot PCA components.
 '''
 import pathlib 
 import pickle
@@ -7,28 +7,11 @@ import pickle
 import pandas as pd
 import numpy as np
 
-import spacy
-import textdescriptives as td
-
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
 
 import seaborn as sns
 import matplotlib.pyplot as plt
-
-def get_descriptive_metrics(df:pd.DataFrame, text_column:str, id_column:str):
-    '''
-    Extract low level descriptive features doc_length, n_tokens, n_characters and n_sentences 
-    '''
-    textcol = df[text_column]
-    idcol = df[id_column]
-
-    metrics = td.extract_metrics(text=textcol, spacy_model="en_core_web_md", metrics=["descriptive_stats", "quality"])
-    subset_metrics = metrics[["doc_length", "n_tokens", "n_characters", "n_sentences"]]
-    
-    metrics_df = pd.concat([df, subset_metrics], axis=1)
-    
-    return metrics_df 
 
 def run_PCA(metrics_df:pd.DataFrame, feature_names:list, n_components:int=4):
     '''
