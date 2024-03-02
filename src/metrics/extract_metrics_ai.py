@@ -4,61 +4,50 @@ import textdescriptives as td
 from argparse import ArgumentParser
 import pathlib 
 
+import sys
+sys.path.append(str(pathlib.Path(__file__).parents[2]))
+
+from src.utils.process_generations import get_ai_paths, format_ai_data
+from src.utils.get_metrics import get_all_metrics
 
 def input_parse():
     parser = ArgumentParser()
-    parser.add_argument("-d",
-                        "--dataset",
-                        type=str,
-                        required=True)
-    parser.add_argument("-m",
-                        "--model",
-                        type=str, 
-                        required=True)
+    parser.add_argument("-d", "--dataset", default="dailymail_cnn", type=str)
     args = parser.parse_args()
 
     return args
 
-
-def process(dataframe, model):
-    print("[INFO] Extracting metrics from AI completions...")
-    completions = nlp.pipe(dataframe[f"{model}_completions"])
-    
-    completion_metrics = td.extract_df(completions,
-                                        include_text=False)
-
-    completion_metrics['id'] = dataframe["id"]
-    print("...done!")
-    
-    # sort columns because td changes the orders each time script is run
-    completion_metrics = completion_metrics.reindex(sorted(completion_metrics.columns), axis=1)
-
-    return completion_metrics
-
-def extract_ai_metrics():
+def main(): 
     args = input_parse()
 
-    prompt_numbers = [1, 2, 3, 4, 5, 6]
+    # define paths 
     path = pathlib.Path(__file__)
+    ai_dir = path.parents[2] / "datasets" / "ai_datasets" / "vLLM" / "FULL_DATA"
 
-    for prompt in prompt_numbers:
-        infile = path.parents[2] / "datasets" / "ai_datasets" / args.model / f"{args.dataset}_prompt_{prompt}.ndjson"
-        try: 
-            data = pd.read_json(infile, lines=True)
-            
-            # process 
-            results = process(data, args.model)
-            
-            # save
-            outpath = path.parents[2] / "results" / "metrics" / "ai_metrics" / args.model 
-            outpath.mkdir(parents=True, exist_ok=True)
-            results.to_csv(outpath / f"{args.dataset}_prompt_{prompt}_completions.csv")
+    results_path = path.parents[2] / "results" / "metrics" / "ai_metrics"
+    results_path.mkdir(parents=True, exist_ok=True)
 
-        except: 
-            print(f"KeyError: Dataset does not exist for prompt {prompt}") 
-        
+    # models
+    models = ["beluga7b", "llama2_chat13b", "mistral7b"]
+
+    # load paths
+    ai_paths = get_ai_paths(ai_dir=ai_dir, models=models, dataset=args.dataset, temp=1, prompt_numbers=[21, 22])
+
+    # load df
+    ai_dfs = [pd.read_json(p, lines=True) for p in ai_paths]
+
+    # combine
+    ai_dfs_formatted = format_ai_data(ai_dfs)
+
+    # process
+    df = pd.concat(ai_dfs_formatted, ignore_index=True, axis=0)
+
+    # get metrics
+    metrics = get_all_metrics(df, "completions", "en_core_web_md")
+    
+    # save
+    metrics.to_csv(results_path / f"{args.dataset}_completions.csv")
+
+
 if __name__ == "__main__":
-    print("[INFO]: Loading model ...")
-    nlp = spacy.load("en_core_web_md")
-    nlp.add_pipe("textdescriptives/all")
-    extract_ai_metrics()
+    main()
