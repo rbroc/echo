@@ -5,7 +5,8 @@ import spacy
 import sys 
 sys.path.append(str(pathlib.Path(__file__).parents[2]))
 from src.utils.process_generations import preprocess_datasets
-from src.utils.pca import get_descriptive_metrics, run_PCA, get_loadings, plot_loadings
+from src.utils.get_metrics import get_descriptive_metrics
+from src.utils.pca import run_PCA, get_loadings, plot_loadings
 
 def main(): 
     spacy.util.fix_random_seed(129)
@@ -26,7 +27,7 @@ def main():
     df = preprocess_datasets(ai_dir, human_dir, models, datasets, subset=99)
 
     print("[INFO:] EXTRACTING LOW LEVEL METRICS")
-    metrics_df = get_descriptive_metrics(df, "completions", "id")
+    metrics_df = get_descriptive_metrics(df, "completions", "en_core_web_lg")
 
     print("[INFO:] RUNNING PCA ...")
     pca, final_df = run_PCA(metrics_df, feature_names=["doc_length", "n_tokens", "n_characters", "n_sentences"], n_components=4)

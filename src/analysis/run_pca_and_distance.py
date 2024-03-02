@@ -4,7 +4,9 @@ Script to investigate generated data
 import pathlib
 import sys
 sys.path.append(str(pathlib.Path(__file__).parents[2]))
+
 from src.utils.process_generations import preprocess_datasets
+from src.utils.get_metrics import get_descriptive_metrics
 from src.utils.pca import get_descriptive_metrics, run_PCA, save_PCA_results, get_loadings, plot_loadings
 from src.utils.distance import compute_distances, jitterplots, interactive_jitterplot
 
@@ -30,7 +32,7 @@ def main():
     print("[INFO:] Extracting Metrics ...")
     df = df.drop("doc_length", axis=1)
 
-    metrics_df = get_descriptive_metrics(df, "completions", "id")
+    metrics_df = get_descriptive_metrics(df, "completions", "en_core_web_md")
     metrics_df.to_csv(pca_path/"metrics_data.csv")
 
     print("[INFO:] Running PCA ...")
