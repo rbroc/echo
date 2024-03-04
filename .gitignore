@@ -170,3 +170,6 @@ cython_debug/
 # tokens 
 tokens/*
 !tokens/README.md
+
+# analysis folder (ign. metrics and pca data)
+results/analysis/*.csv
