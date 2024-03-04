@@ -16,8 +16,6 @@ def main():
     human_dir = path.parents[2] / "datasets" / "human_datasets"
 
     results_path = path.parents[2] / "results" / "analysis"
-    pca_path = results_path / "PCA"
-    distance_path = results_path / "distance"
 
     for p in [pca_path, distance_path]:
         p.mkdir(parents=True, exist_ok=True)
@@ -33,24 +31,24 @@ def main():
     df = df.drop("doc_length", axis=1)
 
     metrics_df = get_descriptive_metrics(df, "completions", "en_core_web_md")
-    metrics_df.to_csv(pca_path/"metrics_data.csv")
+    metrics_df.to_csv(results_path / "metrics_data.csv")
     
     print("[INFO:] Running PCA ...")
     pca, pca_df = run_PCA(metrics_df, feature_names=["doc_length", "n_tokens", "n_characters", "n_sentences"], n_components=4)
 
     print("[INFO:] Saving PCA results ...")
     save_PCA_results(pca, pca_path)
-    pca_df.to_csv(pca_path/"PCA_data.csv")
+    pca_df.to_csv(results_path / "PCA_data.csv")
 
     print("[INFO:] Plotting PCA")
     loadings_matrix = get_loadings(pca, feature_names=["doc_length", "n_tokens", "n_characters", "n_sentences"],  n_components=4)
 
     for component in range(1, 5):
-        plot_loadings(loadings_matrix, component, pca_path)
+        plot_loadings(loadings_matrix, component, results_path)
 
     # run distance
     print("[INFO]: Computing distances")
-    distances = compute_distances(pca_df, models=models, save_path=distance_path, include_baseline_completions=True)
+    distances = compute_distances(pca_df, models=models, save_path=results_path, include_baseline_completions=True)
     
 if __name__ == "__main__":
     main()
