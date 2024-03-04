@@ -45,10 +45,6 @@ def main():
 
     for component in range(1, 5):
         plot_loadings(loadings_matrix, component, results_path)
-
-    # run distance
-    print("[INFO]: Computing distances")
-    distances = compute_distances(pca_df, models=models, save_path=results_path, include_baseline_completions=True)
     
 if __name__ == "__main__":
     main()
