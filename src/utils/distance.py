@@ -111,25 +111,27 @@ def compute_distance_human_average(df: pd.DataFrame, cols: list = ["PC1", "PC2",
     df_human = df[df["model"] == "human"]
 
     # compute average of human completions for each component individually
-    human_avg = df_human[cols].mean()
+    for dataset in df_human["dataset"].unique():
+        df_human_dataset = df_human[df_human["dataset"] == dataset]
+        human_avg_dataset = df_human_dataset[cols].mean()
 
-    for _, row in tqdm(df_human.iterrows(), desc="Computing distances between human completions and human average", total=df_human.shape[0]):
-        current_id = row["id"]
+        for _, row in tqdm(df_human_dataset.iterrows(), desc=f"Computing distances between human completions and human average for {dataset}", total=df_human_dataset.shape[0]):
+            current_id = row["id"]
 
-        pc_human = row[cols].values
+            pc_human = row[cols].values
 
-        # compute euclidean distance in n-dimensions
-        distance = euclidean_distance(human_avg, pc_human)
+            # compute euclidean distance in n-dimensions
+            distance = euclidean_distance(human_avg_dataset, pc_human)
 
-        result_row = {
-            "id": row["id"],
-            "model": row["model"],
-            "dataset": row["dataset"],
-            "distance": distance,
-            "prompt_number": row["prompt_number"],
-            "completions": row["completions"],
-        }
-        result_rows.append(result_row)
+            result_row = {
+                "id": row["id"],
+                "model": row["model"],
+                "dataset": row["dataset"],
+                "distance": distance,
+                "prompt_number": row["prompt_number"],
+                "completions": row["completions"],
+            }
+            result_rows.append(result_row)
 
     result_df = pd.DataFrame(result_rows)
 
