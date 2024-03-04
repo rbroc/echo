@@ -10,6 +10,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 import plotly.express as px
+from tqdm import tqdm
 
 def euclidean_distance(features1, features2):
     '''
@@ -34,7 +35,7 @@ def euclidean_distance(features1, features2):
     
     return distance
 
-def compute_distances(df: pd.DataFrame, models: list = ["beluga7b", "llama2_chat13b"], cols: list = ["PC1", "PC2", "PC3", "PC4"], baseline: str = "human", include_baseline_completions:bool=False, save_path=None):
+def compute_distances(df: pd.DataFrame, models: list = ["beluga7b", "llama2_chat13b"], cols: list = ["PC1", "PC2", "PC3", "PC4"], baseline: str = "human", include_baseline_completions:bool=False):
     '''
     Extract euclidean distances between human and model completions in n-dimensions from a list of features (cols) 
 
@@ -55,7 +56,7 @@ def compute_distances(df: pd.DataFrame, models: list = ["beluga7b", "llama2_chat
     # subset for baseline
     df_baseline = df[df["model"] == baseline]
 
-    for _, row in df_other.iterrows():
+    for _, row in tqdm(df_other.iterrows(), desc=f"Computing distances between {baseline} and the models in list {models}", total=df_other.shape[0]):
         current_id = row["id"]
 
         # extract features for the "baseline" model with the same "id" as df_other 
@@ -96,14 +97,7 @@ def compute_distances(df: pd.DataFrame, models: list = ["beluga7b", "llama2_chat
     result_df = pd.DataFrame(result_rows)
 
     # sort by id and model
-    print(result_df)
     sorted_df = result_df.copy().sort_values(["id", "model"])
-
-    if save_path:
-        save_path.mkdir(parents=True, exist_ok=True)
-        save_file = save_path / "distances_PC_cols.csv"
-        
-        sorted_df.to_csv(save_file, index=False)
 
     return sorted_df
 
@@ -119,7 +113,7 @@ def compute_distance_human_average(df: pd.DataFrame, cols: list = ["PC1", "PC2",
     # compute average of human completions for each component individually
     human_avg = df_human[cols].mean()
 
-    for _, row in df_human.iterrows():
+    for _, row in tqdm(df_human.iterrows(), desc="Computing distances between human completions and human average", total=df_human.shape[0]):
         current_id = row["id"]
 
         pc_human = row[cols].values
