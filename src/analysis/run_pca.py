@@ -16,9 +16,6 @@ def main():
     human_dir = path.parents[2] / "datasets" / "human_datasets"
 
     results_path = path.parents[2] / "results" / "analysis"
-
-    for p in [pca_path, distance_path]:
-        p.mkdir(parents=True, exist_ok=True)
     
     models = ["llama2_chat7b", "llama2_chat13b", "beluga7b", "mistral7b"]
     datasets = ["dailymail_cnn", "stories", "mrpc", "dailydialog"]
