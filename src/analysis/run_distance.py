@@ -17,7 +17,7 @@ def main():
     analysis_path = path.parents[2] / "results" / "analysis"
 
     print("[INFO:] READING CSV ...")
-    df = pd.read_csv(analysis_path / "PCA_data.csv")
+    df = pd.read_csv(analysis_path / "PCA_data.csv", index_col=False)
 
     models = ["beluga7b", "llama2_chat13b", "mistral7b", "llama2_chat7b"]
     pc_cols = ["PC1", "PC2", "PC3", "PC4"]
@@ -26,14 +26,14 @@ def main():
     models_df = compute_distances(df, models=models, cols=pc_cols, include_baseline_completions=False)
 
     # concat 
-    result_df = pd.concat([result_df, human_df])
+    result_df = pd.concat([models_df, human_only_df])
 
     # sort by id and model
     sorted_df = result_df.copy().sort_values(["id", "model"])
     print(sorted_df)
 
     print("[INFO:] SAVING RESULTS ...")
-    sorted_df.to_csv(analysis_path / "distances_all_PC_cols.csv", index=False)
+    sorted_df.to_csv(analysis_path / "distances_PC_cols.csv", index=False)
 
 if __name__ == "__main__":
     main()
