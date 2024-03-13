@@ -19,7 +19,6 @@ def main():
     
     models = ["llama2_chat7b", "llama2_chat13b", "beluga7b", "mistral7b"]
     datasets = ["dailymail_cnn", "stories", "mrpc", "dailydialog"]
-
     print("[INFO:] Preprocessing datasets ...")
     df = preprocess_datasets(ai_dir, human_dir, models, datasets, prompt_numbers=[21, 22])
 
@@ -29,13 +28,13 @@ def main():
 
     metrics_df = get_descriptive_metrics(df, "completions", "en_core_web_md")
     metrics_df.to_csv(results_path / "metrics_data.csv")
-    
+
     print("[INFO:] Running PCA ...")
     pca, pca_df = run_PCA(metrics_df, feature_names=["doc_length", "n_tokens", "n_characters", "n_sentences"], n_components=4)
 
     print("[INFO:] Saving PCA results ...")
-    save_PCA_results(pca, pca_path)
     pca_df.to_csv(results_path / "PCA_data.csv")
+    save_PCA_results(pca, results_path)
 
     print("[INFO:] Plotting PCA")
     loadings_matrix = get_loadings(pca, feature_names=["doc_length", "n_tokens", "n_characters", "n_sentences"],  n_components=4)
