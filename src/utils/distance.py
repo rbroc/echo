@@ -10,18 +10,42 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 import plotly.express as px
+from tqdm import tqdm
 
-def compute_distances(df: pd.DataFrame, models: list = ["beluga7b", "llama2_chat13b"], cols: list = ["PC1", "PC2", "PC3", "PC4"], baseline: str = "human", include_baseline_completions:bool=False, save_path=None):
+def euclidean_distance(features1, features2):
+    '''
+    Compute the Euclidean distance between two sets of features. Supports both 2-dimensional and n-dimensional feature sets.
+
+    This function calculates the Euclidean distance between two sets of features represented as numpy arrays or pandas Series. 
+    It supports both 2-dimensional and n-dimensional feature sets.
+
+    Args:
+        features1: The first set of features.
+        features2: The second set of features.
+
+    Returns:
+        distance: The Euclidean distance between the two sets of features.
+    '''
+    # ensure compatible shapes
+    if features1.shape != features2.shape:
+        raise ValueError("Shapes of features1 and features2 must be compatible for computing Euclidean distance.")
+
+    # compute
+    distance = np.sqrt(np.sum((features1 - features2) ** 2))
+    
+    return distance
+
+def compute_distances(df: pd.DataFrame, models: list = ["beluga7b", "llama2_chat13b"], cols: list = ["PC1", "PC2", "PC3", "PC4"], baseline: str = "human", include_baseline_completions:bool=False):
     '''
     Extract euclidean distances between human and model completions in n-dimensions from a list of features (cols) 
 
-    Args:
+    Args
         df: dataframe with features columns (e.g., PC components)
         models: list of models present in the model column in the dataframe
         cols: list of feature cols present in the dataframe (e.g., PC components)
         baseline: model which the euclidean distance is computed between for all other models (e.g., human-llama2, human-beluga7b and never llama2-beluga7b). Defaults to human completions.
 
-    Returns:
+    Returns
         result_df: dataframe containing columns: id, model, dataset, distance, prompt_number
     '''
     result_rows = []
@@ -32,17 +56,17 @@ def compute_distances(df: pd.DataFrame, models: list = ["beluga7b", "llama2_chat
     # subset for baseline
     df_baseline = df[df["model"] == baseline]
 
-    for _, row in df_other.iterrows():
+    for _, row in tqdm(df_other.iterrows(), desc=f"Computing distances between {baseline} and the models in list {models}", total=df_other.shape[0]):
         current_id = row["id"]
 
         # extract features for the "baseline" model with the same "id" as df_other 
-        pc_baseline = df_baseline[df_baseline["id"] == current_id][cols].values
+        pc_baseline = df_baseline[df_baseline["id"] == current_id][cols].values[0]
 
         # extract features for model completions
         pc_model = row[cols].values
-
+        
         # compute euclidean distance in n-dimensions
-        distance = np.sqrt(np.sum((pc_baseline - pc_model) ** 2))
+        distance = euclidean_distance(pc_baseline, pc_model)
 
         result_row = {
             "id": row["id"],
@@ -54,6 +78,9 @@ def compute_distances(df: pd.DataFrame, models: list = ["beluga7b", "llama2_chat
         }
         if "sample_params" in df.columns: 
             result_row[f"sample_params"] = row["sample_params"]
+
+        if "temperature" in df.columns:
+            result_row[f"temperature"] = row["temperature"]
 
         if include_baseline_completions:
             # extract baseline completion
@@ -70,16 +97,45 @@ def compute_distances(df: pd.DataFrame, models: list = ["beluga7b", "llama2_chat
     result_df = pd.DataFrame(result_rows)
 
     # sort by id and model
-    print(result_df)
     sorted_df = result_df.copy().sort_values(["id", "model"])
 
-    if save_path:
-        save_path.mkdir(parents=True, exist_ok=True)
-        save_file = save_path / "distances_PC_cols.csv"
-        
-        sorted_df.to_csv(save_file, index=False)
-
     return sorted_df
+
+def compute_distance_human_average(df: pd.DataFrame, cols: list = ["PC1", "PC2", "PC3", "PC4"]):
+    '''
+    Compute the euclidean distance between human completions and average of all human completions in n-dimensions from a list of features (cols)
+    '''
+    result_rows = []
+
+    # subset df to only include human completions
+    df_human = df[df["model"] == "human"]
+
+    # compute average of human completions for each component individually
+    for dataset in df_human["dataset"].unique():
+        df_human_dataset = df_human[df_human["dataset"] == dataset]
+        human_avg_dataset = df_human_dataset[cols].mean()
+
+        for _, row in tqdm(df_human_dataset.iterrows(), desc=f"Computing distances between human completions and human average for {dataset}", total=df_human_dataset.shape[0]):
+            current_id = row["id"]
+
+            pc_human = row[cols].values
+
+            # compute euclidean distance in n-dimensions
+            distance = euclidean_distance(human_avg_dataset, pc_human)
+
+            result_row = {
+                "id": row["id"],
+                "model": row["model"],
+                "dataset": row["dataset"],
+                "distance": distance,
+                "prompt_number": row["prompt_number"],
+                "completions": row["completions"],
+            }
+            result_rows.append(result_row)
+
+    result_df = pd.DataFrame(result_rows)
+
+    return result_df
 
 # plotting # 
 def jitterplots(data:pd.DataFrame, datasets:list, save_path:pathlib.Path):

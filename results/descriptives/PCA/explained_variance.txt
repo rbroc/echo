@@ -1,6 +1,0 @@
-PRINCIPAL COMPONENTS: EXPLAINED VARIANCE
-Original features: 'doc_length', 'n_tokens', 'n_characters', 'n_sentences'
-pca_1: 0.97000826
-pca_2: 0.02851782
-pca_3: 0.00127027
-pca_4: 0.00020365
