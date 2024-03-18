@@ -16,7 +16,7 @@ Refer to the project description [here](https://cc.au.dk/en/clai/current-project
 
 1. 🚀 **Prompting** (Completed)
 
-2. 📈 **Generating Data at Large Scale** (January 2024)
+2. 📈 **Generating Data at Large Scale** (Completed)
 
 3. 🧪 **Experimental Design**
 
@@ -33,7 +33,7 @@ The main contents of the repository is as such:
 | `results` | Contains preliminary results for prompt selection (distance plots) and a description of the results workflow. |
 | `tokens` |Place your `.txt` token here for the HuggingFace Hub to run `llama2` models.|
 
-Note that each folder has individual `READMEs` with further instructions.
+Note that the `src/README.md` has greater overview of subfolders and their scripts. 
 
 ## Usage 
 
@@ -45,16 +45,13 @@ bash setup.sh
 Note that this has been tested with python *3.10* and *3.9* which are the standard python versions on UCLOUD CPUs and GPUs, respectively. 
 
 ### Generating Text 
-To run the generation text pipeline, run in the terminal:
+To reproduce the generation of text implemented with `vLLM`, run in the terminal:
 ```
-bash generate.sh
+bash src/generate/run.sh
 ```
-Note that this will run text pipeline on a default dataset and model. If you wish to play around with the pipeline, see the `src/generate/README.md` for instructions.
+Note that this will run several models on all datasets for various temperatures.
 
-To run the entire prompting pipeline (testing out prompts), run in the terminal:
-```
-bash prompting.sh
-```
+If you wish to play around with individual models/datasets or use the Hugging Face `pipeline` implementation, please refer to the instructions in [src/generate/README.md](/src/generate/README.md).
 
 ### Extracting Metrics 
 You can then extract metrics from all of the `human data` using the second bash script:
@@ -85,8 +82,3 @@ Unprocessed datasets are kept under `datasets/*/raw.ndjson`.
 The models that were used for prompting were the following: 
 1. [stabilityai/StableBeluga-7B](https://huggingface.co/stabilityai/StableBeluga-7B) (referred to as `beluga7b`)
 2. [meta-llama/Llama-2-13b-chat-hf](https://huggingface.co/meta-llama/Llama-2-13b-chat-hf) (referred to as `llama2_chat13b`)
-
-Models to be used to generate the final data will be their 70b versions (although likely quantized). 
-
-## Preliminary Results
-For preliminary results on the selection of prompts, please refer to `results/README.md` where a description of workflow and results are given.
