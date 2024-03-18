@@ -5,12 +5,12 @@ import pathlib
 import pandas as pd
 
 import sys 
-sys.path.append(str(pathlib.Path(__file__).parents[2]))
+sys.path.append(str(pathlib.Path(__file__).parents[3]))
 from src.utils.distance import jitterplots, interactive_jitterplot
 
 def main(): 
     path = pathlib.Path(__file__)
-    datapath = path.parents[2] / "results" / "prompt_select" / "distance"
+    datapath = path.parents[3] / "results" / "prompt_select" / "distance"
 
     df = pd.read_csv(datapath / "distances_all_PC_cols.csv")
     
