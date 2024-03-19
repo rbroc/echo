@@ -24,12 +24,14 @@ Refer to the project description [here](https://cc.au.dk/en/clai/current-project
 5. 🤖 **Training Classifiers**
 
 ## Repository Overview
-The main contents of the repository is as such:
+The main contents of the repository is listed below.
 | <div style="width:120px"></div>| Description |
 |---------|:-----------|
-| `datasets` | Contains original datasets `human_datasets` which are described in the [overview](#datasets-overview) below and the generated `ai_datasets`.        |
+| `datasets` | Original datasets `human_datasets` which are described in the [overview](#datasets-overview) below and the generated `ai_datasets`.        |
 | `src` |  Scripts for generating data, running PCA/computing distances, and extracting metrics. See `src/README.md` for greater detail. |
-| `results` | Contains preliminary results for prompt selection (distance plots) and a description of the results workflow. |
+| `results` | Preliminary results (distance plots, length distributions etc.)  |
+| `metrics` | Text metrics for each dataset (human and ai), extracted with [textdescriptives](https://hlasse.github.io/TextDescriptives/)         |
+| `notes` | Jupyter notebooks used for meetings with the `echo` team to present progress |
 | `tokens` |Place your `.txt` token here for the HuggingFace Hub to run `llama2` models.|
 
 ## Usage 
@@ -71,6 +73,8 @@ Text for all dataset is lowercased, but further preprocessing may be needed.
 Unprocessed datasets are kept under `datasets/*/raw.ndjson`.
 
 ## Models 
-The models that were used for prompting were the following: 
-1. [stabilityai/StableBeluga-7B](https://huggingface.co/stabilityai/StableBeluga-7B) (referred to as `beluga7b`)
-2. [meta-llama/Llama-2-13b-chat-hf](https://huggingface.co/meta-llama/Llama-2-13b-chat-hf) (referred to as `llama2_chat13b`)
+The currently used models for data generation (as per 19th March 2024):
+1. llama-chat 7b ([meta-llama/Llama-2-7b-chat-hf](https://huggingface.co/meta-llama/Llama-2-13b-chat-hf))
+2. beluga 7b ([stabilityai/StableBeluga-7B](https://huggingface.co/stabilityai/StableBeluga-7B))
+3. mistral 7b ([mistralai/Mistral-7B-Instruct-v0.2](https://huggingface.co/meta-llama/Llama-2-13b-chat-hf))
+4. llama-chat 13b ([meta-llama/Llama-2-13b-chat-hf](https://huggingface.co/meta-llama/Llama-2-13b-chat-hf))
