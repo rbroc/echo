@@ -47,3 +47,13 @@ python src/generate/run_pipeline.py -batch {BATCH_SIZE} -hf
 
 ## Technical Requirements
 Running the models require a lot of compute power. Using the default `vLLM` implementation, GPU is required. Smaller 7B models can be run with `HF` implementation on the right CPU (32/64 node on UCloud) if a small subset is selected and the `stories` dataset is avoided. The HF implementation still requires GPU for the 70b models (quantized and full). 
+
+## Prompts Utilised
+Prompts used to generate the text for analysis is the following:  
+```
+"dailymail_cnn_21": "summarize this in a few sentences: ",
+"mrpc_21": "paraphrase this: ",
+"stories_21": "write a story based on this: ", 
+"dailydialog_21": "continue the conversation between A and B by writing a single response to the latest speaker. write only a concise response and nothing else: ", 
+```
+See also [prompts.py](prompts.py). 
