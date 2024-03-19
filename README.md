@@ -9,14 +9,13 @@ A Scalable and Explainable Approach to Discriminating Between Human and Artifici
 3. [Usage](#Usage)
 4. [Datasets Overview](#datasets-overview)
 5. [Models](#models)
-6. [Preliminary results](#preliminary-results)
 
 ## Road Map 
 Refer to the project description [here](https://cc.au.dk/en/clai/current-projects/a-scalable-and-explainable-approach-to-discriminating-between-human-and-artificially-generated-text) for more detailed information.
 
 1. 🚀 **Prompting** (Completed)
 
-2. 📈 **Generating Data at Large Scale** (January 2024)
+2. 📈 **Generating Data at Large Scale** (Completed)
 
 3. 🧪 **Experimental Design**
 
@@ -25,43 +24,35 @@ Refer to the project description [here](https://cc.au.dk/en/clai/current-project
 5. 🤖 **Training Classifiers**
 
 ## Repository Overview
-The main contents of the repository is as such:
+The main contents of the repository is listed below.
 | <div style="width:120px"></div>| Description |
 |---------|:-----------|
-| `datasets` | Contains original datasets `human_datasets` which are described in the [overview](#datasets-overview) below and the generated `ai_datasets`.        |
-| `src` |  Scripts for generating data, running PCA/computing distances, and extracting metrics. |
-| `results` | Contains preliminary results for prompt selection (distance plots) and a description of the results workflow. |
+| `datasets` | Original datasets `human_datasets` which are described in the [overview](#datasets-overview) below and the generated `ai_datasets`.        |
+| `src` |  Scripts for generating data, running PCA/computing distances, and extracting metrics. See `src/README.md` for greater detail. |
+| `results` | Preliminary results (distance plots, length distributions etc.)  |
+| `metrics` | Text metrics for each dataset (human and ai), extracted with [textdescriptives](https://hlasse.github.io/TextDescriptives/)         |
+| `notes` | Jupyter notebooks used for meetings with the `echo` team to present progress |
 | `tokens` |Place your `.txt` token here for the HuggingFace Hub to run `llama2` models.|
 
-Note that each folder has individual `READMEs` with further instructions.
-
 ## Usage 
+The setup was tested on Ubuntu 22.04 (UCloud) using Python 3.10. 
 
 ### Setup 
 To install necessary requirements in a virtual environment (`env`), please run the `setup.sh` in the terminal:
 ```bash
 bash setup.sh
 ```
-Note that this has been tested with python *3.10* and *3.9* which are the standard python versions on UCLOUD CPUs and GPUs, respectively. 
-
 ### Generating Text 
-To run the generation text pipeline, run in the terminal:
+To reproduce the generation of text implemented with `vLLM`, run in the terminal:
 ```
-bash generate.sh
+bash src/generate/run.sh
 ```
-Note that this will run text pipeline on a default dataset and model. If you wish to play around with the pipeline, see the `src/generate/README.md` for instructions.
+Note that this will run several models on all datasets for various temperatures.
 
-To run the entire prompting pipeline (testing out prompts), run in the terminal:
-```
-bash prompting.sh
-```
+If you wish to play around with individual models/datasets or use the Hugging Face `pipeline` implementation, please refer to the instructions in [src/generate/README.md](/src/generate/README.md).
 
-### Extracting Metrics 
-You can then extract metrics from all of the `human data` using the second bash script:
-
-```bash
-bash run.sh
-```
+### Running Other Parts of the Pipeline
+To run other parts of the pipeline such as analysis or cleaning of data, please refer to the individual subfolders and their readmes. For instance, the `src/metrics/README.md`. 
 
 ## Datasets Overview
 All datasets can be found under `datasets/human_datasets`
@@ -82,11 +73,8 @@ Text for all dataset is lowercased, but further preprocessing may be needed.
 Unprocessed datasets are kept under `datasets/*/raw.ndjson`.
 
 ## Models 
-The models that were used for prompting were the following: 
-1. [stabilityai/StableBeluga-7B](https://huggingface.co/stabilityai/StableBeluga-7B) (referred to as `beluga7b`)
-2. [meta-llama/Llama-2-13b-chat-hf](https://huggingface.co/meta-llama/Llama-2-13b-chat-hf) (referred to as `llama2_chat13b`)
-
-Models to be used to generate the final data will be their 70b versions (although likely quantized). 
-
-## Preliminary Results
-For preliminary results on the selection of prompts, please refer to `results/README.md` where a description of workflow and results are given.
+The currently used models for data generation (as per 19th March 2024):
+1. llama-chat 7b ([meta-llama/Llama-2-7b-chat-hf](https://huggingface.co/meta-llama/Llama-2-13b-chat-hf))
+2. beluga 7b ([stabilityai/StableBeluga-7B](https://huggingface.co/stabilityai/StableBeluga-7B))
+3. mistral 7b ([mistralai/Mistral-7B-Instruct-v0.2](https://huggingface.co/meta-llama/Llama-2-13b-chat-hf))
+4. llama-chat 13b ([meta-llama/Llama-2-13b-chat-hf](https://huggingface.co/meta-llama/Llama-2-13b-chat-hf))

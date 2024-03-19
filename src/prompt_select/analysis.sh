@@ -1,14 +1,18 @@
 # change directory 
 cd "$(dirname "$0")" 
 
+# activate virtual environment
+source ../../env/bin/activate
+
+# run all analysis
 echo -e "[INFO:] RUNNING PCA ..."
-python run_pca.py
+python analysis/run_pca.py
 
 echo -e "[INFO:] COMPUTING DISTANCES ..."
-python run_distance.py 
+python analysis/run_distance.py 
 
 echo -e "[INFO:] PLOTTING DISTANCES ..."
-python plot_distance.py
+python analysis/plot_distance.py
 
 echo -e "[INFO:] EXTRACTING MEDIAN DISTANCES ..."
-python median_distance.py
+python analysis/median_distance.py

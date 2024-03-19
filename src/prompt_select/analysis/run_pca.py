@@ -3,7 +3,7 @@ import pandas as pd
 import spacy
 
 import sys 
-sys.path.append(str(pathlib.Path(__file__).parents[2]))
+sys.path.append(str(pathlib.Path(__file__).parents[3]))
 from src.utils.process_generations import preprocess_datasets
 from src.utils.get_metrics import get_descriptive_metrics
 from src.utils.pca import run_PCA, get_loadings, plot_loadings
@@ -13,10 +13,10 @@ def main():
 
     # paths
     path = pathlib.Path(__file__)
-    ai_dir = path.parents[2] / "datasets" / "ai_datasets" / "HF" / "prompt_select"
-    human_dir = path.parents[2] / "datasets" / "human_datasets"
+    ai_dir = path.parents[3] / "datasets" / "ai_datasets" / "HF" / "prompt_select"
+    human_dir = path.parents[3] / "datasets" / "human_datasets"
 
-    results_path = path.parents[2] / "results" / "prompt_select" / "PCA"
+    results_path = path.parents[3] / "results" / "prompt_select" / "PCA"
     results_path.mkdir(parents=True, exist_ok=True)
 
     # models     

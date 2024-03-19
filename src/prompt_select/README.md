@@ -1,4 +1,23 @@
 # Prompt Selection
+The scripts in `prompt_select` form part of an initial prompting phase where a more systematised prompting was attempted. 
+
+To run the generation pipeline with these prompts, please run (from root):
+```
+bash src/prompt_select/prompting.sh
+```
+
+To reproduce the analysis, please run (from root): 
+```
+bash src/prompt_select/analysis.sh
+```
+See also the section below for the [Analysis Results](#analysis-results).
+
+## Models
+The models that were used for prompting were the following: 
+1. [stabilityai/StableBeluga-7B](https://huggingface.co/stabilityai/StableBeluga-7B) (referred to as `beluga7b`)
+2. [meta-llama/Llama-2-13b-chat-hf](https://huggingface.co/meta-llama/Llama-2-13b-chat-hf) (referred to as `llama2_chat13b`)
+
+
 ## Prompts
 ### Task (Dataset) Prompts 
 Task prompts were created for each dataset: 
@@ -70,6 +89,7 @@ Afterwards, PCA was run on these low-level features to get new PC components. Se
 
 To then investigate differences between model completions and human completions, euclidean distances were computed between the PC components of the human generation and each model generation (i.e., human-beluga, human-llama2_chat). See also [src/prompt_selection/distance.py](https://github.com/rbroc/echo/blob/main/src/prompt_selection/distance.py).
 
+## Analysis Results
 ## Plotting
 Interactive plots illustrate the distance scores and their corresponding completion by hovering over them:
 1. [dailydialog](https://htmlpreview.github.io/?https://github.com/rbroc/echo/blob/main/results/prompt_select/distance/all_PC_jitterplots/interactive/dailydialog.html)

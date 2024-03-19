@@ -1,7 +1,8 @@
-#!/usr/bin/env bash
+# get the dir 
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
-# activate env 
-source ./env/bin/activate
+# venv 
+source "$SCRIPT_DIR/../../env/bin/activate"
 
 # Define the datasets, models, and prompts
 datasets=("dailydialog" "dailymail_cnn" "mrpc" "stories") 
@@ -15,7 +16,7 @@ do
         for prompt in "${prompts[@]}"
         do
             echo "Processing dataset: $dataset with model: $model and prompt: $prompt"
-            python src/generate/run_pipeline.py --filename "$dataset" --chosen_model "$model" --prompt_number "$prompt" --data_subset 100 --batch_size 10
+            python generate/run_pipeline.py --filename "$dataset" --chosen_model "$model" --prompt_number "$prompt" --data_subset 100 --batch_size 10 -hf
         done
     done
 done

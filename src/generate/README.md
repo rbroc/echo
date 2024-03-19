@@ -15,11 +15,11 @@ The files within this folder are:
 ⚠️ NOTE that only `run_pipeline.py` can be run in the terminal!
 
 ## Generating Text 
-To run a default generation text pipeline, run in the terminal (from root):
+To run the entire generation pipeline, please run the script 
 ```
-bash generate.sh
+bash generate/run.sh
 ```
-This runs [stabilityai/StableBeluga-7B](https://huggingface.co/stabilityai/StableBeluga-7B) (referred to as `beluga7b`) on the `stories` dataset implemented with `vLLM`.
+This runs several models on all four datasets. The pipeline is implemented with `vLLM` (see further for a `Hugging Face` implementation).
 
 ### Custom Generation Pipeline
 To run a custom pipeline, run in the terminal (from root and with `env` active): 
@@ -46,4 +46,14 @@ python src/generate/run_pipeline.py -batch {BATCH_SIZE} -hf
 ```
 
 ## Technical Requirements
-Note that models require a lot of compute power. Using the default `vLLM` implementation, GPU is required. Smaller 7B models can be run with `HF` implementation on the right CPU (32/64 node on UCloud) if a small subset is selected and `stories` is avoided. The HF implementation still requires GPU for the 70b models (quantized and full). 
+Running the models require a lot of compute power. Using the default `vLLM` implementation, GPU is required. Smaller 7B models can be run with `HF` implementation on the right CPU (32/64 node on UCloud) if a small subset is selected and the `stories` dataset is avoided. The HF implementation still requires GPU for the 70b models (quantized and full). 
+
+## Prompts Utilised
+Prompts used to generate the text for analysis is the following:  
+```
+"dailymail_cnn_21": "summarize this in a few sentences: ",
+"mrpc_21": "paraphrase this: ",
+"stories_21": "write a story based on this: ", 
+"dailydialog_21": "continue the conversation between A and B by writing a single response to the latest speaker. write only a concise response and nothing else: ", 
+```
+See also [prompts.py](prompts.py). 

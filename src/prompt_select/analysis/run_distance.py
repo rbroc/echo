@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 
 import sys 
-sys.path.append(str(pathlib.Path(__file__).parents[2]))
+sys.path.append(str(pathlib.Path(__file__).parents[3]))
 from src.utils.distance import compute_distances
 
 def main():
@@ -14,8 +14,8 @@ def main():
 
     path = pathlib.Path(__file__)
 
-    datapath = path.parents[2] / "results" / "prompt_select" / "PCA" / "PCA_data.csv"
-    results_path = path.parents[2] / "results" / "prompt_select" / "distance"
+    datapath = path.parents[3] / "results" / "prompt_select" / "PCA" / "PCA_data.csv"
+    results_path = path.parents[3] / "results" / "prompt_select" / "distance"
     results_path.mkdir(parents=True, exist_ok=True)
 
     print("[INFO:] READING CSV ...")
