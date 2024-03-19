@@ -9,7 +9,6 @@ A Scalable and Explainable Approach to Discriminating Between Human and Artifici
 3. [Usage](#Usage)
 4. [Datasets Overview](#datasets-overview)
 5. [Models](#models)
-6. [Preliminary results](#preliminary-results)
 
 ## Road Map 
 Refer to the project description [here](https://cc.au.dk/en/clai/current-projects/a-scalable-and-explainable-approach-to-discriminating-between-human-and-artificially-generated-text) for more detailed information.
@@ -29,21 +28,18 @@ The main contents of the repository is as such:
 | <div style="width:120px"></div>| Description |
 |---------|:-----------|
 | `datasets` | Contains original datasets `human_datasets` which are described in the [overview](#datasets-overview) below and the generated `ai_datasets`.        |
-| `src` |  Scripts for generating data, running PCA/computing distances, and extracting metrics. |
+| `src` |  Scripts for generating data, running PCA/computing distances, and extracting metrics. See `src/README.md` for greater detail. |
 | `results` | Contains preliminary results for prompt selection (distance plots) and a description of the results workflow. |
 | `tokens` |Place your `.txt` token here for the HuggingFace Hub to run `llama2` models.|
 
-Note that the `src/README.md` has greater overview of subfolders and their scripts. 
-
 ## Usage 
+The setup was tested on Ubuntu 22.04 (UCloud) using Python 3.10. 
 
 ### Setup 
 To install necessary requirements in a virtual environment (`env`), please run the `setup.sh` in the terminal:
 ```bash
 bash setup.sh
 ```
-Note that this has been tested with python *3.10* and *3.9* which are the standard python versions on UCLOUD CPUs and GPUs, respectively. 
-
 ### Generating Text 
 To reproduce the generation of text implemented with `vLLM`, run in the terminal:
 ```
@@ -53,12 +49,8 @@ Note that this will run several models on all datasets for various temperatures.
 
 If you wish to play around with individual models/datasets or use the Hugging Face `pipeline` implementation, please refer to the instructions in [src/generate/README.md](/src/generate/README.md).
 
-### Extracting Metrics 
-You can then extract metrics from all of the `human data` using the second bash script:
-
-```bash
-bash run.sh
-```
+### Running Other Parts of the Pipeline
+To run other parts of the pipeline such as analysis or cleaning of data, please refer to the individual subfolders and their readmes. For instance, the `src/metrics/README.md`. 
 
 ## Datasets Overview
 All datasets can be found under `datasets/human_datasets`
