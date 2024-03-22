@@ -45,7 +45,7 @@ def get_metrics_dummy(df, text_column:str, spacy_mdl:str="en_core_web_md"):
 
     return metrics_df
 
-def get_ai_metrics(ai_dir, models=["beluga7b", "llama2_chat13b", "mistral7b", "llama2_chat7b"], dataset:str="mrpc", temp:int|float=1, save_dir=None):
+def get_ai_metrics(ai_dir, models=["beluga7b", "llama2_chat13b", "mistral7b", "llama2_chat7b"], dataset:str="mrpc", temp:int|float=1, batch_size:int=1, n_process:int=1, save_dir=None):
     '''
     Extract metrics for AI completions
     '''
@@ -59,13 +59,13 @@ def get_ai_metrics(ai_dir, models=["beluga7b", "llama2_chat13b", "mistral7b", "l
     ai_dfs_formatted = format_ai_data(ai_dfs)
 
     # concat
-    df = pd.concat(ai_dfs_formatted, ignore_index=True, axis=0)
+    ai_df = pd.concat(ai_dfs_formatted, ignore_index=True, axis=0)
 
     # drop doc length (as metrics adds it, and will get confused when it has two cols that are duplicate)
-    df = df.drop(columns=["doc_length"])
+    ai_df = ai_df.drop(columns=["doc_length"])
 
     # extract metrics
-    completions_df = get_all_metrics_pipe(human_df, text_column="completions", batch_size=batch_size, n_process=n_process)
+    completions_df = get_all_metrics_pipe(ai_df, text_column="completions", batch_size=batch_size, n_process=n_process)
 
     # drop cols 
     completions_df = completions_df.drop(columns=["completions", "prompt"])
@@ -75,11 +75,11 @@ def get_ai_metrics(ai_dir, models=["beluga7b", "llama2_chat13b", "mistral7b", "l
         completions_df.insert(loc=1, column='model', value=completions_df.pop('model')) # insert mdl col on 2nd position in df  
 
     if save_dir:
-        completions_df.to_csv(save_path / f"{dataset}_completions_temp{temp}.csv")
+        completions_df.to_csv(save_dir / f"{dataset}_completions_temp{temp}.csv")
 
     return completions_df
 
-def get_human_metrics(human_dir, dataset:str, batch_size, n_process, save_dir=None):
+def get_human_metrics(human_dir, dataset:str="mrpc", batch_size:int=1, n_process:int=1, save_dir=None):
     '''
     extract metrics for human data 
     '''
@@ -121,7 +121,7 @@ def main():
     metrics_path = path.parents[2] / "metrics" 
     metrics_path.mkdir(parents=True, exist_ok=True)
 
-    # get cores for multiprocessing
+    # get cores for multiprocessing (-1 for safety)
     n_cores = mp.cpu_count() - 1
 
     # HUMAN PROCESSING
@@ -142,7 +142,9 @@ def main():
         
             ai_metrics_df = get_ai_metrics(ai_dir=ai_dir, 
                                     models=["beluga7b", "llama2_chat13b", "mistral7b", "llama2_chat7b"], 
-                                    dataset=args.dataset, temp=temp, save_dir= metrics_path / "ai_metrics"
+                                    dataset=args.dataset, temp=temp, 
+                                    batch_size=20, n_process=n_cores,
+                                    save_dir= metrics_path / "ai_metrics"
                                     )
 
         if not args.ai_only: # if args_ai_only not specified, then run human also! 
