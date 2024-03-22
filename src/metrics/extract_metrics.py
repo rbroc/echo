@@ -107,7 +107,7 @@ def main():
 
     # HUMAN PROCESSING
     if args.human_only:
-        print(f"[INFO:] Processing HUMAN dataset only for '{args.dataset}'")
+        print(f"[INFO:] Processing HUMAN dataset for '{args.dataset}'")
         source_df, completions_df = get_human_metrics(human_dir=human_dir,
                                     dataset=args.dataset, 
                                     batch_size=20,
@@ -118,7 +118,7 @@ def main():
     else: 
         # AI PROCESSING
         for temp in [1, 1.5]:
-            print(f"[INFO]: Processing AI datasets only for '{args.dataset}'")
+            print(f"[INFO]: Processing AI datasets for '{args.dataset}'")
             ai_savefile = metrics_path / "ai_metrics" / f"{args.dataset}_completions_temp{temp}.csv"
         
             ai_metrics_df = get_ai_metrics(ai_dir=ai_dir, 
@@ -129,7 +129,7 @@ def main():
                                     )
 
         if not args.ai_only: # if args_ai_only not specified, then run human also! 
-            print(f"Processing both AI and HUMAN datasets for '{args.dataset}'")
+            print(f"Processing HUMAN datasets for '{args.dataset}'")
             source_df, completions_df = get_human_metrics(human_dir=human_dir,
                                     dataset=args.dataset, 
                                     batch_size=20,
