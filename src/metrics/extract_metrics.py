@@ -26,25 +26,6 @@ def input_parse():
 
     return args
 
-def get_metrics_dummy(df, text_column:str, spacy_mdl:str="en_core_web_md"):
-    '''
-    dummy function to test pipeline
-    '''
-    n_features = 10
-
-    # create new df 
-    metrics = pd.DataFrame()
-    
-    # add n_features worth of dummy features
-    print(f"Extracting {n_features} dummy features not using {spacy_mdl} and not doing it on text column {text_column} ...")
-    for i in range(n_features):
-        metrics[f"dummy_feature_{i}"] = np.random.randint(0, 1000, size=len(df))
-
-    # add to existing df
-    metrics_df = pd.concat([df, metrics], axis=1)
-
-    return metrics_df
-
 def get_ai_metrics(ai_dir, models=["beluga7b", "llama2_chat13b", "mistral7b", "llama2_chat7b"], dataset:str="mrpc", temp:int|float=1, batch_size:int=1, n_process:int=1, save_dir=None):
     '''
     Extract metrics for AI completions
