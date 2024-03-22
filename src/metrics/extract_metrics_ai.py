@@ -94,7 +94,7 @@ def get_human_metrics(human_dir, dataset:str, batch_size, n_process, save_dir=No
 
     # process source, completions
     source_df = get_all_metrics_pipe(human_df, text_column="source", batch_size=batch_size, n_process=n_process)
-    completions_df = get_all_metrics_pipe(human_df, text_column="completions", batch_size=batch_size, n_process=n_process)
+    completions_df = get_all_metrics_pipe(human_df, text_column="human_completions", batch_size=batch_size, n_process=n_process)
     
     # format dfs
     cols_to_drop = ["source", "human_completions"]
