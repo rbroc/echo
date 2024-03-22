@@ -45,6 +45,7 @@ def get_all_metrics_pipe(df:pd.DataFrame, text_column:str, batch_size:int=1, n_p
     Same functionality as td.extract_metrics() but allows for multiprocessing. 
     '''
     # load nlp, add td to model
+    print(f"[INFO:] Loading SpaCY model '{spacy_mdl}'...")
     nlp = spacy.load(spacy_mdl)
     nlp.add_pipe("textdescriptives/all")
 
@@ -52,9 +53,11 @@ def get_all_metrics_pipe(df:pd.DataFrame, text_column:str, batch_size:int=1, n_p
     text = df[text_column]
 
     # pass txt to pipeline
+    print(f"[INFO:] Passing text from column '{text_column}' to pipeline ...")
     docs = nlp.pipe(text, batch_size=batch_size, n_process=n_process)
 
     # get metrics as df 
+    print("[INFO:] Extracting metrics to df ...")
     metrics_df = td.extract_df(docs, include_text=False)
 
     # sort columns alphabetically
