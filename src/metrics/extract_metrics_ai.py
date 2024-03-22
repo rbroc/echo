@@ -61,23 +61,23 @@ def get_ai_metrics(ai_dir, models=["beluga7b", "llama2_chat13b", "mistral7b", "l
     # concat
     df = pd.concat(ai_dfs_formatted, ignore_index=True, axis=0)
 
-    # drop doc length (as metrics adds it)
+    # drop doc length (as metrics adds it, and will get confused when it has two cols that are duplicate)
     df = df.drop(columns=["doc_length"])
 
     # extract metrics
-    metrics_df = get_metrics_dummy(df, "completions", "en_core_web_md")
+    completions_df = get_all_metrics_pipe(human_df, text_column="completions", batch_size=batch_size, n_process=n_process)
 
     # drop cols 
-    metrics_df = metrics_df.drop(columns=["completions", "prompt"])
+    completions_df = completions_df.drop(columns=["completions", "prompt"])
 
     # mv model col to front if present in df 
-    if "model" in metrics_df.columns: 
-        metrics_df.insert(loc=1, column='model', value=metrics_df.pop('model')) # insert mdl col on 2nd position in df  
+    if "model" in completions_df.columns: 
+        completions_df.insert(loc=1, column='model', value=completions_df.pop('model')) # insert mdl col on 2nd position in df  
 
     if save_dir:
-        metrics_df.to_csv(save_path / f"{dataset}_completions_temp{temp}.csv")
+        completions_df.to_csv(save_path / f"{dataset}_completions_temp{temp}.csv")
 
-    return metrics_df
+    return completions_df
 
 def get_human_metrics(human_dir, dataset:str, batch_size, n_process, save_dir=None):
     '''
@@ -94,7 +94,7 @@ def get_human_metrics(human_dir, dataset:str, batch_size, n_process, save_dir=No
 
     # process source, completions
     source_df = get_all_metrics_pipe(human_df, text_column="source", batch_size=batch_size, n_process=n_process)
-    completions_df = get_all_metrics_pipe(human_df, text_column="source", batch_size=batch_size, n_process=n_process)
+    completions_df = get_all_metrics_pipe(human_df, text_column="completions", batch_size=batch_size, n_process=n_process)
     
     # format dfs
     cols_to_drop = ["source", "human_completions"]
