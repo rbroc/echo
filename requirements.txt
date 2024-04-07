@@ -15,4 +15,4 @@ plotly==5.18.0
 optimum==1.16.1 # for quantization
 auto-gptq==0.6.0 # for quantization
 vllm==0.2.7 # for vllm pipeline
-
+xgboost==2.0.3
