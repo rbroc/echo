@@ -1,5 +1,5 @@
 '''
-Script for exploring metrics within the different datasets. Useful for systematising the prompts
+Script to print min and max doc length of human datasets for systematically setting generation lengths for all language models.
 '''
 
 # utils

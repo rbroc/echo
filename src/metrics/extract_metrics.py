@@ -1,3 +1,7 @@
+'''
+Script to extract metrics for human and AI-generated datasets. 
+See metrics/README.md for instructions on how to run.
+'''
 import pandas as pd
 import spacy
 import textdescriptives as td
