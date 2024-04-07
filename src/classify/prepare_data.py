@@ -5,41 +5,44 @@ import pathlib
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
-def load_metrics(data_dir:pathlib.Path, dataset:str=None): 
+def load_metrics(data_dir: pathlib.Path, dataset: str = None, temp:float= None):
     '''
     Load metrics
 
     Args:
         data_dir: path to directory with metrics
         dataset: name of dataset to load. If None, loads all datasets.
+        temp: temperature of generations. If None, loads all temperatures.
     '''
+    # define how to load a single file
+    def load_file(file):
+        df = pd.read_csv(file, index_col=[0])
+        if "dataset" not in df.columns:
+            df["dataset"] = file.name.split("_")[0]
+        return df
+
+    # load multiple files 
+    dfs = []
     folder_paths = [path for path in data_dir.iterdir()]
 
-    dfs = []
-    for folder in sorted(folder_paths, reverse=True): # reverse=true, sort in desc order to get human first
+    for folder in sorted(folder_paths, reverse=True):
         print(f"[INFO:] Loading data from {folder.name} ...")
         for file in folder.iterdir():
-           # if dataset is specified, read only files that contain dataset in their name, otherwise read all files
-            if dataset:
-                if dataset in file.name:
-                    df = pd.read_csv(file, index_col=[0]) 
-                    # add dataset col if not present
-                    if "dataset" not in df.columns:
-                        df["dataset"] = file.name.split("_")[0]
+            if not dataset or dataset in file.name: # if dataset is specified, only load files with that dataset name
+                dfs.append(load_file(file))
 
-                    # add to list of dfs
-                    dfs.append(df)
-            else:
-                df = pd.read_csv(file, index_col=[0]) 
-                if "dataset" not in df.columns:
-                    df["dataset"] = file.name.split("_")[0]
-                dfs.append(df)
-
-    # concatenate
+    # combine all loaded dfs into a single df
     final_df = pd.concat(dfs, ignore_index=True)
 
-    # create is_human col for classification 
-    final_df["is_human"] = final_df["model"].apply(lambda x: 1 if x == "human" else 0) 
+    # filter by temperature if specified
+    if temp:
+        final_df = final_df[final_df["temperature"] == temp]
+        # error message if no data found for specified temperature
+        if len(final_df) == 0:
+            raise ValueError(f"No data found for temperature {temp}")
+
+    # add binary outcome column for classification (human = 1, ai = 0)
+    final_df["is_human"] = final_df["model"].apply(lambda x: 1 if x == "human" else 0)
 
     return final_df
 
@@ -96,6 +99,7 @@ def create_split(df, random_state=129, val_test_size:float=0.15, outcome_col="is
     # save splits to save_path if specified
     if save_path: 
         save_path.mkdir(parents=True, exist_ok=True)
+        # get dataset name from df
         for key, value in splits.items():
             value.to_csv(save_path / f"{key}.csv")
 
@@ -105,11 +109,11 @@ def main():
     path = pathlib.Path(__file__)
     datapath = path.parents[2] / "metrics"
 
-    final_df = load_metrics(datapath, dataset="stories")
-
+    final_df = load_metrics(datapath, dataset="dailydialog", temp=1.5)
     splits = create_split(final_df, random_state=129, val_test_size=0.15, outcome_col="is_human", verbose=True)
 
-    print(final_df["dataset"].value_counts())
+    print(final_df["dataset"].unique())
+    print(final_df["temperature"].unique())
 
 if __name__ == "__main__":
     main()
