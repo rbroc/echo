@@ -10,8 +10,7 @@ cd "$SCRIPT_DIR"
 # run models sequentially
 for dataset in dailydialog dailymail_cnn mrpc stories
 do
-    echo $dataset
-    python extract_metrics.py --input $dataset
+    python extract_metrics.py -d $dataset
 done
 
 # close venv
