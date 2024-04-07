@@ -36,7 +36,8 @@ def load_metrics(data_dir: pathlib.Path, dataset: str = None, temp:float= None):
 
     # filter by temperature if specified
     if temp:
-        final_df = final_df[final_df["temperature"] == temp]
+        # filter by temperature but keep human
+        final_df = final_df[(final_df["temperature"] == temp) | (final_df["model"] == "human")]
         # error message if no data found for specified temperature
         if len(final_df) == 0:
             raise ValueError(f"No data found for temperature {temp}")
@@ -65,10 +66,14 @@ def create_split(df, random_state=129, val_test_size:float=0.15, outcome_col="is
     '''
     # take all cols for X if feature_cols is unspecified, otherwise subset df to incl. only feature_cols
     if feature_cols == None: 
-        cols_to_drop = ["id", "is_human"] + ["annotations"] if "annotations" in df.columns else [] # drop annotation if present (only present for dailydialog)
+        cols_to_drop = ["id", "is_human", "dataset", "sample_params"] + ["annotations"] if "annotations" in df.columns else [] # drop annotation if present (only present for dailydialog)
         X = df.drop(columns=cols_to_drop)
     else:
         X = df[[feature_cols]]
+
+    # if model col is present, make explicit categorical for xgboost
+    if "model" in X.columns:
+        X["model"] = X["model"].astype("category")
 
     # subset df to a single outcome col for y 
     y = df[[outcome_col]]
