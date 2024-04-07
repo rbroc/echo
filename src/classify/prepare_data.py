@@ -66,10 +66,10 @@ def create_split(df, random_state=129, val_test_size:float=0.15, outcome_col="is
     '''
     # take all cols for X if feature_cols is unspecified, otherwise subset df to incl. only feature_cols
     if feature_cols == None: 
-        cols_to_drop = ["id", "is_human", "dataset", "sample_params"] + ["annotations"] if "annotations" in df.columns else [] # drop annotation if present (only present for dailydialog)
+        cols_to_drop = ["id", "is_human", "dataset", "sample_params", "model", "temperature"] +  (["annotations"] if "annotations" in df.columns else []) # drop annotation if present (only present for dailydialog)
         X = df.drop(columns=cols_to_drop)
     else:
-        X = df[[feature_cols]]
+        X = df[feature_cols]
 
     # if model col is present, make explicit categorical for xgboost
     if "model" in X.columns:
