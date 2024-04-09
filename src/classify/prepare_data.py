@@ -45,6 +45,10 @@ def load_metrics(data_dir: pathlib.Path, dataset: str = None, temp:float= None):
     # add binary outcome column for classification (human = 1, ai = 0)
     final_df["is_human"] = final_df["model"].apply(lambda x: 1 if x == "human" else 0)
 
+    # reset index, add unique id col to first col 
+    final_df = final_df.reset_index(drop=True)
+    final_df.insert(0, "unique_id", range(0, len(final_df)))
+
     return final_df
 
 def create_split(df, random_state=129, val_test_size:float=0.15, outcome_col="is_human", feature_cols:list=None, save_path=None, verbose=False):
@@ -80,11 +84,11 @@ def create_split(df, random_state=129, val_test_size:float=0.15, outcome_col="is
 
     splits = {}
 
-    # create train, test, val splits based on val_test_size, save to splits dict. If val_test_size = 0.15, 15% val and 15% test
-    splits["X_train"], splits["X_test"], splits["y_train"], splits["y_test"] = train_test_split(X, y, test_size=val_test_size*2, random_state=random_state)
+    # create train, test, val splits based on val_test_size, save to splits dict. If val_test_size = 0.15, 15% val and 15% test (and stratify by y to keep class balance as much as possible)
+    splits["X_train"], splits["X_test"], splits["y_train"], splits["y_test"] = train_test_split(X, y, test_size=val_test_size*2, random_state=random_state, stratify=y)
 
-    # split val from test
-    splits["X_val"], splits["X_test"], splits["y_val"], splits["y_test"] = train_test_split(splits["X_test"], splits["y_test"], test_size=0.5, random_state=random_state)
+    # split val from test, stratify by y again 
+    splits["X_val"], splits["X_test"], splits["y_val"], splits["y_test"] = train_test_split(splits["X_test"], splits["y_test"], test_size=0.5, random_state=random_state, stratify=splits["y_test"])
   
     # validate size of splits, print info msg
     if verbose:
