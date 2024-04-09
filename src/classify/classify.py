@@ -2,7 +2,6 @@
 Construct classifiers
 '''
 import pathlib
-import numpy as np # rm this at some point
 import argparse
 from xgboost import XGBClassifier
 from sklearn import metrics
