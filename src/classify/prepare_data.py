@@ -5,7 +5,82 @@ import pathlib
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
-def load_metrics(data_dir: pathlib.Path, dataset: str = None, temp:float= None):
+def load_file(file):
+    '''helper function to load a single file and add dataset column if not present'''
+    df = pd.read_csv(file, index_col=[0])
+    
+    if "dataset" not in df.columns:
+        df["dataset"] = file.name.split("_")[0]
+    
+    return df
+
+def load_human_metrics(human_dir: pathlib.Path, dataset:str = None, human_completions_only=True):
+    '''
+    load human metrics
+
+    Args:
+        human_dir: path to directory with human metrics
+        dataset: name of dataset to load. If None, loads all datasets.
+        human_completions_only: whether to load only human completions. If False, loads also files ending with "source.csv" which contains metrics for the source text (prompt col) instead of completions.
+
+    Returns:
+        dfs: list of dataframes
+    '''
+    # get file paths for human metrics, if dataset is specified, filter by dataset
+    file_paths = [file for file in human_dir.iterdir() if dataset is None or dataset in file.name]
+
+    if human_completions_only:
+        print("[WARNING]: Loading only human completions... If you want to load 'source' metrics also, set human_completions_only=False.")
+        
+        # filter to get only completions
+        file_paths = [file for file in file_paths if "completions" in file.name]
+
+    else: 
+        # get all file paths 
+        file_paths = [file for file in file_paths]
+
+    # sort file paths
+    file_paths = sorted(file_paths)
+
+    # load all files into a list of dfs
+    dfs = [load_file(file) for file in file_paths]
+
+    return dfs
+
+def load_ai_metrics(ai_dir: pathlib.Path, dataset:str = None, temp:float = None):
+    '''
+    load ai metrics
+
+    Args:
+        ai_dir: path to directory with ai metrics
+        dataset: name of dataset to load. If None, loads all datasets.
+        temp: temperature of generations. If None, loads all temperatures.
+
+    Returns:
+        dfs: list of dataframes
+    '''
+    # get file paths for ai metrics, if dataset is specified, filter by dataset and temperature if specified
+    file_paths = [file for file in ai_dir.iterdir() if dataset is None or dataset in file.name]
+
+    # if temperature is specified, filter by temperature
+    if temp:
+        file_identifier = f"{temp}.csv"
+        print(f"[INFO:] Loading only AI data for temperature {temp} ...")
+        file_paths = [file for file in file_paths if file.name.endswith(file_identifier)]
+
+        if len(file_paths) == 0:
+            raise ValueError(f"No files found for temperature {temp}.")
+    
+    # sort file paths
+    file_paths = sorted(file_paths)
+
+    # load all files into a list of dfs
+    dfs = [load_file(file) for file in file_paths]
+  
+    return dfs
+
+
+def load_metrics(human_dir: pathlib.Path, ai_dir:pathlib.Path, human_completions_only=True, dataset: str = None, temp:float= None):
     '''
     Load metrics
 
@@ -14,33 +89,14 @@ def load_metrics(data_dir: pathlib.Path, dataset: str = None, temp:float= None):
         dataset: name of dataset to load. If None, loads all datasets.
         temp: temperature of generations. If None, loads all temperatures.
     '''
-    # define how to load a single file
-    def load_file(file):
-        df = pd.read_csv(file, index_col=[0])
-        if "dataset" not in df.columns:
-            df["dataset"] = file.name.split("_")[0]
-        return df
-
     # load multiple files 
-    dfs = []
-    folder_paths = [path for path in data_dir.iterdir()]
+    human_dfs = load_human_metrics(human_dir, dataset=dataset, human_completions_only=human_completions_only)
+    ai_dfs = load_ai_metrics(ai_dir, dataset=dataset, temp=temp)
 
-    for folder in sorted(folder_paths, reverse=True):
-        print(f"[INFO:] Loading data from {folder.name} ...")
-        for file in folder.iterdir():
-            if not dataset or dataset in file.name: # if dataset is specified, only load files with that dataset name
-                dfs.append(load_file(file))
+    all_dfs = human_dfs + ai_dfs
 
     # combine all loaded dfs into a single df
-    final_df = pd.concat(dfs, ignore_index=True)
-
-    # filter by temperature if specified
-    if temp:
-        # filter by temperature but keep human
-        final_df = final_df[(final_df["temperature"] == temp) | (final_df["model"] == "human")]
-        # error message if no data found for specified temperature
-        if len(final_df) == 0:
-            raise ValueError(f"No data found for temperature {temp}")
+    final_df = pd.concat(all_dfs, ignore_index=True)
 
     # add binary outcome column for classification (human = 1, ai = 0)
     final_df["is_human"] = final_df["model"].apply(lambda x: 1 if x == "human" else 0)
@@ -70,7 +126,7 @@ def create_split(df, random_state=129, val_test_size:float=0.15, outcome_col="is
     '''
     # take all cols for X if feature_cols is unspecified, otherwise subset df to incl. only feature_cols
     if feature_cols == None: 
-        cols_to_drop = ["id", "is_human", "dataset", "sample_params", "model", "temperature", "prompt_number"] +  (["annotations"] if "annotations" in df.columns else []) # drop annotation if present (only present for dailydialog)
+        cols_to_drop = ["id", "is_human", "dataset", "sample_params", "model", "temperature", "prompt_number", "unique_id"] +  (["annotations"] if "annotations" in df.columns else []) # drop annotation if present (only present for dailydialog)
         X = df.drop(columns=cols_to_drop)
     else:
         X = df[feature_cols]
@@ -101,7 +157,7 @@ def create_split(df, random_state=129, val_test_size:float=0.15, outcome_col="is
             split_sizes.loc[split, "percentage"] = len(splits[f"X_{split}"]) / total_size * 100
             split_sizes.loc[split, "absolute"] = len(splits[f"X_{split}"])
 
-        print("[INFO:] Split sizes: \n")
+        print("\n[INFO:] Split sizes:\n")
         print(split_sizes)
         print(f"\nTotal size: {total_size}")
 
@@ -118,11 +174,25 @@ def main():
     path = pathlib.Path(__file__)
     datapath = path.parents[2] / "metrics"
 
-    final_df = load_metrics(datapath, dataset="dailydialog", temp=1.5)
-    splits = create_split(final_df, random_state=129, val_test_size=0.15, outcome_col="is_human", verbose=True)
+    final_df = load_metrics(
+                            human_dir=datapath / "human_metrics", 
+                            ai_dir=datapath / "ai_metrics",
+                            dataset="stories", temp=1, 
+                            human_completions_only=True
+                            )
 
-    print(final_df["dataset"].unique())
-    print(final_df["temperature"].unique())
+
+    splits = create_split(final_df, random_state=129, val_test_size=0.15, outcome_col="is_human", verbose=True)
+    
+    # group by dataset and model
+    print("\nPrinting groupby...\n")
+    print(final_df.groupby(["dataset", "model"]).size())
+
+    print("\nPrinting class distribution... \n")
+    print(f"Y train: {splits['y_train'].value_counts()[0]} AI, {splits['y_train'].value_counts()[1]} human")
+    print(f"Y val: {splits['y_val'].value_counts()[0]} AI, {splits['y_val'].value_counts()[1]} human")
+    print(f"Y test: {splits['y_test'].value_counts()[0]} AI, {splits['y_test'].value_counts()[1]} human")
+
 
 if __name__ == "__main__":
     main()
