@@ -22,8 +22,8 @@ def plot_distribution_per_dataset(df, min_max_tokens_dict=None, col="doc_length"
     colormap = sns.color_palette("viridis").as_hex()
 
     # custom xlims, ylims for each dataset
-    custom_x_lims = {"stories": (0, 1100), "mrpc": (0, 50), "dailydialog": (0, 250), "dailymail_cnn": (0, 450)}
-    custom_y_lims = {"stories": (0, 1000), "mrpc": (0, 800), "dailydialog": (0, 2000), "dailymail_cnn": (0, 850)}
+    custom_x_lims = {"stories": (0, 1100), "mrpc": (0, 50), "dailydialog": (0, 150), "dailymail_cnn": (0, 450)}
+    custom_y_lims = {"stories": (0, 1250), "mrpc": (0, 900), "dailydialog": (0, 1250), "dailymail_cnn": (0, 900)}
 
     for i, dataset in enumerate(unique_datasets):
         # filter dataframe for current dataset

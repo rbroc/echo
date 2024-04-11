@@ -22,7 +22,7 @@ def extract_min_max_tokens(dataset: str):
         "dailymail_cnn": (6, 433),
         "stories": (112, 1055),
         "mrpc": (8, 47),
-        "dailydialog": (2, 220)
+        "dailydialog": (4, 112)
     }
 
     if dataset not in valid_datasets:
