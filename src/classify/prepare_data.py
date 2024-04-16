@@ -13,7 +13,10 @@ def load_file(file):
     df = pd.read_csv(file, index_col=[0])
     
     if "dataset" not in df.columns:
-        df["dataset"] = file.name.split("_")[0]
+        if "dailymail_cnn" in file.name:
+            df["dataset"] = "dailymail_cnn"
+        else: 
+            df["dataset"] = file.name.split("_")[0]
     
     return df
 
