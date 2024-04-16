@@ -1,0 +1,106 @@
+Dataset: dailydialog, Temp: 1.0
+Columns dropped: ['contains_lorem ipsum', 'duplicate_line_chr_fraction', 'duplicate_ngram_chr_fraction_10', 'duplicate_ngram_chr_fraction_5', 'duplicate_ngram_chr_fraction_6', 'duplicate_ngram_chr_fraction_7', 'duplicate_ngram_chr_fraction_8', 'duplicate_ngram_chr_fraction_9', 'duplicate_paragraph_chr_fraction', 'first_order_coherence', 'pos_prop_SYM', 'pos_prop_X', 'proportion_bullet_points', 'proportion_ellipsis', 'second_order_coherence', 'smog', 'symbol_to_word_ratio_#', 'top_ngram_chr_fraction_2', 'top_ngram_chr_fraction_3', 'top_ngram_chr_fraction_4', 'pos_prop_SPACE']
+Dropping criteria: 90% of values in col were either NA or 90% of values were zero
+Remaining columns: Index(['id', 'unique_id', 'sample_params', 'temperature', 'prompt_number',
+       'is_human', 'model', 'annotations', 'alpha_ratio',
+       'automated_readability_index', 'coleman_liau_index',
+       'dependency_distance_mean', 'dependency_distance_std', 'doc_length',
+       'entropy', 'flesch_kincaid_grade', 'flesch_reading_ease', 'gunning_fog',
+       'lix', 'mean_word_length', 'n_characters', 'n_sentences',
+       'n_stop_words', 'n_tokens', 'n_unique_tokens', 'oov_ratio',
+       'passed_quality_check', 'per_word_perplexity', 'perplexity',
+       'pos_prop_ADJ', 'pos_prop_ADP', 'pos_prop_ADV', 'pos_prop_AUX',
+       'pos_prop_CCONJ', 'pos_prop_DET', 'pos_prop_INTJ', 'pos_prop_NOUN',
+       'pos_prop_NUM', 'pos_prop_PART', 'pos_prop_PRON', 'pos_prop_PROPN',
+       'pos_prop_PUNCT', 'pos_prop_SCONJ', 'pos_prop_VERB',
+       'prop_adjacent_dependency_relation_mean',
+       'prop_adjacent_dependency_relation_std', 'proportion_unique_tokens',
+       'rix', 'sentence_length_mean', 'sentence_length_median',
+       'sentence_length_std', 'syllables_per_token_mean',
+       'syllables_per_token_median', 'syllables_per_token_std',
+       'token_length_mean', 'token_length_median', 'token_length_std',
+       'dataset'],
+      dtype='object')
+
+--------------------------------------------------
+
+Dataset: dailymail_cnn, Temp: 1.0
+Columns dropped: ['contains_lorem ipsum', 'duplicate_line_chr_fraction', 'duplicate_ngram_chr_fraction_10', 'duplicate_ngram_chr_fraction_5', 'duplicate_ngram_chr_fraction_6', 'duplicate_ngram_chr_fraction_7', 'duplicate_ngram_chr_fraction_8', 'duplicate_ngram_chr_fraction_9', 'duplicate_paragraph_chr_fraction', 'pos_prop_INTJ', 'pos_prop_X', 'proportion_bullet_points', 'proportion_ellipsis', 'symbol_to_word_ratio_#', 'top_ngram_chr_fraction_3', 'top_ngram_chr_fraction_4']
+Dropping criteria: 90% of values in col were either NA or 90% of values were zero
+Remaining columns: Index(['id', 'unique_id', 'sample_params', 'temperature', 'prompt_number',
+       'is_human', 'model', 'alpha_ratio', 'automated_readability_index',
+       'coleman_liau_index', 'dependency_distance_mean',
+       'dependency_distance_std', 'doc_length', 'entropy',
+       'first_order_coherence', 'flesch_kincaid_grade', 'flesch_reading_ease',
+       'gunning_fog', 'lix', 'mean_word_length', 'n_characters', 'n_sentences',
+       'n_stop_words', 'n_tokens', 'n_unique_tokens', 'oov_ratio',
+       'passed_quality_check', 'per_word_perplexity', 'perplexity',
+       'pos_prop_ADJ', 'pos_prop_ADP', 'pos_prop_ADV', 'pos_prop_AUX',
+       'pos_prop_CCONJ', 'pos_prop_DET', 'pos_prop_NOUN', 'pos_prop_NUM',
+       'pos_prop_PART', 'pos_prop_PRON', 'pos_prop_PROPN', 'pos_prop_PUNCT',
+       'pos_prop_SCONJ', 'pos_prop_SPACE', 'pos_prop_SYM', 'pos_prop_VERB',
+       'prop_adjacent_dependency_relation_mean',
+       'prop_adjacent_dependency_relation_std', 'proportion_unique_tokens',
+       'rix', 'second_order_coherence', 'sentence_length_mean',
+       'sentence_length_median', 'sentence_length_std', 'smog',
+       'syllables_per_token_mean', 'syllables_per_token_median',
+       'syllables_per_token_std', 'token_length_mean', 'token_length_median',
+       'token_length_std', 'top_ngram_chr_fraction_2', 'dataset'],
+      dtype='object')
+
+--------------------------------------------------
+
+Dataset: mrpc, Temp: 1.0
+Columns dropped: ['contains_lorem ipsum', 'duplicate_line_chr_fraction', 'duplicate_ngram_chr_fraction_10', 'duplicate_ngram_chr_fraction_5', 'duplicate_ngram_chr_fraction_6', 'duplicate_ngram_chr_fraction_7', 'duplicate_ngram_chr_fraction_8', 'duplicate_ngram_chr_fraction_9', 'duplicate_paragraph_chr_fraction', 'first_order_coherence', 'pos_prop_SPACE', 'pos_prop_SYM', 'pos_prop_X', 'proportion_bullet_points', 'proportion_ellipsis', 'second_order_coherence', 'smog', 'symbol_to_word_ratio_#', 'top_ngram_chr_fraction_2', 'top_ngram_chr_fraction_3', 'top_ngram_chr_fraction_4']
+Dropping criteria: 90% of values in col were either NA or 90% of values were zero
+Remaining columns: Index(['id', 'unique_id', 'sample_params', 'temperature', 'prompt_number',
+       'is_human', 'model', 'alpha_ratio', 'automated_readability_index',
+       'coleman_liau_index', 'dependency_distance_mean',
+       'dependency_distance_std', 'doc_length', 'entropy',
+       'flesch_kincaid_grade', 'flesch_reading_ease', 'gunning_fog', 'lix',
+       'mean_word_length', 'n_characters', 'n_sentences', 'n_stop_words',
+       'n_tokens', 'n_unique_tokens', 'oov_ratio', 'passed_quality_check',
+       'per_word_perplexity', 'perplexity', 'pos_prop_ADJ', 'pos_prop_ADP',
+       'pos_prop_ADV', 'pos_prop_AUX', 'pos_prop_CCONJ', 'pos_prop_DET',
+       'pos_prop_INTJ', 'pos_prop_NOUN', 'pos_prop_NUM', 'pos_prop_PART',
+       'pos_prop_PRON', 'pos_prop_PROPN', 'pos_prop_PUNCT', 'pos_prop_SCONJ',
+       'pos_prop_VERB', 'prop_adjacent_dependency_relation_mean',
+       'prop_adjacent_dependency_relation_std', 'proportion_unique_tokens',
+       'rix', 'sentence_length_mean', 'sentence_length_median',
+       'sentence_length_std', 'syllables_per_token_mean',
+       'syllables_per_token_median', 'syllables_per_token_std',
+       'token_length_mean', 'token_length_median', 'token_length_std',
+       'dataset'],
+      dtype='object')
+
+--------------------------------------------------
+
+Dataset: stories, Temp: 1.0
+Columns dropped: ['contains_lorem ipsum', 'duplicate_line_chr_fraction', 'duplicate_ngram_chr_fraction_10', 'duplicate_paragraph_chr_fraction', 'pos_prop_SYM', 'pos_prop_X', 'proportion_bullet_points', 'proportion_ellipsis', 'symbol_to_word_ratio_#', 'pos_prop_SPACE']
+Dropping criteria: 90% of values in col were either NA or 90% of values were zero
+Remaining columns: Index(['id', 'unique_id', 'sample_params', 'temperature', 'prompt_number',
+       'is_human', 'model', 'alpha_ratio', 'automated_readability_index',
+       'coleman_liau_index', 'dependency_distance_mean',
+       'dependency_distance_std', 'doc_length',
+       'duplicate_ngram_chr_fraction_5', 'duplicate_ngram_chr_fraction_6',
+       'duplicate_ngram_chr_fraction_7', 'duplicate_ngram_chr_fraction_8',
+       'duplicate_ngram_chr_fraction_9', 'entropy', 'first_order_coherence',
+       'flesch_kincaid_grade', 'flesch_reading_ease', 'gunning_fog', 'lix',
+       'mean_word_length', 'n_characters', 'n_sentences', 'n_stop_words',
+       'n_tokens', 'n_unique_tokens', 'oov_ratio', 'passed_quality_check',
+       'per_word_perplexity', 'perplexity', 'pos_prop_ADJ', 'pos_prop_ADP',
+       'pos_prop_ADV', 'pos_prop_AUX', 'pos_prop_CCONJ', 'pos_prop_DET',
+       'pos_prop_INTJ', 'pos_prop_NOUN', 'pos_prop_NUM', 'pos_prop_PART',
+       'pos_prop_PRON', 'pos_prop_PROPN', 'pos_prop_PUNCT', 'pos_prop_SCONJ',
+       'pos_prop_VERB', 'prop_adjacent_dependency_relation_mean',
+       'prop_adjacent_dependency_relation_std', 'proportion_unique_tokens',
+       'rix', 'second_order_coherence', 'sentence_length_mean',
+       'sentence_length_median', 'sentence_length_std', 'smog',
+       'syllables_per_token_mean', 'syllables_per_token_median',
+       'syllables_per_token_std', 'token_length_mean', 'token_length_median',
+       'token_length_std', 'top_ngram_chr_fraction_2',
+       'top_ngram_chr_fraction_3', 'top_ngram_chr_fraction_4', 'dataset'],
+      dtype='object')
+
+--------------------------------------------------
+

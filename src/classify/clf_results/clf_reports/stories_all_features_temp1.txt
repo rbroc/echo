@@ -1,0 +1,13 @@
+Results from model run at 2024-04-16 19:32:27.730256
+Original dataset: stories, temperature: 1.0
+Random state: 129
+              precision    recall  f1-score   support
+
+           0       1.00      1.00      1.00      2999
+           1       0.98      0.98      0.98       749
+
+    accuracy                           0.99      3748
+   macro avg       0.99      0.99      0.99      3748
+weighted avg       0.99      0.99      0.99      3748
+
+Features: ['alpha_ratio', 'automated_readability_index', 'coleman_liau_index', 'dependency_distance_mean', 'dependency_distance_std', 'doc_length', 'duplicate_ngram_chr_fraction_5', 'duplicate_ngram_chr_fraction_6', 'duplicate_ngram_chr_fraction_7', 'duplicate_ngram_chr_fraction_8', 'duplicate_ngram_chr_fraction_9', 'entropy', 'first_order_coherence', 'flesch_kincaid_grade', 'flesch_reading_ease', 'gunning_fog', 'lix', 'mean_word_length', 'n_characters', 'n_sentences', 'n_stop_words', 'n_tokens', 'n_unique_tokens', 'oov_ratio', 'passed_quality_check', 'per_word_perplexity', 'perplexity', 'pos_prop_ADJ', 'pos_prop_ADP', 'pos_prop_ADV', 'pos_prop_AUX', 'pos_prop_CCONJ', 'pos_prop_DET', 'pos_prop_INTJ', 'pos_prop_NOUN', 'pos_prop_NUM', 'pos_prop_PART', 'pos_prop_PRON', 'pos_prop_PROPN', 'pos_prop_PUNCT', 'pos_prop_SCONJ', 'pos_prop_VERB', 'prop_adjacent_dependency_relation_mean', 'prop_adjacent_dependency_relation_std', 'proportion_unique_tokens', 'rix', 'second_order_coherence', 'sentence_length_mean', 'sentence_length_median', 'sentence_length_std', 'smog', 'syllables_per_token_mean', 'syllables_per_token_median', 'syllables_per_token_std', 'token_length_mean', 'token_length_median', 'token_length_std', 'top_ngram_chr_fraction_2', 'top_ngram_chr_fraction_3', 'top_ngram_chr_fraction_4']
