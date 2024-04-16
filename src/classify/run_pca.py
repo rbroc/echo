@@ -24,6 +24,9 @@ def plot_cumulative_variance(pca, title, save_dir=None, file_name=None):
 
     code by https://jakevdp.github.io/PythonDataScienceHandbook/05.09-principal-component-analysis.html 
     '''
+    # close previous plot
+    plt.close()
+
     sns.set_theme(rc={'figure.figsize':(10, 10)}) # see https://jakevdp.github.io/PythonDataScienceHandbook/05.09-principal-component-analysis.html 
     plt.plot(np.cumsum(pca.explained_variance_ratio_))
     plt.xlabel('number of components')
@@ -34,7 +37,6 @@ def plot_cumulative_variance(pca, title, save_dir=None, file_name=None):
         save_dir.mkdir(parents=True, exist_ok=True)
         plt.savefig(save_dir / file_name)
 
-    plt.close()
 
 def create_loadings(pca, feature_names):
     # see stack overflow https://stackoverflow.com/questions/67585809/how-to-map-the-results-of-principal-component-analysis-back-to-the-actual-featur
@@ -44,6 +46,9 @@ def create_loadings(pca, feature_names):
     return loadings
 
 def plot_loadings(loadings, component:str="PC1", save_dir=None):
+    # close previous plot
+    plt.close()
+
     # see stack overflow https://stackoverflow.com/questions/67585809/how-to-map-the-results-of-principal-component-analysis-back-to-the-actual-featur
     sns.set_theme(rc={'figure.figsize':(10, 16)})
     loadings[component].sort_values().plot.barh()
@@ -54,8 +59,6 @@ def plot_loadings(loadings, component:str="PC1", save_dir=None):
     if save_dir: 
         save_dir.mkdir(parents=True, exist_ok=True)
         plt.savefig(save_dir / f"{component}.png")
-
-    plt.close()
 
 def main(): 
     args = input_parse()
