@@ -57,7 +57,7 @@ Remaining columns: Index(['id', 'unique_id', 'sample_params', 'temperature', 'pr
 
 --------------------------------------------------
 
-Dataset: dailymail, Temp: 1.0
+Dataset: dailymail_cnn, Temp: 1.0
 Columns dropped: ['contains_lorem ipsum', 'duplicate_line_chr_fraction', 'duplicate_ngram_chr_fraction_10', 'duplicate_ngram_chr_fraction_5', 'duplicate_ngram_chr_fraction_6', 'duplicate_ngram_chr_fraction_7', 'duplicate_ngram_chr_fraction_8', 'duplicate_ngram_chr_fraction_9', 'duplicate_paragraph_chr_fraction', 'pos_prop_INTJ', 'pos_prop_X', 'proportion_bullet_points', 'proportion_ellipsis', 'symbol_to_word_ratio_#', 'top_ngram_chr_fraction_3', 'top_ngram_chr_fraction_4']
 Dropping criteria: 90% of values in col were either NA or 90% of values were zero
 Remaining columns: Index(['id', 'unique_id', 'sample_params', 'temperature', 'prompt_number',
@@ -83,7 +83,7 @@ Remaining columns: Index(['id', 'unique_id', 'sample_params', 'temperature', 'pr
 
 --------------------------------------------------
 
-Dataset: dailymail, Temp: 1.5
+Dataset: dailymail_cnn, Temp: 1.5
 Columns dropped: ['contains_lorem ipsum', 'duplicate_line_chr_fraction', 'duplicate_ngram_chr_fraction_10', 'duplicate_ngram_chr_fraction_5', 'duplicate_ngram_chr_fraction_6', 'duplicate_ngram_chr_fraction_7', 'duplicate_ngram_chr_fraction_8', 'duplicate_ngram_chr_fraction_9', 'duplicate_paragraph_chr_fraction', 'pos_prop_INTJ', 'pos_prop_X', 'proportion_bullet_points', 'proportion_ellipsis', 'second_order_coherence', 'smog', 'symbol_to_word_ratio_#', 'top_ngram_chr_fraction_3', 'top_ngram_chr_fraction_4']
 Dropping criteria: 90% of values in col were either NA or 90% of values were zero
 Remaining columns: Index(['id', 'unique_id', 'sample_params', 'temperature', 'prompt_number',

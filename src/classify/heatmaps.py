@@ -46,9 +46,9 @@ def main():
             )
 
             # filter 
-            df = filter_metrics(df, percent_NA=0.9, percent_zero=0.9, verbose=False, log_file=path.parents[0] / "prelim_plots" / "filtered_metrics_log.txt")
+            df = filter_metrics(df, percent_NA=0.9, percent_zero=0.9, verbose=False, log_file=path.parents[0] / "prelim_plots" / "heatmaps" / "filtered_metrics_log.txt")
 
-            create_corrM(df, f"{dataset.upper()} (Temperature of {temp})" , path.parents[0] / "prelim_plots", f"{dataset}_heatmap_temp{temp}.png")
+            create_corrM(df, f"{dataset.upper()} (Temperature of {temp})", path.parents[0] / "prelim_plots" / "heatmaps", f"{dataset}_heatmap_temp{temp}.png")
 
 
 if __name__ == "__main__":
