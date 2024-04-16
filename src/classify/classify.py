@@ -164,7 +164,7 @@ def main():
     splits, clf, clf_report = clf_pipeline(df, random_state=129, features=None)
 
     # do on selected features
-    selected_features = ["sentence_length_median", "proportion_unique_tokens"]
+    selected_features = ["sentence_length_median", "proportion_unique_tokens", "oov_ratio"]
 
     splits, clf, clf_report = clf_pipeline(df, random_state=129, features=selected_features)
 
