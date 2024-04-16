@@ -145,7 +145,7 @@ def drop_metrics(df, percent_NA=0.8, percent_zero=0.8, verbose=True, log_file:pa
         filtered_df: dataframe with filtered columns
     '''
     # identify cols that must not be dropped regardless of NA values (as they include ID cols or with cols that are always NA if model = human and would thus be dropped if we filter by a HIGH NA threshold)
-    cols_to_keep = ["id", "unique_id", "sample_params", "temperature", "prompt_number"] 
+    cols_to_keep = ["id", "unique_id", "sample_params", "temperature", "prompt_number", "is_human"] 
 
     # identify cols to filter based on the cols to keep
     cols_to_filter = [col for col in df.columns if col not in cols_to_keep]
