@@ -5,6 +5,10 @@ import pathlib
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
+import sys 
+sys.path.append(str(pathlib.Path(__file__).parents[2]))
+from src.generate.generation import extract_min_max_tokens 
+
 def load_file(file):
     '''helper function to load a single file and add dataset column if not present'''
     df = pd.read_csv(file, index_col=[0])
@@ -107,9 +111,26 @@ def load_metrics(human_dir: pathlib.Path, ai_dir:pathlib.Path, human_completions
 
     return final_df
 
-def filter_metrics(df, percent_NA=0.8, percent_zero=0.8, verbose=True, log_file:pathlib.Path=None):
+def drop_lengths(df, verbose=True):
     '''
-    Remove metric columns where there are more than the percent threshold observations that are NA (percent_NA) and less than the percent threshold observations that are zero (percent_zero)
+    Drop rows based on min and max doc lengths
+    '''
+    # extract min and max tokens from completions, drop cols that are below or above these in doc length
+    min_tokens, max_tokens = extract_min_max_tokens(df["dataset"].unique()[0])
+
+    # drop cols that are below or above min and max tokens
+    filtered_df = df[(df["doc_length"] >= min_tokens) & (df["doc_length"] <= max_tokens)]
+
+    # print info msg
+    if verbose:
+        print(f"[INFO:] Dropped {len(df) - len(filtered_df)} rows based on doc length. Min tokens: {min_tokens}, Max tokens: {max_tokens}")
+        print(f"[INFO:] Min len in df: {filtered_df['doc_length'].min()}, Max len in df: {filtered_df['doc_length'].max()}")
+
+    return filtered_df
+
+def drop_metrics(df, percent_NA=0.8, percent_zero=0.8, verbose=True, log_file:pathlib.Path=None):
+    '''
+    Drop metric columns where there are more than the percent threshold observations that are NA (percent_NA) and less than the percent threshold observations that are zero (percent_zero)
 
     Args: 
         df: dataframe with metrics to filter
@@ -167,6 +188,18 @@ def filter_metrics(df, percent_NA=0.8, percent_zero=0.8, verbose=True, log_file:
             f.write(f"{'-'*50}\n\n")
 
     return filtered_df
+
+def filter_metrics(df, percent_NA=0.8, percent_zero=0.8, verbose=True, log_file:pathlib.Path=None):
+    '''
+    Filter data based on NA and zero values in the columns and doc length
+    '''
+    # remove rows with NA values in doc length
+    filtered_lengths = drop_lengths(df, verbose=verbose)
+
+    # remove cols with high NA and zero values
+    filtered_metrics = drop_metrics(filtered_lengths, percent_NA=percent_NA, percent_zero=percent_zero, verbose=verbose, log_file=log_file)
+
+    return filtered_metrics
 
 def create_split(df, random_state=129, val_test_size:float=0.15, outcome_col="is_human", feature_cols:list=None, save_path=None, verbose=False):
     '''
@@ -235,19 +268,21 @@ def main():
     path = pathlib.Path(__file__)
     datapath = path.parents[2] / "metrics"
 
-    final_df = load_metrics(
+    df = load_metrics(
                             human_dir=datapath / "human_metrics", 
                             ai_dir=datapath / "ai_metrics",
-                            dataset="stories", temp=1, 
+                            dataset="stories", temp=1.5, 
                             human_completions_only=True
                             )
 
+    # filter metrics
+    df = filter_metrics(df, percent_NA=0.9, percent_zero=0.9, verbose=True)
 
-    splits = create_split(final_df, random_state=129, val_test_size=0.15, outcome_col="is_human", verbose=True)
+    splits = create_split(df, random_state=129, val_test_size=0.15, outcome_col="is_human", verbose=True)
     
     # group by dataset and model
     print("\nPrinting groupby...\n")
-    print(final_df.groupby(["dataset", "model"]).size())
+    print(df.groupby(["dataset", "model"]).size())
 
     print("\nPrinting class distribution... \n")
     print(f"Y train: {splits['y_train'].value_counts()[0]} AI, {splits['y_train'].value_counts()[1]} human")
