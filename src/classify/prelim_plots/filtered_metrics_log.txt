@@ -1,6 +1,6 @@
 Dataset: stories, Temp: 1.0
 Columns dropped: ['contains_lorem ipsum', 'duplicate_line_chr_fraction', 'duplicate_ngram_chr_fraction_10', 'duplicate_paragraph_chr_fraction', 'pos_prop_SYM', 'pos_prop_X', 'proportion_bullet_points', 'proportion_ellipsis', 'symbol_to_word_ratio_#', 'pos_prop_SPACE']
-Dropping criteria: 0.9 NA, 0.9 zero
+Dropping criteria: 90% of values in col were either NA or 90% of values were zero
 Remaining columns: Index(['id', 'unique_id', 'sample_params', 'temperature', 'prompt_number',
        'model', 'alpha_ratio', 'automated_readability_index',
        'coleman_liau_index', 'dependency_distance_mean',
@@ -30,7 +30,7 @@ Remaining columns: Index(['id', 'unique_id', 'sample_params', 'temperature', 'pr
 
 Dataset: stories, Temp: 1.5
 Columns dropped: ['contains_lorem ipsum', 'duplicate_line_chr_fraction', 'duplicate_ngram_chr_fraction_10', 'duplicate_ngram_chr_fraction_7', 'duplicate_ngram_chr_fraction_8', 'duplicate_ngram_chr_fraction_9', 'duplicate_paragraph_chr_fraction', 'pos_prop_SYM', 'proportion_bullet_points', 'proportion_ellipsis', 'symbol_to_word_ratio_#', 'pos_prop_SPACE']
-Dropping criteria: 0.9 NA, 0.9 zero
+Dropping criteria: 90% of values in col were either NA or 90% of values were zero
 Remaining columns: Index(['id', 'unique_id', 'sample_params', 'temperature', 'prompt_number',
        'model', 'alpha_ratio', 'automated_readability_index',
        'coleman_liau_index', 'dependency_distance_mean',
@@ -59,7 +59,7 @@ Remaining columns: Index(['id', 'unique_id', 'sample_params', 'temperature', 'pr
 
 Dataset: dailymail, Temp: 1.0
 Columns dropped: ['contains_lorem ipsum', 'duplicate_line_chr_fraction', 'duplicate_ngram_chr_fraction_10', 'duplicate_ngram_chr_fraction_5', 'duplicate_ngram_chr_fraction_6', 'duplicate_ngram_chr_fraction_7', 'duplicate_ngram_chr_fraction_8', 'duplicate_ngram_chr_fraction_9', 'duplicate_paragraph_chr_fraction', 'pos_prop_INTJ', 'pos_prop_X', 'proportion_bullet_points', 'proportion_ellipsis', 'symbol_to_word_ratio_#', 'top_ngram_chr_fraction_3', 'top_ngram_chr_fraction_4']
-Dropping criteria: 0.9 NA, 0.9 zero
+Dropping criteria: 90% of values in col were either NA or 90% of values were zero
 Remaining columns: Index(['id', 'unique_id', 'sample_params', 'temperature', 'prompt_number',
        'model', 'alpha_ratio', 'automated_readability_index',
        'coleman_liau_index', 'dependency_distance_mean',
@@ -85,7 +85,7 @@ Remaining columns: Index(['id', 'unique_id', 'sample_params', 'temperature', 'pr
 
 Dataset: dailymail, Temp: 1.5
 Columns dropped: ['contains_lorem ipsum', 'duplicate_line_chr_fraction', 'duplicate_ngram_chr_fraction_10', 'duplicate_ngram_chr_fraction_5', 'duplicate_ngram_chr_fraction_6', 'duplicate_ngram_chr_fraction_7', 'duplicate_ngram_chr_fraction_8', 'duplicate_ngram_chr_fraction_9', 'duplicate_paragraph_chr_fraction', 'pos_prop_INTJ', 'pos_prop_X', 'proportion_bullet_points', 'proportion_ellipsis', 'second_order_coherence', 'smog', 'symbol_to_word_ratio_#', 'top_ngram_chr_fraction_3', 'top_ngram_chr_fraction_4']
-Dropping criteria: 0.9 NA, 0.9 zero
+Dropping criteria: 90% of values in col were either NA or 90% of values were zero
 Remaining columns: Index(['id', 'unique_id', 'sample_params', 'temperature', 'prompt_number',
        'model', 'alpha_ratio', 'automated_readability_index',
        'coleman_liau_index', 'dependency_distance_mean',
@@ -111,7 +111,7 @@ Remaining columns: Index(['id', 'unique_id', 'sample_params', 'temperature', 'pr
 
 Dataset: mrpc, Temp: 1.0
 Columns dropped: ['contains_lorem ipsum', 'duplicate_line_chr_fraction', 'duplicate_ngram_chr_fraction_10', 'duplicate_ngram_chr_fraction_5', 'duplicate_ngram_chr_fraction_6', 'duplicate_ngram_chr_fraction_7', 'duplicate_ngram_chr_fraction_8', 'duplicate_ngram_chr_fraction_9', 'duplicate_paragraph_chr_fraction', 'first_order_coherence', 'pos_prop_SPACE', 'pos_prop_SYM', 'pos_prop_X', 'proportion_bullet_points', 'proportion_ellipsis', 'second_order_coherence', 'smog', 'symbol_to_word_ratio_#', 'top_ngram_chr_fraction_2', 'top_ngram_chr_fraction_3', 'top_ngram_chr_fraction_4']
-Dropping criteria: 0.9 NA, 0.9 zero
+Dropping criteria: 90% of values in col were either NA or 90% of values were zero
 Remaining columns: Index(['id', 'unique_id', 'sample_params', 'temperature', 'prompt_number',
        'model', 'alpha_ratio', 'automated_readability_index',
        'coleman_liau_index', 'dependency_distance_mean',
@@ -136,7 +136,7 @@ Remaining columns: Index(['id', 'unique_id', 'sample_params', 'temperature', 'pr
 
 Dataset: mrpc, Temp: 1.5
 Columns dropped: ['contains_lorem ipsum', 'duplicate_line_chr_fraction', 'duplicate_ngram_chr_fraction_10', 'duplicate_ngram_chr_fraction_5', 'duplicate_ngram_chr_fraction_6', 'duplicate_ngram_chr_fraction_7', 'duplicate_ngram_chr_fraction_8', 'duplicate_ngram_chr_fraction_9', 'duplicate_paragraph_chr_fraction', 'first_order_coherence', 'pos_prop_INTJ', 'pos_prop_SPACE', 'pos_prop_SYM', 'pos_prop_X', 'proportion_bullet_points', 'proportion_ellipsis', 'second_order_coherence', 'smog', 'symbol_to_word_ratio_#', 'top_ngram_chr_fraction_2', 'top_ngram_chr_fraction_3', 'top_ngram_chr_fraction_4']
-Dropping criteria: 0.9 NA, 0.9 zero
+Dropping criteria: 90% of values in col were either NA or 90% of values were zero
 Remaining columns: Index(['id', 'unique_id', 'sample_params', 'temperature', 'prompt_number',
        'model', 'alpha_ratio', 'automated_readability_index',
        'coleman_liau_index', 'dependency_distance_mean',
@@ -161,7 +161,7 @@ Remaining columns: Index(['id', 'unique_id', 'sample_params', 'temperature', 'pr
 
 Dataset: dailydialog, Temp: 1.0
 Columns dropped: ['contains_lorem ipsum', 'duplicate_line_chr_fraction', 'duplicate_ngram_chr_fraction_10', 'duplicate_ngram_chr_fraction_5', 'duplicate_ngram_chr_fraction_6', 'duplicate_ngram_chr_fraction_7', 'duplicate_ngram_chr_fraction_8', 'duplicate_ngram_chr_fraction_9', 'duplicate_paragraph_chr_fraction', 'first_order_coherence', 'pos_prop_SYM', 'pos_prop_X', 'proportion_bullet_points', 'proportion_ellipsis', 'second_order_coherence', 'smog', 'symbol_to_word_ratio_#', 'top_ngram_chr_fraction_2', 'top_ngram_chr_fraction_3', 'top_ngram_chr_fraction_4', 'pos_prop_SPACE']
-Dropping criteria: 0.9 NA, 0.9 zero
+Dropping criteria: 90% of values in col were either NA or 90% of values were zero
 Remaining columns: Index(['id', 'unique_id', 'sample_params', 'temperature', 'prompt_number',
        'model', 'annotations', 'alpha_ratio', 'automated_readability_index',
        'coleman_liau_index', 'dependency_distance_mean',
@@ -186,7 +186,7 @@ Remaining columns: Index(['id', 'unique_id', 'sample_params', 'temperature', 'pr
 
 Dataset: dailydialog, Temp: 1.5
 Columns dropped: ['contains_lorem ipsum', 'duplicate_line_chr_fraction', 'duplicate_ngram_chr_fraction_10', 'duplicate_ngram_chr_fraction_5', 'duplicate_ngram_chr_fraction_6', 'duplicate_ngram_chr_fraction_7', 'duplicate_ngram_chr_fraction_8', 'duplicate_ngram_chr_fraction_9', 'duplicate_paragraph_chr_fraction', 'first_order_coherence', 'pos_prop_SYM', 'pos_prop_X', 'proportion_bullet_points', 'proportion_ellipsis', 'second_order_coherence', 'smog', 'symbol_to_word_ratio_#', 'top_ngram_chr_fraction_2', 'top_ngram_chr_fraction_3', 'top_ngram_chr_fraction_4', 'pos_prop_SPACE']
-Dropping criteria: 0.9 NA, 0.9 zero
+Dropping criteria: 90% of values in col were either NA or 90% of values were zero
 Remaining columns: Index(['id', 'unique_id', 'sample_params', 'temperature', 'prompt_number',
        'model', 'annotations', 'alpha_ratio', 'automated_readability_index',
        'coleman_liau_index', 'dependency_distance_mean',
