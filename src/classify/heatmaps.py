@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 from prepare_data import load_metrics, filter_metrics
 
 
-def create_corrM(df, plot_title, save_dir, file_name):
+def create_corrM(df, plot_title, save_dir=None, file_name=None):
     # define out irrelvant cols for correlation matrix
     cols_to_drop = ["id", "unique_id", "sample_params", "temperature", "prompt_number"]
 
@@ -24,7 +24,9 @@ def create_corrM(df, plot_title, save_dir, file_name):
     corrMplot.set_title(plot_title)
 
     # save plot
-    corrMplot.get_figure().savefig(save_dir / file_name)
+    if save_dir and file_name: 
+        save_dir.mkdir(parents=True, exist_ok=True)
+        corrMplot.get_figure().savefig(save_dir / file_name)
 
     # close plot
     plt.close()
