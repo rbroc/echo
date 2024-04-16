@@ -117,16 +117,40 @@ def input_parse():
 
     return args
 
+def clf_pipeline(df, random_state=129, features=None): 
+    # init classifier 
+    print("[INFO:] Initializing XGClassifier ...")
+    clf = XGBClassifier(enable_categorical=True, use_label_encoder=False, random_state=random_state)
+
+    # creating splits 
+    if features: 
+        print(f"[INFO:] Creating splits with features: {features} using random state {random_state} ...")
+    else: 
+        print(f"[INFO:] Creating splits with all features using random state {random_state} ...")
+    
+    splits = create_split(df, random_state=129, val_test_size=0.15, outcome_col="is_human", verbose=False, feature_cols=features)
+
+    # fit classifier
+    print("[INFO:] Fitting classifier ...")
+    clf = clf_fit(clf, splits["X_train"], splits["y_train"])
+
+    # evaluate classifier on val set
+    print("[INFO:] Evaluating classifier ...")
+    clf_report = clf_evaluate(clf, X=splits["X_val"], y=splits["y_val"])
+
+    print(clf_report)
+
+    return splits, clf, clf_report
+
 def main():
     args = input_parse()
-
-    # initialize classifier
-    clf = XGBClassifier(enable_categorical=True, use_label_encoder=False, random_state=129)
 
     # load data, create splits
     path = pathlib.Path(__file__)
     datapath = path.parents[2] / "metrics"
     temp = 1 # for now 
+
+    print(args.dataset)
 
     df = load_metrics(human_dir=datapath / "human_metrics", 
                                     ai_dir=datapath / "ai_metrics",
@@ -136,17 +160,14 @@ def main():
     # filter 
     df = filter_metrics(df, percent_NA=0.9, percent_zero=0.9, verbose=True, log_file=path.parents[0] / "filtered_metrics_classify_log.txt")
 
-    # make train, val, test splits
-    splits = create_split(df, random_state=129, val_test_size=0.15, outcome_col="is_human", verbose=False)
+    # do on all features
+    splits, clf, clf_report = clf_pipeline(df, random_state=129, features=None)
 
-    # fit classifier
-    clf = clf_fit(clf, splits["X_train"], splits["y_train"])
+    # do on selected features
+    selected_features = ["sentence_length_median", "proportion_unique_tokens"]
 
-    # evaluate classifier on val set
-    clf_report = clf_evaluate(clf, X=splits["X_val"], y=splits["y_val"])
+    splits, clf, clf_report = clf_pipeline(df, random_state=129, features=selected_features)
 
-    # info
-    check_splits(splits, df)
 
 if __name__ == "__main__":
     main()
