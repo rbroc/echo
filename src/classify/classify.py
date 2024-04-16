@@ -3,6 +3,12 @@ Construct classifiers
 '''
 import pathlib
 import argparse
+from datetime import datetime
+
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+
 from sklearn.model_selection import train_test_split
 from xgboost import XGBClassifier
 from sklearn import metrics
@@ -107,17 +113,23 @@ def check_splits(splits, df):
     print(f"Y val: {splits['y_val'].value_counts()[0]} AI, {splits['y_val'].value_counts()[1]} human")
     print(f"Y test: {splits['y_test'].value_counts()[0]} AI, {splits['y_test'].value_counts()[1]} human")
 
-def input_parse():
-    parser = argparse.ArgumentParser()
+def clf_pipeline(df, random_state=129, features=None, save_dir=None, save_filename:str="clf_report"): 
+    '''
+    Pipeline for creating splits, fitting classifier, evaluating classifier and saving evaluation report (on validation data)
 
-    # add dataset as arg 
-    parser.add_argument("-d", "--dataset", default="dailymail_cnn", help="Choose between 'stories', 'dailymail_cnn', 'mrpc', 'dailydialog'", type=str)
+    Args:
+        df: dataframe to use for classifier
+        random_state: seed for reproducibility
+        features: list of features to use for classifier. If None, uses all viable features
+        save_dir: directory to save classifier report. If None, does not save
+        save_filename: filename for classifier report. Defaults to "clf_report"
+    
+    Returns:
+        splits: dict with X_train, X_val, X_test, y_train, y_val, y_test
+        clf: fitted classifier
+        clf_report: classification report on validation data
+    '''
 
-    args = parser.parse_args()
-
-    return args
-
-def clf_pipeline(df, random_state=129, features=None): 
     # init classifier 
     print("[INFO:] Initializing XGClassifier ...")
     clf = XGBClassifier(enable_categorical=True, use_label_encoder=False, random_state=random_state)
@@ -138,9 +150,59 @@ def clf_pipeline(df, random_state=129, features=None):
     print("[INFO:] Evaluating classifier ...")
     clf_report = clf_evaluate(clf, X=splits["X_val"], y=splits["y_val"])
 
-    print(clf_report)
+    # save results 
+    if save_dir:
+        print("[INFO:] Saving classifier report ...")
+        save_dir.mkdir(parents=True, exist_ok=True) # create save dir if it doesn't exist
+
+        # get feature names for report from X_train (as list)
+        feature_names = splits["X_train"].columns.tolist()
+
+        with open(f"{save_dir / save_filename}.txt", "w") as file: 
+            file.write(f"Results from model run at {datetime.now()}\n")
+            file.write(f"Original dataset: {df.dataset.unique()[0]}, temperature: {df.temperature.unique()[1]}\n") # taking second value as temp as 
+            file.write(f"Random state: {random_state}\n")
+            file.write(f"{clf_report}\n")
+            file.write(f"Features: {feature_names}\n")
 
     return splits, clf, clf_report
+
+def get_feature_importances(splits, clf):
+    # get feature importance, sort by importance
+    feature_importances_vals = clf.feature_importances_
+    feature_importances = pd.DataFrame({"feature": splits["X_train"].columns, "importance": feature_importances_vals})
+    sorted_feature_importances = feature_importances.sort_values(by="importance", ascending=False)
+
+    # return plot 
+    sns.set_theme(style="whitegrid")
+    plt.figure(figsize=(10, 15))
+    g = sns.barplot(x="importance", y="feature", data=feature_importances.sort_values(by="importance", ascending=False))
+    plt.title("Feature importances")
+    
+    return sorted_feature_importances
+
+def plot_feature_importances(feature_importances_df, save_dir=None, save_filename:str="feature_importances"):
+    # plot 
+    sns.set_theme(style="whitegrid")
+    plt.figure(figsize=(10, 15))
+    g = sns.barplot(x="importance", y="feature", data=feature_importances_df, hue="feature", palette="viridis")
+    plt.title("Feature importances")
+
+    # save plot
+    if save_dir:
+        save_dir.mkdir(parents=True, exist_ok=True)
+        plt.savefig(save_dir / f"{save_filename}.png")
+
+def input_parse():
+    parser = argparse.ArgumentParser()
+
+    # add dataset as arg 
+    parser.add_argument("-d", "--dataset", default="dailymail_cnn", help="Choose between 'stories', 'dailymail_cnn', 'mrpc', 'dailydialog'", type=str)
+    parser.add_argument("-t", "--temp", default=1, help="Temperature of generations", type=float)
+
+    args = parser.parse_args()
+
+    return args
 
 def main():
     args = input_parse()
@@ -148,26 +210,40 @@ def main():
     # load data, create splits
     path = pathlib.Path(__file__)
     datapath = path.parents[2] / "metrics"
-    temp = 1 # for now 
+    savepath = path.parents[0] / "clf_results"
+    savepath.mkdir(parents=True, exist_ok=True)
 
-    print(args.dataset)
+    dataset, temp = args.dataset, args.temp
+
+    if temp == 1.0:
+        temp = int(temp)
 
     df = load_metrics(human_dir=datapath / "human_metrics", 
                                     ai_dir=datapath / "ai_metrics",
-                                    dataset=args.dataset, temp=temp, 
+                                    dataset=dataset, temp=temp, 
                                     human_completions_only=True
             )
     # filter 
-    df = filter_metrics(df, percent_NA=0.9, percent_zero=0.9, verbose=True, log_file=path.parents[0] / "filtered_metrics_classify_log.txt")
+    df = filter_metrics(df, percent_NA=0.9, percent_zero=0.9, verbose=True, log_file=savepath / "filtered_metrics_log.txt")
 
-    # do on all features
-    splits, clf, clf_report = clf_pipeline(df, random_state=129, features=None)
+    ## ALL FEATURES ## 
+    # fit 
+    splits, clf, clf_report = clf_pipeline(df, random_state=129, features=None, save_dir=savepath / "clf_reports", save_filename=f"{dataset}_all_features_temp{temp}")
 
-    # do on selected features
+    # feature importances
+    feature_importances = get_feature_importances(splits, clf)
+    plot_feature_importances(feature_importances, save_dir=savepath / "feature_importances", save_filename=f"{dataset}_all_features_temp{temp}")
+
+    ## SELECTED FEATURES
+    # define selected features
     selected_features = ["sentence_length_median", "proportion_unique_tokens", "oov_ratio"]
 
-    splits, clf, clf_report = clf_pipeline(df, random_state=129, features=selected_features)
+    # fit
+    splits, clf, clf_report = clf_pipeline(df, random_state=129, features=selected_features, save_dir=savepath / "clf_reports", save_filename=f"{dataset}_selected_features_temp{temp}")
 
+    # feature importances
+    feature_importances = get_feature_importances(splits, clf)
+    plot_feature_importances(feature_importances, save_dir=savepath / "feature_importances", save_filename=f"{dataset}_selected_features_temp{temp}")
 
 if __name__ == "__main__":
     main()
