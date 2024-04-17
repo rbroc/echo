@@ -16,5 +16,8 @@ python -m spacy download en_core_web_sm
 python -m spacy download en_core_web_md
 python -m spacy download en_core_web_lg
 
+# for note-taking in ipynb
+python -m ipykernel install --user --name=env
+
 deactivate
 echo "[INFO]: Done!" 
