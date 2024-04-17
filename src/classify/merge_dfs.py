@@ -1,5 +1,5 @@
 import pathlib
-from prepare_data import load_metrics
+from prepare_metrics import load_metrics
 
 import sys 
 sys.path.append(str(pathlib.Path(__file__).parents[2] / "src"))
