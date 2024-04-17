@@ -31,7 +31,7 @@ def run_PCA(metrics_df:pd.DataFrame, feature_names:list, n_components:int=4):
     pca_df.columns = column_names
 
     # add new components to overall df 
-    df = pd.concat([metrics_df, pca_df],axis=1)
+    df = pd.concat([metrics_df.reset_index(), pca_df.reset_index()], axis=1)
 
     return pca, df
 
