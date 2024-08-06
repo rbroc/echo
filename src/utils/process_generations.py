@@ -103,7 +103,28 @@ def load_dataset(ai_paths, human_path):
 
     return ai_dfs, human_df
 
-def format_ai_data(ai_dfs, human_df=None, subset=None):
+def clean_ai_df(df, col = "completions"):
+    '''
+    lowercase, remove irregular format to standardise to human datasets like in src/clean/clean_data.py
+    '''
+    # remove space at the beginning of a string
+    df[col] = df[col].str.replace(r"^\s+", "", regex=True)
+
+    # make lowercase ALL 
+    df[col] = df[col].str.lower()
+
+    # convert any a: or b: in the start to A: and B: 
+    df[col] = df[col].str.replace(r"^(a:|b:)", lambda m: m.group(1).upper(), regex=True)
+
+    # remove newline characters
+    df[col] = df[col].str.replace("<newline>", " ", regex=False)
+
+    # remove extra spaces
+    df[col] = df[col].str.replace(r"\s+", " ", regex=True)
+
+    return df
+
+def format_ai_data(ai_dfs, human_df=None, subset=None, clean_ai=True):
     '''
     Format AI data to match human data. Alternatively, if human data is provided, add source column to AI data.
 
@@ -111,6 +132,7 @@ def format_ai_data(ai_dfs, human_df=None, subset=None):
         ai_dfs: list of dataframes
         human_df: dataframe corresponding to the dfs in ai_dfs 
         subset: whether datasets should be subsetted (subsets ai datasets to n first rows, and subsequently matches the human completions
+        clean_ai: whether to clean ai data (e.g., lowercase, removing irregular format)
 
     Returns:
         ai_dfs: list of dataframes
@@ -134,6 +156,9 @@ def format_ai_data(ai_dfs, human_df=None, subset=None):
 
         if "sample_params" in df.columns:
             new_df["temperature"] = df.sample_params.apply(lambda x: ast.literal_eval(x).get("temperature") if pd.notna(x) else None)
+
+        if clean_ai:
+            new_df = clean_ai_df(new_df)
         
         # add source col
         if human_df is not None:
@@ -144,20 +169,21 @@ def format_ai_data(ai_dfs, human_df=None, subset=None):
 
     return ai_dfs
 
-def combine_data(ai_dfs, human_df, subset=None):
+def combine_data(ai_dfs, human_df, clean_ai=True, subset:int=None):
     '''
     Return a dataframe for a particular dataset with all AI generations and human data in one.
 
     Args: 
         ai_dfs: list of dataframes
         human_df: dataframe corresponding to the dfs in ai_dfs 
+        clean_ai: whether to clean ai data (e.g., lowercase, removing irregular format)
         subset: whether datasets should be subsetted (subsets ai datasets to n first rows, and subsequently matches the human completions on completion id). For prompt selection, this was set to 99.
 
     Returns: 
         combined_df: combined dataframe
     '''
     # prepare data for concatenating (similar formatting)
-    ai_dfs = format_ai_data(ai_dfs, human_df, subset=subset)
+    ai_dfs = format_ai_data(ai_dfs, human_df, subset=subset, clean_ai=clean_ai)
    
     human_df = human_df.query('id in @ai_dfs[0]["id"]').copy()
     human_df["model"] = "human"
@@ -172,7 +198,7 @@ def combine_data(ai_dfs, human_df, subset=None):
 
     return combined_df
 
-def preprocess_datasets(ai_dir: pathlib.Path, human_dir: pathlib.Path, models: list, datasets: list, subset=None, temp: int | float = None, prompt_numbers: list=None):
+def preprocess_datasets(ai_dir: pathlib.Path, human_dir: pathlib.Path, models: list, datasets: list, clean_ai=True, subset:int=None, temp: int | float = None, prompt_numbers: list = [21]):
     '''
     Loads and prepares as many datasets as needed
     
@@ -181,9 +207,11 @@ def preprocess_datasets(ai_dir: pathlib.Path, human_dir: pathlib.Path, models: l
         human_dir: path to directory with human datasets
         models: list of models to include
         datasets: list of datasets to include
-        subset: whether datasets should be subsetted (subsets ai datasets to n first rows, and subsequently matches the human completions
+        clean_ai: whether to clean ai data (e.g., lowercase, removing irregular format)
+
+        subset: whether datasets should be subsetted (subsets ai datasets to n first rows, and subsequently matches the human completions)
         temp: temperature in file name (e.g., 1 if temp1, 1.4 if temp1.4)
-        prompt_n: prompt number (e.g., 3 or 21)
+        prompt_n: prompt number (e.g., 3 or 21). Defaults to 21 which is what we settled on.
 
     Returns:
         all_dfs_combined: combined dataframe with all datasets
@@ -194,7 +222,7 @@ def preprocess_datasets(ai_dir: pathlib.Path, human_dir: pathlib.Path, models: l
     for dataset in tqdm(datasets): 
         ai_paths, human_path = get_paths(ai_dir, human_dir, models, dataset, temp, prompt_numbers)
         ai_dfs, human_df = load_dataset(ai_paths, human_path)
-        dataset_df = combine_data(ai_dfs, human_df, subset=subset)
+        dataset_df = combine_data(ai_dfs, human_df, clean_ai=clean_ai, subset=subset)
         
         # add dataset col 
         dataset_df["dataset"] = dataset
@@ -217,7 +245,7 @@ def main():
     models = ["beluga7b", "llama2_chat13b", "mistral7b"]
     datasets = ["dailymail_cnn", "stories", "mrpc", "dailydialog"]
 
-    combined_df = preprocess_datasets(ai_dir, human_dir, models, datasets, subset=None, temp=1, prompt_numbers=[21, 22])
+    combined_df = preprocess_datasets(ai_dir, human_dir, models, datasets, subset=None, temp=1, prompt_numbers=[21], clean_ai=True)
 
     print(combined_df)
 
