@@ -3,6 +3,9 @@ Functions to load metrics data + drop lengths below or above min and max tokens.
 '''
 import pathlib
 import pandas as pd
+import sys 
+sys.path.append(str(pathlib.Path(__file__).parents[2]))
+from src.generate.generation import extract_min_max_tokens
 
 def load_file(file):
     '''helper function to load a single file and add dataset column if not present'''
