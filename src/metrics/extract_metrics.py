@@ -41,7 +41,7 @@ def get_ai_metrics(ai_dir, models=["beluga7b", "llama2_chat13b", "mistral7b", "l
     ai_dfs = [pd.read_json(ai_path, lines=True) for ai_path in ai_paths]
 
     # format dfs using custom fn
-    ai_dfs_formatted = format_ai_data(ai_dfs)
+    ai_dfs_formatted = format_ai_data(ai_dfs, clean_ai = True)
 
     # concat
     ai_df = pd.concat(ai_dfs_formatted, ignore_index=True, axis=0)
