@@ -33,13 +33,19 @@ def main():
 
     args = input_parse()
 
-    models = ["beluga7b"]
-    temperature = 2
+    models = ["beluga7b", "llama2_chat7b", "llama2_chat13b", "mistral7b"]
+    temperature = 1
 
     print(f"[INFO:] Preprocessing datasets with temp {temperature} ...")
-    df = preprocess_datasets(ai_dir = ai_dir, human_dir = human_dir, models=models, datasets=[args.dataset], temp=temperature, prompt_numbers=[21])
+    df = preprocess_datasets(ai_dir = ai_dir, 
+                            human_dir = human_dir, 
+                            models=models, 
+                            datasets=[args.dataset], 
+                            temp=temperature, 
+                            prompt_numbers=[21], 
+                            clean_ai=True)
 
-    indices = [20, 500, 1000, 3600]
+    indices = [20, 500, 1000, 2000]
     print_example_from_each_model(df, args.dataset, row_indices=indices, print_source=True)
     
 if __name__ == "__main__":
