@@ -17,7 +17,7 @@ def main():
     # define paths 
     path = pathlib.Path(__file__)
     datapath = path.parents[3] / "metrics"
-    savedir = path.parents[3] / "results" / "classify / "pca_results"
+    savedir = path.parents[3] / "results" / "classify" / "pca_results"
 
     # save directories    
     loadingspath = savedir / "loadings"
@@ -69,7 +69,7 @@ def main():
         features = [feat for feat in all_features if feat not in cols_to_drop]
 
         # run PCA
-        pca, pca_df = run_PCA(df, feature_names=features, n_components=len(features))
+        pca, pca_df = run_PCA(df, feature_names=features, n_components=len(features), keep_metrics_df=False) # keep_metrics_df=False to only keep pca components and row identifiers
         file_name = f"{dataset}_temp{temp}"
 
         # cumvar
@@ -92,7 +92,6 @@ def main():
         
         with open(objectspath / f'{file_name}_obj.pkl', 'wb') as file:
             pickle.dump(pca, file)
-
 
 
         with open(expvarpath/ f'{file_name}_EXPVAR.txt', 'w') as file:

@@ -13,7 +13,7 @@ from sklearn.decomposition import PCA
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-def run_PCA(metrics_df:pd.DataFrame, feature_names:list, n_components:int=4):
+def run_PCA(metrics_df:pd.DataFrame, feature_names:list, n_components:int=4, keep_metrics_df=True):
     '''
     Run PCA on list of feature names. Normalises features prior to running PCA
     '''
@@ -29,9 +29,12 @@ def run_PCA(metrics_df:pd.DataFrame, feature_names:list, n_components:int=4):
     column_names = [f"PC{i}" for i in range(1, n_components + 1)]
     pca_df = pd.DataFrame(data = results)
     pca_df.columns = column_names
-
-    # add new components to overall df 
-    df = pd.concat([metrics_df.reset_index(), pca_df.reset_index()], axis=1)
+   
+    if keep_metrics_df: # add new components to overall metrics df
+        df = pd.concat([metrics_df.reset_index(), pca_df.reset_index()], axis=1)
+    else: # only keep pca components and identifiers
+        metrics_df = metrics_df[["id", "model", "is_human", "temperature", "prompt_number"]]
+        df = pd.concat([metrics_df.reset_index(), pca_df.reset_index()], axis=1)
 
     return pca, df
 
