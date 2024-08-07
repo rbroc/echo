@@ -78,7 +78,7 @@ def main():
     path = pathlib.Path(__file__)
     ai_dir = path.parents[2] / "datasets" / "ai_datasets" / "vLLM" / "FULL_DATA"
     human_dir = path.parents[2] / "datasets" / "human_datasets"
-    save_dir = path.parents[2] / "results" / "lengths"
+    save_dir = path.parents[2] / "results" / "analysis" / "lengths"
     save_dir.mkdir(parents=True, exist_ok=True)
 
     # specs (models, datasets, temperatures)
