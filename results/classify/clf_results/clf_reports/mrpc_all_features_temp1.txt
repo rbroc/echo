@@ -1,13 +1,13 @@
-Results from model run at 2024-04-16 19:32:15.910040
+Results from model run at 2024-08-07 13:51:25.007821
 Original dataset: mrpc, temperature: 1.0
 Random state: 129
               precision    recall  f1-score   support
 
-           0       0.97      0.99      0.98      2340
-           1       0.98      0.88      0.92       585
+           0       0.87      0.94      0.90      2340
+           1       0.65      0.44      0.52       585
 
-    accuracy                           0.97      2925
-   macro avg       0.97      0.94      0.95      2925
-weighted avg       0.97      0.97      0.97      2925
+    accuracy                           0.84      2925
+   macro avg       0.76      0.69      0.71      2925
+weighted avg       0.82      0.84      0.83      2925
 
-Features: ['alpha_ratio', 'automated_readability_index', 'coleman_liau_index', 'dependency_distance_mean', 'dependency_distance_std', 'doc_length', 'entropy', 'flesch_kincaid_grade', 'flesch_reading_ease', 'gunning_fog', 'lix', 'mean_word_length', 'n_characters', 'n_sentences', 'n_stop_words', 'n_tokens', 'n_unique_tokens', 'oov_ratio', 'passed_quality_check', 'per_word_perplexity', 'perplexity', 'pos_prop_ADJ', 'pos_prop_ADP', 'pos_prop_ADV', 'pos_prop_AUX', 'pos_prop_CCONJ', 'pos_prop_DET', 'pos_prop_INTJ', 'pos_prop_NOUN', 'pos_prop_NUM', 'pos_prop_PART', 'pos_prop_PRON', 'pos_prop_PROPN', 'pos_prop_PUNCT', 'pos_prop_SCONJ', 'pos_prop_VERB', 'prop_adjacent_dependency_relation_mean', 'prop_adjacent_dependency_relation_std', 'proportion_unique_tokens', 'rix', 'sentence_length_mean', 'sentence_length_median', 'sentence_length_std', 'syllables_per_token_mean', 'syllables_per_token_median', 'syllables_per_token_std', 'token_length_mean', 'token_length_median', 'token_length_std']
+Features: ['PC1', 'PC2', 'PC3', 'PC4', 'PC5', 'PC6', 'PC7', 'PC8', 'PC9', 'PC10', 'PC11', 'PC12', 'PC13', 'PC14', 'PC15', 'PC16', 'PC17', 'PC18', 'PC19', 'PC20', 'PC21', 'PC22', 'PC23', 'PC24', 'PC25', 'PC26', 'PC27', 'PC28', 'PC29', 'PC30', 'PC31', 'PC32', 'PC33', 'PC34', 'PC35', 'PC36', 'PC37', 'PC38', 'PC39', 'PC40', 'PC41', 'PC42', 'PC43', 'PC44', 'PC45', 'PC46', 'PC47', 'PC48', 'PC49', 'PC50', 'PC51', 'PC52', 'PC53', 'PC54']
