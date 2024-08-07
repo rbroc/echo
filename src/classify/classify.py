@@ -13,7 +13,8 @@ from sklearn.model_selection import train_test_split
 from xgboost import XGBClassifier
 from sklearn import metrics
 
-from prepare_metrics import load_metrics, filter_metrics
+sys.path.append(str(pathlib.Path(__file__).parents[2]))
+from process_metrics import load_metrics_per_dataset
 
 def clf_fit(classifier, X_train, y_train): 
     '''
