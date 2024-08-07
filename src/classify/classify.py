@@ -145,7 +145,6 @@ def clf_pipeline(df, feature_cols, random_state=129, save_dir=None, save_filenam
         clf: fitted classifier
         clf_report: classification report on validation data
     '''
-
     # init classifier 
     print("[INFO:] Initializing XGClassifier ...")
     clf = XGBClassifier(enable_categorical=True, use_label_encoder=False, random_state=random_state)
@@ -175,6 +174,7 @@ def clf_pipeline(df, feature_cols, random_state=129, save_dir=None, save_filenam
             file.write(f"Original dataset: {df.dataset.unique()[0]}, temperature: {df.temperature.unique()[1]}\n") # taking second value as temp as 
             file.write(f"Random state: {random_state}\n")
             file.write(f"{clf_report}\n")
+            file.write(f"Model(s) compared with human:{[model for model in df['model'].unique() if model != 'human']}\n")
             file.write(f"Features: {feature_names}\n")
 
     return splits, clf, clf_report
@@ -193,34 +193,41 @@ def input_parse():
 def main():
     args = input_parse()
 
-    # load data, create splits
+    # paths 
     path = pathlib.Path(__file__)
     datapath = path.parents[2] / "results" / "classify" / "pca_results" / "data"
     savepath = path.parents[2] / "results" / "classify" / "clf_results"
     savepath.mkdir(parents=True, exist_ok=True)
-
+    
+    # load data
     dataset, temp = args.dataset, args.temp
 
     if temp == 1.0:
         temp = int(temp)
 
-    ## ALL FEATURES ## 
-    # load data
     df = pd.read_csv(datapath / f"{dataset}_temp{temp}_data.csv")
     df["dataset"] = dataset
 
+    ## ALL FEATURES, ALL MODELS ## 
     cols = df.columns.tolist()
-
     pc_features = [col for col in cols if "PC" in col]
 
-    print(pc_features)
-
     # fit 
-    splits, clf, clf_report = clf_pipeline(df, random_state=129, feature_cols=pc_features, save_dir=savepath / "clf_reports", save_filename=f"{dataset}_all_features_temp{temp}")
+    splits, clf, clf_report = clf_pipeline(df, random_state=129, feature_cols=pc_features, save_dir=savepath / "clf_reports" / f"{dataset}_temp{temp}", save_filename=f"all_models_all_features")
 
-    # feature importances
+    # get feature importances
     feature_importances = get_feature_importances(splits, clf)
-    plot_feature_importances(feature_importances, save_dir=savepath / "feature_importances", save_filename=f"{dataset}_all_features_temp{temp}")
+    plot_feature_importances(feature_importances, save_dir=savepath / "feature_importances" / f"{dataset}_temp{temp}", save_filename=f"all_models_all_features")
+
+    ## ALL FEATURES, SINGLE MODEL ##
+    models = [model for model in df["model"].unique() if model != "human"]
+    
+    for model in models:
+        model_df = df[(df["model"] == model) | (df["model"] == "human")] # subset to particular model and human
+        splits, clf, clf_report = clf_pipeline(model_df, random_state=129, feature_cols=pc_features, save_dir=savepath / "clf_reports" / f"{dataset}_temp{temp}", save_filename=f"{model}-human_all_features")
+
+        feature_importances = get_feature_importances(splits, clf)
+        plot_feature_importances(feature_importances, save_dir=savepath / "feature_importances" / f"{dataset}_temp{temp}", save_filename=f"{model}-human_all_features")
 
 if __name__ == "__main__":
     main()
