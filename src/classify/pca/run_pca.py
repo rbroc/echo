@@ -88,7 +88,7 @@ def main():
             plot_loadings(loadings, comp, loadingspath / file_name)
 
         # save results
-        pca_df.to_csv(pcafilepath / f"{file_name}_data.csv")
+        pca_df.reset_index().to_csv(pcafilepath / f"{file_name}_data.csv", index=False)
         
         with open(objectspath / f'{file_name}_obj.pkl', 'wb') as file:
             pickle.dump(pca, file)
