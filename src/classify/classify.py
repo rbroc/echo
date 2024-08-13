@@ -13,8 +13,6 @@ from sklearn.model_selection import train_test_split
 from xgboost import XGBClassifier
 from sklearn import metrics
 
-from prepare_data import load_metrics, filter_metrics
-
 def clf_fit(classifier, X_train, y_train): 
     '''
     fit an initialized classifier to training data
@@ -33,7 +31,7 @@ def clf_evaluate(classifier, X, y):
 
     return clf_report
 
-def create_split(df, random_state=129, val_test_size:float=0.15, outcome_col="is_human", feature_cols:list=None, save_path=None, verbose=False):
+def create_split(df, feature_cols:list, random_state:int=129, val_test_size:float=0.15, outcome_col:str="is_human", save_path:pathlib.Path=None, verbose:bool=False):
     '''
     Create X, y from df, split into train, test and val 
 
@@ -42,7 +40,6 @@ def create_split(df, random_state=129, val_test_size:float=0.15, outcome_col="is
         random_state: seed for split for reproducibility
         val_test_size: size of validation and test sets. 0.15 results in 15% val and 15% test. 
         feature_cols: feature columns in df (predictors)
-                      If None, defaults to all viable features (removing outcome column "is_human" and other irrelevant cols)
         outcome_col: column for outcome. Defaults to "is_human"
         verbose: 
         save_path: directory to save splitted data. If None, does not sav
@@ -50,12 +47,7 @@ def create_split(df, random_state=129, val_test_size:float=0.15, outcome_col="is
     Returns: 
         splits: dict with all splits 
     '''
-    # take all cols for X if feature_cols is unspecified, otherwise subset df to incl. only feature_cols
-    if feature_cols == None: 
-        cols_to_drop = ["id", "is_human", "dataset", "sample_params", "model", "temperature", "prompt_number", "unique_id"] +  (["annotations"] if "annotations" in df.columns else []) # drop annotation if present (only present for dailydialog)
-        X = df.drop(columns=cols_to_drop)
-    else:
-        X = df[feature_cols]
+    X = df[feature_cols]
 
     # if model col is present, make explicit categorical for xgboost
     if "model" in X.columns:
@@ -65,8 +57,7 @@ def create_split(df, random_state=129, val_test_size:float=0.15, outcome_col="is
     y = df[[outcome_col]]
 
     splits = {}
-
-    # create train, test, val splits based on val_test_size, save to splits dict. If val_test_size = 0.15, 15% val and 15% test (and stratify by y to keep class balance as much as possible)
+    # create splits based on val_test_size, save to dict. If val_test_size = 0.15, 15% val and 15% test (stratify by y to somewhat keep class balance)
     splits["X_train"], splits["X_test"], splits["y_train"], splits["y_test"] = train_test_split(X, y, test_size=val_test_size*2, random_state=random_state, stratify=y)
 
     # split val from test, stratify by y again 
@@ -90,82 +81,10 @@ def create_split(df, random_state=129, val_test_size:float=0.15, outcome_col="is
     # save splits to save_path if specified
     if save_path: 
         save_path.mkdir(parents=True, exist_ok=True)
-        # get dataset name from df
-        for key, value in splits.items():
+        for key, value in splits.items(): # get dataset name from df
             value.to_csv(save_path / f"{key}.csv")
 
     return splits
-
-def check_splits(splits, df):
-    '''
-    Print groupby and class distribution for splits
-
-    Args:
-        splits: dict with X_train, X_val, X_test, y_train, y_val, y_test
-        df: original dataframe from which splits were created
-    '''
-    # group by dataset and model
-    print("\nPrinting groupby...\n")
-    print(df.groupby(["dataset", "model"]).size())
-
-    print("\nPrinting class distribution... \n")
-    print(f"Y train: {splits['y_train'].value_counts()[0]} AI, {splits['y_train'].value_counts()[1]} human")
-    print(f"Y val: {splits['y_val'].value_counts()[0]} AI, {splits['y_val'].value_counts()[1]} human")
-    print(f"Y test: {splits['y_test'].value_counts()[0]} AI, {splits['y_test'].value_counts()[1]} human")
-
-def clf_pipeline(df, random_state=129, features=None, save_dir=None, save_filename:str="clf_report"): 
-    '''
-    Pipeline for creating splits, fitting classifier, evaluating classifier and saving evaluation report (on validation data)
-
-    Args:
-        df: dataframe to use for classifier
-        random_state: seed for reproducibility
-        features: list of features to use for classifier. If None, uses all viable features
-        save_dir: directory to save classifier report. If None, does not save
-        save_filename: filename for classifier report. Defaults to "clf_report"
-    
-    Returns:
-        splits: dict with X_train, X_val, X_test, y_train, y_val, y_test
-        clf: fitted classifier
-        clf_report: classification report on validation data
-    '''
-
-    # init classifier 
-    print("[INFO:] Initializing XGClassifier ...")
-    clf = XGBClassifier(enable_categorical=True, use_label_encoder=False, random_state=random_state)
-
-    # creating splits 
-    if features: 
-        print(f"[INFO:] Creating splits with features: {features} using random state {random_state} ...")
-    else: 
-        print(f"[INFO:] Creating splits with all features using random state {random_state} ...")
-    
-    splits = create_split(df, random_state=129, val_test_size=0.15, outcome_col="is_human", verbose=False, feature_cols=features)
-
-    # fit classifier
-    print("[INFO:] Fitting classifier ...")
-    clf = clf_fit(clf, splits["X_train"], splits["y_train"])
-
-    # evaluate classifier on val set
-    print("[INFO:] Evaluating classifier ...")
-    clf_report = clf_evaluate(clf, X=splits["X_val"], y=splits["y_val"])
-
-    # save results 
-    if save_dir:
-        print("[INFO:] Saving classifier report ...")
-        save_dir.mkdir(parents=True, exist_ok=True) # create save dir if it doesn't exist
-
-        # get feature names for report from X_train (as list)
-        feature_names = splits["X_train"].columns.tolist()
-
-        with open(f"{save_dir / save_filename}.txt", "w") as file: 
-            file.write(f"Results from model run at {datetime.now()}\n")
-            file.write(f"Original dataset: {df.dataset.unique()[0]}, temperature: {df.temperature.unique()[1]}\n") # taking second value as temp as 
-            file.write(f"Random state: {random_state}\n")
-            file.write(f"{clf_report}\n")
-            file.write(f"Features: {feature_names}\n")
-
-    return splits, clf, clf_report
 
 def get_feature_importances(splits, clf):
     # get feature importance, sort by importance
@@ -193,6 +112,73 @@ def plot_feature_importances(feature_importances_df, save_dir=None, save_filenam
         save_dir.mkdir(parents=True, exist_ok=True)
         plt.savefig(save_dir / f"{save_filename}.png")
 
+def check_splits(splits, df):
+    '''
+    Print groupby and class distribution for splits
+
+    Args:
+        splits: dict with X_train, X_val, X_test, y_train, y_val, y_test
+        df: original dataframe from which splits were created
+    '''
+    # group by dataset and model
+    print("\nPrinting groupby...\n")
+    print(df.groupby(["dataset", "model"]).size())
+
+    print("\nPrinting class distribution... \n")
+    print(f"Y train: {splits['y_train'].value_counts()[0]} AI, {splits['y_train'].value_counts()[1]} human")
+    print(f"Y val: {splits['y_val'].value_counts()[0]} AI, {splits['y_val'].value_counts()[1]} human")
+    print(f"Y test: {splits['y_test'].value_counts()[0]} AI, {splits['y_test'].value_counts()[1]} human")
+
+def clf_pipeline(df, feature_cols, random_state=129, save_dir=None, save_filename:str="clf_report"): 
+    '''
+    Pipeline for creating splits, fitting classifier, evaluating classifier and saving evaluation report (on validation data)
+
+    Args:
+        df: dataframe to use for classifier
+        random_state: seed for reproducibility
+        feature_cols: list of features to use for classifier. If None, uses all viable features
+        save_dir: directory to save classifier report. If None, does not save
+        save_filename: filename for classifier report. Defaults to "clf_report"
+    
+    Returns:
+        splits: dict with X_train, X_val, X_test, y_train, y_val, y_test
+        clf: fitted classifier
+        clf_report: classification report on validation data
+    '''
+    # init classifier 
+    print("[INFO:] Initializing XGClassifier ...")
+    clf = XGBClassifier(enable_categorical=True, use_label_encoder=False, random_state=random_state)
+
+    # creating splits 
+    print(f"[INFO:] Creating splits with features: {feature_cols} using random state {random_state} ...")    
+    splits = create_split(df, feature_cols=feature_cols, random_state=129, val_test_size=0.15, outcome_col="is_human", verbose=False)
+
+    # fit classifier
+    print("[INFO:] Fitting classifier ...")
+    clf = clf_fit(clf, splits["X_train"], splits["y_train"])
+
+    # evaluate classifier on val set
+    print("[INFO:] Evaluating classifier ...")
+    clf_report = clf_evaluate(clf, X=splits["X_val"], y=splits["y_val"])
+
+    # save results 
+    if save_dir:
+        print("[INFO:] Saving classifier report ...")
+        save_dir.mkdir(parents=True, exist_ok=True) # create save dir if it doesn't exist
+
+        # get feature names for report from X_train (as list)
+        feature_names = splits["X_train"].columns.tolist()
+
+        with open(f"{save_dir / save_filename}.txt", "w") as file: 
+            file.write(f"Results from model run at {datetime.now()}\n")
+            file.write(f"Original dataset: {df.dataset.unique()[0]}, temperature: {df.temperature.unique()[1]}\n") # taking second value as temp as 
+            file.write(f"Random state: {random_state}\n")
+            file.write(f"{clf_report}\n")
+            file.write(f"Model(s) compared with human:{[model for model in df['model'].unique() if model != 'human']}\n")
+            file.write(f"Features: {feature_names}\n")
+
+    return splits, clf, clf_report
+
 def input_parse():
     parser = argparse.ArgumentParser()
 
@@ -207,43 +193,41 @@ def input_parse():
 def main():
     args = input_parse()
 
-    # load data, create splits
+    # paths 
     path = pathlib.Path(__file__)
-    datapath = path.parents[2] / "metrics"
-    savepath = path.parents[0] / "clf_results"
+    datapath = path.parents[2] / "results" / "classify" / "pca_results" / "data"
+    savepath = path.parents[2] / "results" / "classify" / "clf_results"
     savepath.mkdir(parents=True, exist_ok=True)
-
+    
+    # load data
     dataset, temp = args.dataset, args.temp
 
     if temp == 1.0:
         temp = int(temp)
 
-    df = load_metrics(human_dir=datapath / "human_metrics", 
-                                    ai_dir=datapath / "ai_metrics",
-                                    dataset=dataset, temp=temp, 
-                                    human_completions_only=True
-            )
-    # filter 
-    df = filter_metrics(df, percent_NA=0.9, percent_zero=0.9, verbose=True, log_file=savepath / "filtered_metrics_log.txt")
+    df = pd.read_csv(datapath / f"{dataset}_temp{temp}_data.csv")
+    df["dataset"] = dataset
 
-    ## ALL FEATURES ## 
+    ## ALL FEATURES, ALL MODELS ## 
+    cols = df.columns.tolist()
+    pc_features = [col for col in cols if "PC" in col]
+
     # fit 
-    splits, clf, clf_report = clf_pipeline(df, random_state=129, features=None, save_dir=savepath / "clf_reports", save_filename=f"{dataset}_all_features_temp{temp}")
+    splits, clf, clf_report = clf_pipeline(df, random_state=129, feature_cols=pc_features, save_dir=savepath / "clf_reports" / f"{dataset}_temp{temp}", save_filename=f"all_models_all_features")
 
-    # feature importances
+    # get feature importances
     feature_importances = get_feature_importances(splits, clf)
-    plot_feature_importances(feature_importances, save_dir=savepath / "feature_importances", save_filename=f"{dataset}_all_features_temp{temp}")
+    plot_feature_importances(feature_importances, save_dir=savepath / "feature_importances" / f"{dataset}_temp{temp}", save_filename=f"all_models_all_features")
 
-    ## SELECTED FEATURES
-    # define selected features
-    selected_features = ["sentence_length_median", "proportion_unique_tokens", "oov_ratio"]
+    ## ALL FEATURES, SINGLE MODEL ##
+    models = [model for model in df["model"].unique() if model != "human"]
+    
+    for model in models:
+        model_df = df[(df["model"] == model) | (df["model"] == "human")] # subset to particular model and human
+        splits, clf, clf_report = clf_pipeline(model_df, random_state=129, feature_cols=pc_features, save_dir=savepath / "clf_reports" / f"{dataset}_temp{temp}", save_filename=f"{model}-human_all_features")
 
-    # fit
-    splits, clf, clf_report = clf_pipeline(df, random_state=129, features=selected_features, save_dir=savepath / "clf_reports", save_filename=f"{dataset}_selected_features_temp{temp}")
-
-    # feature importances
-    feature_importances = get_feature_importances(splits, clf)
-    plot_feature_importances(feature_importances, save_dir=savepath / "feature_importances", save_filename=f"{dataset}_selected_features_temp{temp}")
+        feature_importances = get_feature_importances(splits, clf)
+        plot_feature_importances(feature_importances, save_dir=savepath / "feature_importances" / f"{dataset}_temp{temp}", save_filename=f"{model}-human_all_features")
 
 if __name__ == "__main__":
     main()

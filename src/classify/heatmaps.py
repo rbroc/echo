@@ -7,7 +7,7 @@ import pandas as pd
 import seaborn as sns
 
 import matplotlib.pyplot as plt
-from prepare_data import load_metrics, filter_metrics
+from prepare_metrics import load_metrics, filter_metrics
 
 
 def create_corrM(df, plot_title, save_dir=None, file_name=None):
