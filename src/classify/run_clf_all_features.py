@@ -47,7 +47,9 @@ def main():
     # get feature importances
     feature_importances = get_feature_importances(splits, clf)
     plot_feature_importances(feature_importances, save_dir=savepath / "feature_importances" / f"{dataset}_temp{temp}", save_filename=f"all_models_all_features")
-
+    
+    feature_importances.reset_index().to_csv(savepath / "feature_importances" / f"{dataset}_temp{temp}" / "all_models_all_features.csv", index=False) # save feature importances to csv (to load in top_features)
+    
     ## ALL FEATURES, SINGLE MODEL ##
     models = [model for model in df["model"].unique() if model != "human"]
     
