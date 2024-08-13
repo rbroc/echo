@@ -1,5 +1,5 @@
 '''
-Construct classifiers
+Run XGBOOST classifier for each dataset and temp combination, save results to /results/classify/clf_results on all features.
 '''
 import pathlib
 import argparse
