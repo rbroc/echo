@@ -19,7 +19,23 @@ def load_file(file):
     
     return df
 
-def load_human_metrics(human_dir: pathlib.Path, dataset:str = None, human_completions_only=True):
+def drop_lengths(df, verbose=True):
+    '''
+    Drop rows based on min and max doc lengths
+    '''
+    # extract min and max tokens from completions, drop cols that are below or above these in doc length
+    min_tokens, max_tokens = extract_min_max_tokens(df["dataset"].unique()[0])
+
+    # drop cols that are below or above min and max tokens
+    filtered_df = df[(df["doc_length"] >= min_tokens) & (df["doc_length"] <= max_tokens)]
+
+    # print info msg
+    if verbose:
+        print(f"[INFO:] {df['dataset'].unique()[0].upper()}: Dropped {len(df) - len(filtered_df)} rows on doc length. Tokens min/max {min_tokens}/{max_tokens}. Final doc length min/max: {int(min(filtered_df['doc_length']))}/{int(max(filtered_df['doc_length']))}")
+
+    return filtered_df
+
+def load_human_metrics(human_dir: pathlib.Path, dataset:str = None, human_completions_only=True, filter_lengths=True):
     '''
     load human metrics
 
@@ -50,9 +66,13 @@ def load_human_metrics(human_dir: pathlib.Path, dataset:str = None, human_comple
     # load all files into a list of dfs
     dfs = [load_file(file) for file in file_paths]
 
+    # filter lengths
+    if filter_lengths:
+        dfs = [drop_lengths(df, verbose=True) for df in dfs]
+
     return dfs
 
-def load_ai_metrics(ai_dir: pathlib.Path, dataset:str = None, temp:float = None):
+def load_ai_metrics(ai_dir: pathlib.Path, dataset:str = None, temp:float = None, filter_lengths=True):
     '''
     load ai metrics
 
@@ -64,7 +84,7 @@ def load_ai_metrics(ai_dir: pathlib.Path, dataset:str = None, temp:float = None)
     Returns:
         dfs: list of dataframes
     '''
-    # get file paths for ai metrics, if dataset is specified, filter by dataset and temperature if specified
+    # get file paths for ai metrics, if dataset is specified, filter by datasef
     file_paths = [file for file in ai_dir.iterdir() if dataset is None or dataset in file.name]
 
     # if temperature is specified, filter by temperature
@@ -76,30 +96,16 @@ def load_ai_metrics(ai_dir: pathlib.Path, dataset:str = None, temp:float = None)
         if len(file_paths) == 0:
             raise ValueError(f"No files found for temperature {temp}.")
     
-    # sort file paths
     file_paths = sorted(file_paths)
 
     # load all files into a list of dfs
     dfs = [load_file(file) for file in file_paths]
+
+    # filter lengths
+    if filter_lengths:
+        dfs = [drop_lengths(df, verbose=True) for df in dfs]
   
     return dfs
-
-def drop_lengths(df, verbose=True):
-    '''
-    Drop rows based on min and max doc lengths
-    '''
-    # extract min and max tokens from completions, drop cols that are below or above these in doc length
-    min_tokens, max_tokens = extract_min_max_tokens(df["dataset"].unique()[0])
-
-    # drop cols that are below or above min and max tokens
-    filtered_df = df[(df["doc_length"] >= min_tokens) & (df["doc_length"] <= max_tokens)]
-
-    # print info msg
-    if verbose:
-        print(f"[INFO:] Dropped {len(df) - len(filtered_df)} rows based on doc length. Min tokens: {min_tokens}, Max tokens: {max_tokens}")
-        print(f"[INFO:] Min len in df: {filtered_df['doc_length'].min()}, Max len in df: {filtered_df['doc_length'].max()}")
-
-    return filtered_df
 
 def load_metrics(human_dir: pathlib.Path, ai_dir:pathlib.Path, filter_lengths=True, human_completions_only=True, dataset: str = None, temp:float= None):
     '''
@@ -111,8 +117,8 @@ def load_metrics(human_dir: pathlib.Path, ai_dir:pathlib.Path, filter_lengths=Tr
         temp: temperature of generations. If None, loads all temperatures.
     '''
     # load multiple files 
-    human_dfs = load_human_metrics(human_dir, dataset=dataset, human_completions_only=human_completions_only)
-    ai_dfs = load_ai_metrics(ai_dir, dataset=dataset, temp=temp)
+    human_dfs = load_human_metrics(human_dir, dataset=dataset, human_completions_only=human_completions_only, filter_lengths=filter_lengths)
+    ai_dfs = load_ai_metrics(ai_dir, dataset=dataset, temp=temp, filter_lengths=filter_lengths)
 
     all_dfs = human_dfs + ai_dfs
 
@@ -125,8 +131,5 @@ def load_metrics(human_dir: pathlib.Path, ai_dir:pathlib.Path, filter_lengths=Tr
     # reset index, add unique id col to first col 
     final_df = final_df.reset_index(drop=True)
     final_df.insert(0, "unique_id", range(0, len(final_df)))
-
-    if filter_lengths:
-        final_df = drop_lengths(final_df)
 
     return final_df

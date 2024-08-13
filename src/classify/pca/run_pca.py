@@ -53,14 +53,9 @@ def main():
         # cols that are directly tied to type of generation (and should therefore not be included in classification)
         type_cols = ["model", "id", "is_human", "unique_id", "sample_params", "temperature", "prompt_number", "dataset", "annotations"] 
         
-        # cols found by running identify_NA_metrics.py
-        na_cols = ['contains_lorem ipsum', 'duplicate_line_chr_fraction', 
-                    'duplicate_ngram_chr_fraction_10', 'duplicate_ngram_chr_fraction_7', 
-                    'duplicate_ngram_chr_fraction_8', 'duplicate_ngram_chr_fraction_9', 
-                    'duplicate_paragraph_chr_fraction', 'pos_prop_SYM', 'proportion_bullet_points', 
-                    'proportion_ellipsis', 'symbol_to_word_ratio_#', 'first_order_coherence', 'second_order_coherence', 'smog'] 
-
-        manually_selected_cols = ["pos_prop_SPACE", "pos_prop_PUNCT"]
+        # cols found by running identify_NA_metrics.py 
+        na_cols = ['first_order_coherence', 'second_order_coherence', 'smog', 'pos_prop_SPACE']
+        manually_selected_cols = ["pos_prop_PUNCT"]
         
         # final cols to drop 
         cols_to_drop = type_cols + na_cols + manually_selected_cols
