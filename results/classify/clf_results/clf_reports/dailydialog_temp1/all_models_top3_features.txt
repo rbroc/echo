@@ -1,0 +1,14 @@
+Results from model run at 2024-08-13 14:55:41.570860
+Original dataset: dailydialog, temperature: 1.0
+Random state: 129
+              precision    recall  f1-score   support
+
+           0       0.85      0.94      0.89      2994
+           1       0.59      0.36      0.45       750
+
+    accuracy                           0.82      3744
+   macro avg       0.72      0.65      0.67      3744
+weighted avg       0.80      0.82      0.80      3744
+
+Model(s) compared with human:['beluga7b', 'llama2_chat13b', 'mistral7b', 'llama2_chat7b']
+Features: ['PC1', 'PC21', 'PC58']

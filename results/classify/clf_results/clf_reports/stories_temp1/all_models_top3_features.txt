@@ -1,0 +1,14 @@
+Results from model run at 2024-08-13 14:55:51.733719
+Original dataset: stories, temperature: 1.0
+Random state: 129
+              precision    recall  f1-score   support
+
+           0       0.92      0.95      0.93      2996
+           1       0.77      0.65      0.71       749
+
+    accuracy                           0.89      3745
+   macro avg       0.84      0.80      0.82      3745
+weighted avg       0.89      0.89      0.89      3745
+
+Model(s) compared with human:['beluga7b', 'llama2_chat13b', 'mistral7b', 'llama2_chat7b']
+Features: ['PC1', 'PC7', 'PC8']
