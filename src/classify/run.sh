@@ -18,6 +18,6 @@ for dataset in "${datasets[@]}"
 do
     for temp in "${temperatures[@]}"
     do  
-        python classify.py --dataset "$dataset" --temp "$temp"
+        python run_clf_all_features.py --dataset "$dataset" --temp "$temp"
     done
 done
