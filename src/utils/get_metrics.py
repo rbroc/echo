@@ -23,7 +23,6 @@ def get_descriptive_metrics(df:pd.DataFrame, text_column:str, spacy_mdl:str="en_
     
     return final_df 
 
-
 def get_all_metrics(df:pd.DataFrame, text_column:str, spacy_mdl:str="en_core_web_md"):
     '''
     Extract all metrics using textdescriptives
@@ -123,8 +122,8 @@ def get_information_metrics(df:pd.DataFrame, text_column:str="completions", mode
     print(f"[INFO:] Computing entropy ...")
     entropy_scores = [convert_to_entropy(score) for score in perplexity_scores]
 
-    # add to df
-    df["perplexity_manual"] = perplexity_scores
-    df["entropy_manual"] = entropy_scores
+    # overwrite existing cols
+    df["perplexity"] = perplexity_scores
+    df["entropy"] = entropy_scores
     
     return df
