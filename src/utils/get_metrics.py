@@ -68,7 +68,7 @@ def get_all_metrics_pipe(df:pd.DataFrame, text_column:str, batch_size:int=1, n_p
 
     return final_df
 
-def convert_to_entropy(perplexity: float)
+def convert_to_entropy(perplexity: float):
     '''
     Compute entropy from perplexity 
     (since HF's perplexity is "defined as the exponentiated average negative log-likelihood of a sequence, calculated with exponent base `e`."), we just take log(perplexity) to get entropy.
