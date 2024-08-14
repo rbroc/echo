@@ -5,6 +5,7 @@ import pandas as pd
 import spacy 
 import textdescriptives as td
 from evaluate import load
+import numpy as np
 
 def get_descriptive_metrics(df:pd.DataFrame, text_column:str, spacy_mdl:str="en_core_web_md"):
     '''
@@ -116,7 +117,7 @@ def get_information_metrics(df:pd.DataFrame, text_column:str="completions", mode
     results = compute_perplexity(texts, model_id=model_id, batch_size=batch_size)
 
     # get perplexity only (returns also mean)
-    perplexity_scores = [result["perplexity"] for result in results]
+    perplexity_scores = results["perplexities"]
 
     # convert to entropy
     print(f"[INFO:] Computing entropy ...")
@@ -125,5 +126,5 @@ def get_information_metrics(df:pd.DataFrame, text_column:str="completions", mode
     # add to df
     df["perplexity_manual"] = perplexity_scores
     df["entropy_manual"] = entropy_scores
-
+    
     return df
