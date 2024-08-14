@@ -125,5 +125,8 @@ def get_information_metrics(df:pd.DataFrame, text_column:str="completions", mode
     # overwrite existing cols
     df["perplexity"] = perplexity_scores
     df["entropy"] = entropy_scores
+
+    # drop "per_word_perplexity" as it no longer makes sense (not connected to the perplexity metric that was computed)
+    df.drop(columns=["per_word_perplexity"], inplace=True)
     
     return df
