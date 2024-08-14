@@ -168,7 +168,7 @@ def main():
                                     dataset=args.dataset, 
                                     batch_size=batch_size,
                                     n_process=n_cores,
-                                    compute_perplexity=True,
+                                    compute_perplexity=False, # for now until we decide on a model
                                     save_dir = metrics_path / "human_metrics"
                                     )
 
@@ -183,7 +183,7 @@ def main():
                                     dataset=args.dataset, 
                                     temp=temp, 
                                     batch_size=batch_size, 
-                                    compute_perplexity=True,
+                                    compute_perplexity=False, # for now until we decide on a model
                                     n_process=n_cores,
                                     save_dir= metrics_path / "ai_metrics"
                                     )
@@ -194,7 +194,7 @@ def main():
                                     dataset=args.dataset, 
                                     batch_size=20,
                                     n_process=n_cores,
-                                    compute_perplexity=True,
+                                    compute_perplexity=False, # for now until we decide on a model
                                     save_dir = metrics_path / "human_metrics"
                                     )
 
