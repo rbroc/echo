@@ -159,7 +159,7 @@ def main():
 
     # get cores for multiprocessing (-1 for safety)
     n_cores = mp.cpu_count() - 1
-    batch_size = 50
+    batch_size = 100
 
     # HUMAN PROCESSING
     if args.human_only:
