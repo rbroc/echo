@@ -16,7 +16,7 @@ def get_descriptive_metrics(df:pd.DataFrame, text_column:str, spacy_mdl:str="en_
 
     # extract metrics, select only relevant cols 
     metrics_df = td.extract_metrics(text=text, spacy_model=spacy_mdl, metrics=["descriptive_stats", "quality"])
-    subset_metrics_df = metrics[["doc_length", "n_tokens", "n_characters", "n_sentences"]]
+    subset_metrics_df = metrics_df[["doc_length", "n_tokens", "n_characters", "n_sentences"]]
 
     # combine with df 
     final_df = pd.concat([df, subset_metrics_df], axis=1)
