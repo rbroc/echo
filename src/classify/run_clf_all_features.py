@@ -6,7 +6,7 @@ import argparse
 import pandas as pd
 import sys
 sys.path.append(str(pathlib.Path(__file__).parents[2]))
-from src.utils.classify import clf_pipeline, get_feature_importances, plot_feature_importances
+from src.utils.classify import create_split, clf_pipeline, get_feature_importances, plot_feature_importances
 
 def input_parse():
     parser = argparse.ArgumentParser()
@@ -38,11 +38,25 @@ def main():
     df["dataset"] = dataset
 
     ## ALL FEATURES, ALL MODELS ## 
+    # identify feature cols 
     cols = df.columns.tolist()
     pc_features = [col for col in cols if "PC" in col]
 
+    # split data 
+    splits = create_split(df, feature_cols=pc_features, random_state=129, val_test_size=0.15, outcome_col="is_human")
+
     # fit 
-    splits, clf, clf_report = clf_pipeline(df, random_state=129, feature_cols=pc_features, save_dir=savepath / "clf_reports" / f"{dataset}_temp{temp}", save_filename=f"all_models_all_features")
+    clf, clf_report = clf_pipeline(
+                                    df = df, 
+                                    model = "XGBoost",
+                                    X_train = splits["X_train"],
+                                    y_train = splits["y_train"],
+                                    X_val = splits["X_val"],
+                                    y_val = splits["y_val"],
+                                    random_state = 129, 
+                                    save_dir = savepath / "clf_reports" / f"{dataset}_temp{temp}", 
+                                    save_filename = f"all_models_all_features"
+                                    )
 
     # get feature importances
     feature_importances = get_feature_importances(splits, clf)
@@ -55,9 +69,23 @@ def main():
     
     for model in models:
         model_df = df[(df["model"] == model) | (df["model"] == "human")] # subset to particular model and human
-        splits, clf, clf_report = clf_pipeline(model_df, random_state=129, feature_cols=pc_features, save_dir=savepath / "clf_reports" / f"{dataset}_temp{temp}", save_filename=f"{model}-human_all_features")
 
-        feature_importances = get_feature_importances(splits, clf)
+        # split data
+        model_splits = create_split(model_df, feature_cols=pc_features, random_state=129, val_test_size=0.15, outcome_col="is_human")
+
+        clf, clf_report = clf_pipeline(
+                                        df = model_df,
+                                        model = "XGBoost", 
+                                        X_train = model_splits["X_train"],
+                                        y_train = model_splits["y_train"],
+                                        X_val = model_splits["X_val"],
+                                        y_val = model_splits["y_val"],
+                                        random_state = 129, 
+                                        save_dir = savepath / "clf_reports" / f"{dataset}_temp{temp}", 
+                                        save_filename = f"{model}-human_all_features"
+                                        )
+
+        feature_importances = get_feature_importances(model_splits, clf)
         plot_feature_importances(feature_importances, save_dir=savepath / "feature_importances" / f"{dataset}_temp{temp}", save_filename=f"{model}-human_all_features")
 
 if __name__ == "__main__":

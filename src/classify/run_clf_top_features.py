@@ -6,7 +6,7 @@ import argparse
 import pandas as pd
 import sys
 sys.path.append(str(pathlib.Path(__file__).parents[2]))
-from src.utils.classify import clf_pipeline
+from src.utils.classify import clf_pipeline, create_split
 
 def input_parse():
     parser = argparse.ArgumentParser()
@@ -55,8 +55,21 @@ def main():
     top_features_df = extract_top_features(feature_importances, top_n_features=top_n)
     top_features = top_features_df["feature"].tolist()
 
+    # create splits (with top features)
+    splits = create_split(df, feature_cols=top_features, random_state=129, val_test_size=0.15, outcome_col="is_human")
+
     # fit 
-    splits, clf, clf_report = clf_pipeline(df, random_state=129, feature_cols=top_features, save_dir=savepath / "clf_reports" / f"{dataset}_temp{temp}", save_filename=f"all_models_top{top_n}_features")
+    clf, clf_report = clf_pipeline(
+                                    df = df, 
+                                    model = "XGBoost",
+                                    X_train = splits["X_train"],
+                                    y_train = splits["y_train"],
+                                    X_val = splits["X_val"],
+                                    y_val = splits["y_val"],
+                                    random_state = 129, 
+                                    save_dir = savepath / "clf_reports" / f"{dataset}_temp{temp}", 
+                                    save_filename = f"all_models_top{top_n}_features"
+                                    )
 
 if __name__ == "__main__":
     main()

@@ -3,14 +3,16 @@ functions for classification tasks (e.g. fitting classifier, evaluating classifi
 Currently only used in src/classify
 '''
 import pathlib
-import pandas as pd
-
+from typing import Literal
 from datetime import datetime
+
+import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 
 from sklearn.model_selection import train_test_split
 from xgboost import XGBClassifier
+from sklearn.linear_model import LogisticRegression
 from sklearn import metrics
 
 def clf_fit(classifier, X_train, y_train): 
@@ -58,6 +60,7 @@ def create_split(df, feature_cols:list, random_state:int=129, val_test_size:floa
 
     splits = {}
     # create splits based on val_test_size, save to dict. If val_test_size = 0.15, 15% val and 15% test (stratify by y to somewhat keep class balance)
+    print(f"[INFO:] Creating splits with features: {feature_cols} using random state {random_state} ...")   
     splits["X_train"], splits["X_test"], splits["y_train"], splits["y_test"] = train_test_split(X, y, test_size=val_test_size*2, random_state=random_state, stratify=y)
 
     # split val from test, stratify by y again 
@@ -129,37 +132,37 @@ def check_splits(splits, df):
     print(f"Y val: {splits['y_val'].value_counts()[0]} AI, {splits['y_val'].value_counts()[1]} human")
     print(f"Y test: {splits['y_test'].value_counts()[0]} AI, {splits['y_test'].value_counts()[1]} human")
 
-def clf_pipeline(df, feature_cols, random_state=129, save_dir=None, save_filename:str="clf_report"): 
+def clf_pipeline(df, model:Literal["XGBoost", "LogisticRegression"], X_train, y_train, X_val, y_val, random_state=129, save_dir=None, save_filename:str="clf_report"): 
     '''
-    Pipeline for creating splits, fitting classifier, evaluating classifier and saving evaluation report (on validation data)
+    Pipeline for fitting instantiated classifier, evaluating classifier and saving evaluation report (on validation data)
 
     Args:
-        df: dataframe to use for classifier
+        df: dataframe that is trained on (for metadata)
+        model: classifier to fit
         random_state: seed for reproducibility
-        feature_cols: list of features to use for classifier. If None, uses all viable features
         save_dir: directory to save classifier report. If None, does not save
         save_filename: filename for classifier report. Defaults to "clf_report"
     
     Returns:
-        splits: dict with X_train, X_val, X_test, y_train, y_val, y_test
         clf: fitted classifier
         clf_report: classification report on validation data
     '''
     # init classifier 
-    print("[INFO:] Initializing XGClassifier ...")
-    clf = XGBClassifier(enable_categorical=True, use_label_encoder=False, random_state=random_state)
+    if model == "XGBoost":
+        print("[INFO:] Initializing XGClassifier ...")
+        clf = XGBClassifier(enable_categorical=True, use_label_encoder=False, random_state=random_state)
 
-    # creating splits 
-    print(f"[INFO:] Creating splits with features: {feature_cols} using random state {random_state} ...")    
-    splits = create_split(df, feature_cols=feature_cols, random_state=129, val_test_size=0.15, outcome_col="is_human", verbose=False)
+    elif model == "LogisticRegression":
+        print("[INFO:] Initializing LogisticRegression ...")
+        clf = LogisticRegression(random_state=random_state)
 
     # fit classifier
     print("[INFO:] Fitting classifier ...")
-    clf = clf_fit(clf, splits["X_train"], splits["y_train"])
+    clf = clf_fit(clf, X_train, y_train)
 
     # evaluate classifier on val set
     print("[INFO:] Evaluating classifier ...")
-    clf_report = clf_evaluate(clf, X=splits["X_val"], y=splits["y_val"])
+    clf_report = clf_evaluate(clf, X=X_val, y=y_val)
 
     # save results 
     if save_dir:
@@ -167,7 +170,7 @@ def clf_pipeline(df, feature_cols, random_state=129, save_dir=None, save_filenam
         save_dir.mkdir(parents=True, exist_ok=True) # create save dir if it doesn't exist
 
         # get feature names for report from X_train (as list)
-        feature_names = splits["X_train"].columns.tolist()
+        feature_names = X_train.columns.tolist()
 
         with open(f"{save_dir / save_filename}.txt", "w") as file: 
             file.write(f"Results from model run at {datetime.now()}\n")
@@ -177,4 +180,4 @@ def clf_pipeline(df, feature_cols, random_state=129, save_dir=None, save_filenam
             file.write(f"Model(s) compared with human:{[model for model in df['model'].unique() if model != 'human']}\n")
             file.write(f"Features: {feature_names}\n")
 
-    return splits, clf, clf_report
+    return clf, clf_report
