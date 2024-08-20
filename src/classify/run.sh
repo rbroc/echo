@@ -31,3 +31,12 @@ do
         python run_clf_top_features.py --dataset "$dataset" --temp "$temp"
     done
 done
+
+echo "[INFO:] Running classification with TF-IDF"
+for dataset in "${datasets[@]}"
+do
+    for temp in "${temperatures[@]}"
+    do  
+        python run_clf_tfidf.py --dataset "$dataset" --temp "$temp"
+    done
+done
