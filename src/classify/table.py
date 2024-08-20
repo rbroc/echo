@@ -49,7 +49,6 @@ def create_multi_header_from_clf(df:pd.DataFrame, type:str):
     hacky solution (for now)
     '''
     df_class = df[df['class'].isin(['0', '1'])]
-    df_non_class = df[2:]
     
     # Set the 'class' column as the index
     df_class.set_index('class', inplace=True)
@@ -80,6 +79,11 @@ def create_multi_header_from_clf(df:pd.DataFrame, type:str):
     # drop index
     table_df.reset_index(drop=True, inplace=True)
 
+    # add accuracy from df (row)
+    accuracy = df[df['class'] == 'accuracy']['f1-score'].values[0] # accuracy is stored in the f1-score column
+   
+    table_df["accuracy"] = accuracy
+    
     return table_df
 
 def input_parse():
