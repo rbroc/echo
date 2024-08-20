@@ -4,6 +4,7 @@ Present txt file as table
 Code from: https://github.com/MinaAlmasi/CIFAKE-image-classifiers/blob/main/src/modules/visualisation.py
 '''
 import pathlib
+import argparse
 import pandas as pd
 
 def create_df_from_clf_txt(filepath:pathlib.Path, skiprows=[0, 1, 2], nrows=5):
@@ -43,47 +44,10 @@ def create_df_from_clf_txt(filepath:pathlib.Path, skiprows=[0, 1, 2], nrows=5):
     return df
 
 
-def create_multi_header(df:pd.DataFrame, filename:str="test.html", savepath:pathlib.Path=None):
+def create_multi_header_from_clf(df:pd.DataFrame, type:str):
     '''
     hacky solution (for now)
     '''
-    df_class = df[df['class'].isin(['0', '1'])]
-
-    classes = [0, 1]
-    metrics = ['precision', 'recall', 'f1-score', 'support']
-
-    # create a multi-index dataframe
-    df_multi = pd.DataFrame(index=classes, columns=pd.MultiIndex.from_product([metrics, classes]))
-
-    # fill in the multi-index dataframe
-    for c in classes:
-        for m in metrics:
-            df_multi[m, c] = df_class.loc[str(c), m]
-
-    # print first row
-    table_df = df_multi.iloc[0].to_frame().T
-
-    # add col
-    table_df["type"] = "all_models_all_features"
-
-    # place type first in columns
-    table_df = table_df[["type", "precision", "recall", "f1-score", "support"]]
-
-    # drop index
-    table_df.reset_index(drop=True, inplace=True)
-
-    # save 
-    table_df.to_html("test.html")
-
-
-def main(): 
-    path = pathlib.Path(__file__)
-
-    savepath = path.parents[2] / "results" / "classify" / "clf_results"
-    filepath = savepath / "clf_reports" / "dailymail_cnn_temp1" / "all_models_all_features.txt"
-
-    df = create_df_from_clf_txt(filepath)
-
     df_class = df[df['class'].isin(['0', '1'])]
     df_non_class = df[2:]
     
@@ -96,7 +60,7 @@ def main():
     classes = [0, 1]
     metrics = ['precision', 'recall', 'f1-score', 'support']
 
-    # create a multi-index dataframe
+    # create a multi-index 
     df_multi = pd.DataFrame(index=classes, columns=pd.MultiIndex.from_product([metrics, classes]))
 
     # fill in the multi-index dataframe
@@ -108,7 +72,7 @@ def main():
     table_df = df_multi.iloc[0].to_frame().T
 
     # add col
-    table_df["type"] = "all_models_all_features"
+    table_df["type"] = type
 
     # place type first in columns
     table_df = table_df[["type", "precision", "recall", "f1-score", "support"]]
@@ -116,10 +80,47 @@ def main():
     # drop index
     table_df.reset_index(drop=True, inplace=True)
 
-    # save 
-    table_df.to_html("test.html")
+    return table_df
 
+def input_parse():
+    parser = argparse.ArgumentParser()
 
+    # add dataset as arg 
+    parser.add_argument("-d", "--dataset", default="dailymail_cnn", help="Choose between 'stories', 'dailymail_cnn', 'mrpc', 'dailydialog'", type=str)
+    parser.add_argument("-t", "--temp", default=1, help="Temperature of generations", type=float)
+
+    args = parser.parse_args()
+
+    return args
+
+def main(): 
+    args = input_parse()
+
+    path = pathlib.Path(__file__)
+
+    savepath = path.parents[2] / "results" / "classify" / "clf_results"
+    datapath = savepath / "clf_reports" / f"{args.dataset}_temp{args.temp}"
+
+    dfs = []
+
+    # get filepaths 
+    filepaths = [file for file in datapath.iterdir() if file.suffix == ".txt"]
+
+    # sort filepaths by name
+    filepaths = sorted(filepaths, key=lambda x: x.stem)
+
+    for file in filepaths:
+        df = create_df_from_clf_txt(file)
+        table_df = create_multi_header_from_clf(df, file.stem)
+        dfs.append(table_df)
+
+    final_df = pd.concat(dfs)
+
+    # save to html
+    final_df.to_html(datapath / "all_results.html", index=False)
+
+    # save to csv
+    final_df.to_csv(datapath / "all_results.csv", index=False)
 
 
 if __name__ == "__main__":
