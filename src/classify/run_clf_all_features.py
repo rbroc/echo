@@ -53,6 +53,7 @@ def main():
                                     y_train = splits["y_train"],
                                     X_val = splits["X_val"],
                                     y_val = splits["y_val"],
+                                    feature_names = splits["X_train"].columns.tolist(),
                                     random_state = 129, 
                                     save_dir = savepath / "clf_reports" / f"{dataset}_temp{temp}", 
                                     save_filename = f"all_models_all_features"
@@ -80,6 +81,7 @@ def main():
                                         y_train = model_splits["y_train"],
                                         X_val = model_splits["X_val"],
                                         y_val = model_splits["y_val"],
+                                        feature_names = splits["X_train"].columns.tolist(),
                                         random_state = 129, 
                                         save_dir = savepath / "clf_reports" / f"{dataset}_temp{temp}", 
                                         save_filename = f"{model}-human_all_features"

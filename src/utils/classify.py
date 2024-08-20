@@ -132,7 +132,7 @@ def check_splits(splits, df):
     print(f"Y val: {splits['y_val'].value_counts()[0]} AI, {splits['y_val'].value_counts()[1]} human")
     print(f"Y test: {splits['y_test'].value_counts()[0]} AI, {splits['y_test'].value_counts()[1]} human")
 
-def clf_pipeline(df, model:Literal["XGBoost", "LogisticRegression"], X_train, y_train, X_val, y_val, random_state=129, save_dir=None, save_filename:str="clf_report"): 
+def clf_pipeline(df, model:Literal["XGBoost", "LogisticRegression"], X_train, y_train, X_val, y_val, feature_names:list, random_state=129, save_dir=None, save_filename:str="clf_report"): 
     '''
     Pipeline for fitting instantiated classifier, evaluating classifier and saving evaluation report (on validation data)
 
@@ -168,9 +168,6 @@ def clf_pipeline(df, model:Literal["XGBoost", "LogisticRegression"], X_train, y_
     if save_dir:
         print("[INFO:] Saving classifier report ...")
         save_dir.mkdir(parents=True, exist_ok=True) # create save dir if it doesn't exist
-
-        # get feature names for report from X_train (as list)
-        feature_names = X_train.columns.tolist()
 
         with open(f"{save_dir / save_filename}.txt", "w") as file: 
             file.write(f"Results from model run at {datetime.now()}\n")

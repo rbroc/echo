@@ -66,6 +66,7 @@ def main():
                                     y_train = splits["y_train"],
                                     X_val = splits["X_val"],
                                     y_val = splits["y_val"],
+                                    feature_names = splits["X_train"].columns.tolist(),
                                     random_state = 129, 
                                     save_dir = savepath / "clf_reports" / f"{dataset}_temp{temp}", 
                                     save_filename = f"all_models_top{top_n}_features"
