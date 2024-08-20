@@ -1,0 +1,9 @@
+type,precision,precision,recall,recall,f1-score,f1-score,support,support,accuracy
+,0,1,0,1,0,1,0,1,
+all_models_all_features,0.99,0.97,0.99,0.96,0.99,0.96,1800,450,0.98
+all_models_tfidf_1000_features,0.95,0.92,0.98,0.79,0.97,0.85,1800,450,0.94
+all_models_top3_features,0.98,0.95,0.99,0.92,0.98,0.94,1800,450,0.98
+beluga7b-human_all_features,0.97,0.97,0.97,0.97,0.97,0.97,450,450,0.97
+llama2_chat13b-human_all_features,1.00,0.99,0.99,1.00,0.99,0.99,450,450,0.99
+llama2_chat7b-human_all_features,1.00,0.99,0.99,1.00,1.00,1.00,450,450,1.00
+mistral7b-human_all_features,1.00,0.99,0.99,1.00,0.99,0.99,450,450,0.99

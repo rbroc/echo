@@ -17,11 +17,11 @@ Refer to the project description [here](https://cc.au.dk/en/clai/current-project
 
 2. 📈 **Generating Data at Large Scale** (Completed)
 
-3. 🧪 **Experimental Design**
+3. 📊 **Extracting Metrics** (Completed)
 
-4. 📊 **Extracting Metrics / Analyzing Data**
+4. 🤖 **Training Classifiers** (In progress)
 
-5. 🤖 **Training Classifiers**
+5. 🧪 **Experimental Design** (Upcoming)
 
 ## Repository Overview
 The main contents of the repository is listed below.
@@ -35,7 +35,7 @@ The main contents of the repository is listed below.
 | `tokens` |Place your `.txt` token here for the HuggingFace Hub to run `llama2` models.|
 
 ## Usage 
-The setup was tested on Ubuntu 22.04 (UCloud) using Python 3.10. 
+The setup was tested on Ubuntu **22.04** (UCloud, Coder Python **1.87.2**) using Python **3.10.12**. 
 
 ### Setup 
 To install necessary requirements in a virtual environment (`env`), please run the `setup.sh` in the terminal:

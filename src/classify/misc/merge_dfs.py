@@ -1,10 +1,11 @@
 import pathlib
-from prepare_metrics import load_metrics
+
 
 import sys 
 sys.path.append(str(pathlib.Path(__file__).parents[2] / "src"))
 from utils.process_generations import preprocess_datasets
 from tqdm import tqdm
+from utils.process_metrics import load_metrics
 
 def main(): 
     path = pathlib.Path(__file__)
