@@ -1,4 +1,5 @@
 import pathlib 
+import multiprocessing as mp
 import pandas as pd
 import spacy
 
@@ -27,7 +28,8 @@ def main():
     df = preprocess_datasets(ai_dir, human_dir, models, datasets, subset=99, temp=None, prompt_numbers=None)
 
     print("[INFO:] EXTRACTING LOW LEVEL METRICS")
-    metrics_df = get_descriptive_metrics(df, "completions", "en_core_web_lg")
+    n_cores = mp.cpu_count() - 1
+    metrics_df = get_descriptive_metrics(df, "completions", "en_core_web_lg", batch_size=20, n_process=n_cores)
 
     print("[INFO:] RUNNING PCA ...")
     pca, final_df = run_PCA(metrics_df, feature_names=["doc_length", "n_tokens", "n_characters", "n_sentences"], n_components=4)
@@ -38,10 +40,10 @@ def main():
     final_df.to_csv(results_path / "PCA_data.csv")
 
     print("[INFO:] PLOTTING PCA")
-    loadings_matrix = get_loadings(pca, feature_names=["doc_length", "n_tokens", "n_characters", "n_sentences"],  n_components=4)
+    loadings = get_loadings(pca, feature_names=["doc_length", "n_tokens", "n_characters", "n_sentences"])
 
-    for component in range(1, 5):
-        plot_loadings(loadings_matrix, component, results_path)
+    for component in loadings:
+        plot_loadings(loadings, component, results_path)
 
 if __name__ == "__main__":
     main()
