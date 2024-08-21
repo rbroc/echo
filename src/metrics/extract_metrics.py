@@ -13,7 +13,7 @@ import multiprocessing as mp
 import sys
 sys.path.append(str(pathlib.Path(__file__).parents[2]))
 from src.utils.process_generations import get_ai_paths, format_ai_data
-from src.utils.get_metrics import get_all_metrics_pipe, get_information_metrics
+from src.utils.get_metrics import get_all_metrics, get_information_metrics
 
 def input_parse():
     parser = ArgumentParser()
@@ -70,7 +70,7 @@ def get_ai_metrics(
     ai_df = ai_df.drop(columns=["doc_length"])
 
     # extract metrics
-    completions_df = get_all_metrics_pipe(
+    completions_df = get_all_metrics(
                                             ai_df, 
                                             text_column="completions", 
                                             batch_size=batch_size, 
@@ -125,8 +125,8 @@ def get_human_metrics(
     human_df["model"] = "human"
 
     # process source, completions
-    source_df = get_all_metrics_pipe(human_df, text_column="source", batch_size=batch_size, n_process=n_process)
-    completions_df = get_all_metrics_pipe(human_df, text_column="human_completions", batch_size=batch_size, n_process=n_process)
+    source_df = get_all_metrics(human_df, text_column="source", batch_size=batch_size, n_process=n_process)
+    completions_df = get_all_metrics(human_df, text_column="human_completions", batch_size=batch_size, n_process=n_process)
 
     # compute perplexity and entropy manually
     if compute_perplexity:

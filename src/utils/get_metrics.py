@@ -7,38 +7,32 @@ import textdescriptives as td
 from evaluate import load
 import numpy as np
 
-def get_descriptive_metrics(df:pd.DataFrame, text_column:str, spacy_mdl:str="en_core_web_md"):
+
+def get_descriptive_metrics(df:pd.DataFrame, text_column:str, spacy_mdl:str="en_core_web_md", batch_size:int=1, n_process:int=1):
     '''
     Extract low level descriptive features doc_length, n_tokens, n_characters and n_sentences 
     '''
-    # get text
+    # load nlp, add td to model
+    print(f"[INFO:] Loading SpaCY model '{spacy_mdl}'...")
+    nlp = spacy.load(spacy_mdl)
+    nlp.add_pipe("textdescriptives/descriptive_stats")
+    nlp.add_pipe("textdescriptives/quality")
+
+    # pass txt to pipeline
     text = df[text_column]
+    print(f"[INFO:] Passing text from column '{text_column}' to pipeline ...")
+    docs = nlp.pipe(text, batch_size=batch_size, n_process=n_process)
 
-    # extract metrics, select only relevant cols 
-    metrics_df = td.extract_metrics(text=text, spacy_model=spacy_mdl, metrics=["descriptive_stats", "quality"])
-    subset_metrics_df = metrics_df[["doc_length", "n_tokens", "n_characters", "n_sentences"]]
+    print("[INFO:] Extracting metrics to df ...")
+    metrics_df = td.extract_df(docs, include_text=False)
 
-    # combine with df 
-    final_df = pd.concat([df, subset_metrics_df], axis=1)
-    
-    return final_df 
-
-def get_all_metrics(df:pd.DataFrame, text_column:str, spacy_mdl:str="en_core_web_md"):
-    '''
-    Extract all metrics using textdescriptives
-    '''
-    # get text
-    text = df[text_column]
-
-    # extract text
-    metrics_df = td.extract_metrics(text=text, spacy_model=spacy_mdl)
-
-    # combine with df 
+    # subset metrics to only include low level features, then concat
+    metrics_df = metrics_df[["doc_length", "n_tokens", "n_characters", "n_sentences"]]
     final_df = pd.concat([df, metrics_df], axis=1)
-    
+
     return final_df
 
-def get_all_metrics_pipe(df:pd.DataFrame, text_column:str, batch_size:int=1, n_process:int=1, spacy_mdl:str="en_core_web_md"):
+def get_all_metrics(df:pd.DataFrame, text_column:str, spacy_mdl:str="en_core_web_md", batch_size:int=1, n_process:int=1):
     '''
     Extract all metrics using textdescriptives using nlp.pipe(). 
 
@@ -49,21 +43,16 @@ def get_all_metrics_pipe(df:pd.DataFrame, text_column:str, batch_size:int=1, n_p
     nlp = spacy.load(spacy_mdl)
     nlp.add_pipe("textdescriptives/all")
 
-    # get txt
-    text = df[text_column]
-
     # pass txt to pipeline
+    text = df[text_column]
     print(f"[INFO:] Passing text from column '{text_column}' to pipeline ...")
     docs = nlp.pipe(text, batch_size=batch_size, n_process=n_process)
 
-    # get metrics as df 
     print("[INFO:] Extracting metrics to df ...")
-    metrics_df = td.extract_df(docs, include_text=False)
+    metrics_df = td.extract_df(docs, include_text=False) 
 
-    # sort columns alphabetically
-    metrics_df = metrics_df.reindex(sorted(metrics_df.columns), axis=1)
-
-    # concat 
+    # sort columns alphabetically, then concat
+    metrics_df = metrics_df.reindex(sorted(metrics_df.columns), axis=1) 
     final_df = pd.concat([df, metrics_df], axis=1)
 
     return final_df
