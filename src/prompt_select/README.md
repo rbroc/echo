@@ -102,34 +102,34 @@ Static plots can also be found in this [folder](https://github.com/rbroc/echo/tr
 ## Medians
 The medians of the distances were computed for each model, dataset and prompt number:
 
-| dataset       | model       |   1.0 |   2.0 |   3.0 |   4.0 | 5.0   | 6.0   |
-|---------------|-------------|-------|-------|-------|-------|-------|-------|
-|               | beluga7b      |  0.39 |  0.52 |  0.40 |  0.27 |       |       |
-| dailydialog   | llama2_chat13b |  1.16 |  1.38 |  1.42 |  1.07 |       |       |
-|               | beluga7b      |  0.61 |  0.46 |  0.49 |  0.62 | 1.11  | 0.664 |
-| dailymail_cnn | llama2_chat13b |  1.67 |  1.48 |  1.31 |  1.39 | 1.803 | 2.001 |
-|               | beluga7b      |  0.04 |  0.05 |  0.05 |  0.05 |       |       |
+| dataset       | model          |   1.0 |   2.0 |   3.0 |   4.0 | 5.0   | 6.0   |
+|---------------|----------------|-------|-------|-------|-------|-------|-------|
+|               | beluga7b       |  0.35 |  0.48 |  0.38 |  0.24 |       |       |
+| dailydialog   | llama2_chat13b |  1.18 |  1.42 |  1.45 |  1.07 |       |       |
+|               | beluga7b       |  0.63 |  0.46 |  0.46 |  0.64 | 1.047 | 0.673 |
+| dailymail_cnn | llama2_chat13b |  1.62 |  1.54 |  1.34 |  1.42 | 1.753 | 1.977 |
+|               | beluga7b       |  0.04 |  0.04 |  0.04 |  0.04 |       |       |
 | mrpc          | llama2_chat13b |  0.07 |  0.07 |  0.06 |  0.06 |       |       |
-|               | beluga7b      |  2.83 |  2.98 |  5.05 |  3.14 | 3.533 | 2.875 |
-| stories       | llama2_chat13b |  3.07 |  3.41 |  3.83 |  3.03 | 2.871 | 2.535 |
+|               | beluga7b       |  2.76 |  2.87 |  4.46 |  2.96 | 3.26  | 3.022 |
+| stories       | llama2_chat13b |  2.97 |  2.99 |  3.48 |  2.92 | 2.69  | 2.48  |
 
 ## Two lowest medians per MODEL, DATASET
 We can also group the results in the two prompts that hold the lowest median per model and dataset: 
-| dataset       | model       |   prompt |   median |
-|---------------|-------------|----------|----------|
-| dailydialog   | beluga7b      |        4 |    0.267 |
-|               |             |        1 |    0.394 |
-|               | llama2_chat13b |        4 |    1.074 |
-|               |             |        1 |    1.162 |
-| dailymail_cnn | beluga7b      |        2 |    0.46  |
-|               |             |        3 |    0.487 |
-|               | llama2_chat13b |        3 |    1.311 |
-|               |             |        4 |    1.394 |
-| mrpc          | beluga7b      |        1 |    0.045 |
-|               |             |        3 |    0.046 |
-|               | llama2_chat13b |        4 |    0.064 |
-|               |             |        3 |    0.064 |
-| stories       | beluga7b      |        1 |    2.832 |
-|               |             |        6 |    2.875 |
-|               | llama2_chat13b |        6 |    2.535 |
-|               |             |        5 |    2.871 |
+| dataset       | model          |   prompt |   median |
+|---------------|----------------|----------|----------|
+| dailydialog   | beluga7b       |        4 |    0.241 |
+|               |                |        1 |    0.354 |
+|               | llama2_chat13b |        4 |    1.069 |
+|               |                |        1 |    1.181 |
+| dailymail_cnn | beluga7b       |        2 |    0.456 |
+|               |                |        3 |    0.462 |
+|               | llama2_chat13b |        3 |    1.337 |
+|               |                |        4 |    1.417 |
+| mrpc          | beluga7b       |        1 |    0.039 |
+|               |                |        4 |    0.04  |
+|               | llama2_chat13b |        3 |    0.056 |
+|               |                |        4 |    0.06  |
+| stories       | beluga7b       |        1 |    2.763 |
+|               |                |        2 |    2.87  |
+|               | llama2_chat13b |        6 |    2.48  |
+|               |                |        5 |    2.69  |

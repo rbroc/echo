@@ -29,15 +29,18 @@ def main():
 
     print("[INFO:] EXTRACTING LOW LEVEL METRICS")
     n_cores = mp.cpu_count() - 1
-    metrics_df = get_descriptive_metrics(df, "completions", "en_core_web_lg", batch_size=20, n_process=n_cores)
+    metrics_df = get_descriptive_metrics(df, "completions", "en_core_web_md", batch_size=20, n_process=n_cores)
 
     print("[INFO:] RUNNING PCA ...")
-    pca, final_df = run_PCA(metrics_df, feature_names=["doc_length", "n_tokens", "n_characters", "n_sentences"], n_components=4)
+    pca, final_df = run_PCA(metrics_df, feature_names=["doc_length", "n_tokens", "n_characters", "n_sentences"], n_components=4, keep_metrics_df=True)
 
     print(final_df)
     print(pca.explained_variance_ratio_)
 
-    final_df.to_csv(results_path / "PCA_data.csv")
+    # drop source and "annotations"
+    final_df = final_df.drop(columns=["source", "annotations", "index"])
+
+    final_df.to_csv(results_path / "PCA_data.csv", index=False)
 
     print("[INFO:] PLOTTING PCA")
     loadings = get_loadings(pca, feature_names=["doc_length", "n_tokens", "n_characters", "n_sentences"])
