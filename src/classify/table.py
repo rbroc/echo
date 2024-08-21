@@ -7,6 +7,8 @@ import pathlib
 import argparse
 import pandas as pd
 
+from great_tables import GT
+
 def create_df_from_clf_txt(filepath:pathlib.Path, skiprows=[0, 1, 2], nrows=5):
     '''
     Create a dataframe from a text file containing the classification report from sklearn.metrics.classification_report
@@ -41,50 +43,16 @@ def create_df_from_clf_txt(filepath:pathlib.Path, skiprows=[0, 1, 2], nrows=5):
     # set precision and recall to None for the accuracy row
     df.loc[is_accuracy, ['precision', 'recall']] = None
 
+    # transpose
+    df = df.T
+
+    # name columns (where 0 and 1 refers to the classes)
+    df.columns = ['0', '1', 'accuracy', 'macro_avg', 'weighted_avg']
+
+    # drop class index
+    df = df[~df.index.isin(["class"])]
+
     return df
-
-
-def create_multi_header_from_clf(df:pd.DataFrame, type:str):
-    '''
-    hacky solution (for now)
-    '''
-    df_class = df[df['class'].isin(['0', '1'])]
-    
-    # Set the 'class' column as the index
-    df_class.set_index('class', inplace=True)
-
-    # drop class column
-    df_class = df_class[['precision', 'recall', 'f1-score', 'support']]
-
-    classes = [0, 1]
-    metrics = ['precision', 'recall', 'f1-score', 'support']
-
-    # create a multi-index 
-    df_multi = pd.DataFrame(index=classes, columns=pd.MultiIndex.from_product([metrics, classes]))
-
-    # fill in the multi-index dataframe
-    for c in classes:
-        for m in metrics:
-            df_multi[m, c] = df_class.loc[str(c), m]
-
-    # print first row
-    table_df = df_multi.iloc[0].to_frame().T
-
-    # add col
-    table_df["type"] = type
-
-    # place type first in columns
-    table_df = table_df[["type", "precision", "recall", "f1-score", "support"]]
-
-    # drop index
-    table_df.reset_index(drop=True, inplace=True)
-
-    # add accuracy from df (row)
-    accuracy = df[df['class'] == 'accuracy']['f1-score'].values[0] # accuracy is stored in the f1-score column
-   
-    table_df["accuracy"] = accuracy
-    
-    return table_df
 
 def input_parse():
     parser = argparse.ArgumentParser()
@@ -95,7 +63,64 @@ def input_parse():
 
     args = parser.parse_args()
 
-    return args
+    return args    
+
+
+def prepare_df_for_table(df, type:str):
+    # avg_df
+    avg_df = df[["accuracy", "macro_avg", "weighted_avg"]]
+
+    # class df
+    class_df = df[["0", "1"]]
+
+    # unstack
+    class_df = class_df.unstack().to_frame().T
+
+    # rename so that columns are called 0_precision, 0_recall, 0_f1-score, 0_support, 1_precision, etc.
+    class_df.columns = [f"{col}_{row}" for row, col in class_df.columns]
+
+    # add type col
+    class_df["type"] = type
+
+    # sort cols 
+    class_df = class_df[["type", "precision_0", "precision_1", "recall_0", "recall_1", "f1-score_0", "f1-score_1", "support_0", "support_1"]]
+
+    # add accuracy
+    class_df["accuracy"] = avg_df.loc["f1-score", "accuracy"]
+
+    # rename f1-score to f1_score
+    class_df.columns = class_df.columns.str.replace("-", "_")
+
+    return class_df
+
+def create_table(df, savepath:pathlib.Path): 
+    table = GT(df)
+    table = table.tab_spanner(label="Precision", columns=["precision_0", "precision_1"])
+    table = table.tab_spanner(label="Recall", columns=["recall_0", "recall_1"])
+    table = table.tab_spanner(label="F1-score", columns=["f1_score_0", "f1_score_1"])
+    table = table.tab_spanner(label="Support", columns=["support_0", "support_1"])
+
+    table = table.cols_label(
+                            precision_0="0", 
+                            precision_1="1", 
+                            recall_0="0", 
+                            recall_1="1", 
+                            f1_score_0="0", 
+                            f1_score_1="1", 
+                            support_0="0", 
+                            support_1="1",
+                            accuracy="Accuracy",
+                            type="Type"
+                            )
+
+    table = table.opt_vertical_padding(scale=2).opt_horizontal_padding(scale=3)
+
+    # save table
+    html = table.as_raw_html("table.html")
+
+    # save as html
+    with open(savepath / "all_results.html", "w") as f:
+        f.write(html)
 
 def main(): 
     args = input_parse()
@@ -103,7 +128,7 @@ def main():
     path = pathlib.Path(__file__)
 
     savepath = path.parents[2] / "results" / "classify" / "clf_results"
-    datapath = savepath / "clf_reports" / f"{args.dataset}_temp{args.temp}"
+    datapath = savepath / "clf_reports" / f"{args.dataset}_temp{args.temp}" 
 
     dfs = []
 
@@ -115,16 +140,14 @@ def main():
 
     for file in filepaths:
         df = create_df_from_clf_txt(file)
-        table_df = create_multi_header_from_clf(df, file.stem)
+        table_df = prepare_df_for_table(df, file.stem)
         dfs.append(table_df)
 
     final_df = pd.concat(dfs)
 
-    # save to html
-    final_df.to_html(datapath / "all_results.html", index=False)
+    # create table
+    create_table(final_df, datapath)
 
-    # save to csv
-    final_df.to_csv(datapath / "all_results.csv", index=False)
 
 
 if __name__ == "__main__":
