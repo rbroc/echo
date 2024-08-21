@@ -51,7 +51,9 @@ def get_ai_paths(ai_dir: pathlib.Path, models: list, dataset: str, temp:float|in
             ai_paths.extend(paths)
 
         else:
-            ai_paths.extend([file for file in model_path.iterdir()])
+            paths = [file for file in model_path.iterdir()]
+            ai_paths.extend(paths)
+            print(f"[INFO:] No prompt number or temperature specified. Using all files in {model_path}")
 
     if len(ai_paths) == 0: 
         print(f"[WARNING:] Length of ai paths is zero. Ensure that you have valid arguments.")
