@@ -20,7 +20,7 @@ def main():
     models = ["llama2_chat7b", "llama2_chat13b", "beluga7b", "mistral7b"]
     datasets = ["dailymail_cnn", "stories", "mrpc", "dailydialog"]
     print("[INFO:] Preprocessing datasets ...")
-    df = preprocess_datasets(ai_dir, human_dir, models, datasets, prompt_numbers=[21, 22])
+    df = preprocess_datasets(ai_dir, human_dir, models, datasets, prompt_numbers=[21])
 
     # run pca
     print("[INFO:] Extracting Metrics ...")

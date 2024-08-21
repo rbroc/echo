@@ -24,7 +24,7 @@ def main():
     datasets = ["dailymail_cnn", "stories", "mrpc", "dailydialog"]
 
     print("[INFO:] PREPROCESSING DATA, COMBINING DATAFRAMES")
-    df = preprocess_datasets(ai_dir, human_dir, models, datasets, subset=99)
+    df = preprocess_datasets(ai_dir, human_dir, models, datasets, subset=99, temp=None, prompt_numbers=None)
 
     print("[INFO:] EXTRACTING LOW LEVEL METRICS")
     metrics_df = get_descriptive_metrics(df, "completions", "en_core_web_lg")
