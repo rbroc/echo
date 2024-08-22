@@ -169,8 +169,13 @@ def main():
 
     path = pathlib.Path(__file__)
 
-    savepath = path.parents[2] / "results" / "classify" / "clf_results"
-    datapath = savepath / "clf_reports" / f"{args.dataset}_temp{args.temp}" 
+    dataset, temp = args.dataset, args.temp
+
+    if temp == 1.0:
+        temp = int(temp)
+
+    savepath = path.parents[3] / "results" / "classify" / "clf_results"
+    datapath = savepath / "clf_reports" / f"{dataset}_temp{temp}" 
 
     dfs = []
 
@@ -190,7 +195,7 @@ def main():
     # create table
     create_table(
                 df = final_df,
-                title = f"{args.dataset.capitalize()}: Validation Results", 
+                title = f"{dataset.capitalize()}: Validation Results", 
                 savepath = datapath
                 )
 
