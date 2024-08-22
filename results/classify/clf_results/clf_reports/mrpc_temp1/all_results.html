@@ -1,110 +1,180 @@
-<table border="1" class="dataframe">
-  <thead>
-    <tr>
-      <th>type</th>
-      <th colspan="2" halign="left">precision</th>
-      <th colspan="2" halign="left">recall</th>
-      <th colspan="2" halign="left">f1-score</th>
-      <th colspan="2" halign="left">support</th>
-      <th>accuracy</th>
-    </tr>
-    <tr>
-      <th></th>
-      <th>0</th>
-      <th>1</th>
-      <th>0</th>
-      <th>1</th>
-      <th>0</th>
-      <th>1</th>
-      <th>0</th>
-      <th>1</th>
-      <th></th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>all_models_all_features</td>
-      <td>0.86</td>
-      <td>0.60</td>
-      <td>0.93</td>
-      <td>0.40</td>
-      <td>0.90</td>
-      <td>0.48</td>
-      <td>2340</td>
-      <td>585</td>
-      <td>0.83</td>
-    </tr>
-    <tr>
-      <td>all_models_tfidf_1000_features</td>
-      <td>0.87</td>
-      <td>0.87</td>
-      <td>0.98</td>
-      <td>0.43</td>
-      <td>0.93</td>
-      <td>0.57</td>
-      <td>2340</td>
-      <td>585</td>
-      <td>0.87</td>
-    </tr>
-    <tr>
-      <td>all_models_top3_features</td>
-      <td>0.83</td>
-      <td>0.53</td>
-      <td>0.94</td>
-      <td>0.25</td>
-      <td>0.89</td>
-      <td>0.34</td>
-      <td>2340</td>
-      <td>585</td>
-      <td>0.81</td>
-    </tr>
-    <tr>
-      <td>beluga7b-human_all_features</td>
-      <td>0.69</td>
-      <td>0.68</td>
-      <td>0.66</td>
-      <td>0.71</td>
-      <td>0.68</td>
-      <td>0.69</td>
-      <td>585</td>
-      <td>585</td>
-      <td>0.68</td>
-    </tr>
-    <tr>
-      <td>llama2_chat13b-human_all_features</td>
-      <td>0.94</td>
-      <td>0.89</td>
-      <td>0.89</td>
-      <td>0.95</td>
-      <td>0.92</td>
-      <td>0.92</td>
-      <td>585</td>
-      <td>585</td>
-      <td>0.92</td>
-    </tr>
-    <tr>
-      <td>llama2_chat7b-human_all_features</td>
-      <td>0.75</td>
-      <td>0.73</td>
-      <td>0.72</td>
-      <td>0.77</td>
-      <td>0.74</td>
-      <td>0.75</td>
-      <td>585</td>
-      <td>585</td>
-      <td>0.74</td>
-    </tr>
-    <tr>
-      <td>mistral7b-human_all_features</td>
-      <td>0.74</td>
-      <td>0.74</td>
-      <td>0.74</td>
-      <td>0.74</td>
-      <td>0.74</td>
-      <td>0.74</td>
-      <td>585</td>
-      <td>585</td>
-      <td>0.74</td>
-    </tr>
-  </tbody>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+</head>
+<body>
+<div id="kxdlboisok" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>
+#kxdlboisok table {
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
+          -webkit-font-smoothing: antialiased;
+          -moz-osx-font-smoothing: grayscale;
+        }
+
+#kxdlboisok thead, tbody, tfoot, tr, td, th { border-style: none; }
+ tr { background-color: transparent; }
+#kxdlboisok p { margin: 0; padding: 0; }
+ #kxdlboisok .gt_table { display: table; border-collapse: collapse; line-height: normal; margin-left: auto; margin-right: auto; color: #333333; font-size: 16px; font-weight: normal; font-style: normal; background-color: #FFFFFF; width: auto; border-top-style: solid; border-top-width: 2px; border-top-color: #A8A8A8; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #A8A8A8; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; }
+ #kxdlboisok .gt_caption { padding-top: 4px; padding-bottom: 4px; }
+ #kxdlboisok .gt_title { color: #333333; font-size: 125%; font-weight: initial; padding-top: 8px; padding-bottom: 8px; padding-left: 15px; padding-right: 15px; border-bottom-color: #FFFFFF; border-bottom-width: 0; }
+ #kxdlboisok .gt_subtitle { color: #333333; font-size: 85%; font-weight: initial; padding-top: 7px; padding-bottom: 9px; padding-left: 15px; padding-right: 15px; border-top-color: #FFFFFF; border-top-width: 0; }
+ #kxdlboisok .gt_heading { background-color: #FFFFFF; text-align: center; border-bottom-color: #FFFFFF; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
+ #kxdlboisok .gt_bottom_border { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; }
+ #kxdlboisok .gt_col_headings { border-top-style: solid; border-top-width: 2px; border-top-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
+ #kxdlboisok .gt_col_heading { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: bottom; padding-top: 10px; padding-bottom: 9px; padding-left: 15px; padding-right: 15px; overflow-x: hidden; }
+ #kxdlboisok .gt_column_spanner_outer { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; padding-top: 0; padding-bottom: 0; padding-left: 4px; padding-right: 4px; }
+ #kxdlboisok .gt_column_spanner_outer:first-child { padding-left: 0; }
+ #kxdlboisok .gt_column_spanner_outer:last-child { padding-right: 0; }
+ #kxdlboisok .gt_column_spanner { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; vertical-align: bottom; padding-top: 10px; padding-bottom: 10px; overflow-x: hidden; display: inline-block; width: 100%; }
+ #kxdlboisok .gt_spanner_row { border-bottom-style: hidden; }
+ #kxdlboisok .gt_group_heading { padding-top: 16px; padding-bottom: 16px; padding-left: 15px; padding-right: 15px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-top-style: solid; border-top-width: 2px; border-top-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: middle; text-align: left; }
+ #kxdlboisok .gt_empty_group_heading { padding: 0.5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; border-top-style: solid; border-top-width: 2px; border-top-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; vertical-align: middle; }
+ #kxdlboisok .gt_from_md> :first-child { margin-top: 0; }
+ #kxdlboisok .gt_from_md> :last-child { margin-bottom: 0; }
+ #kxdlboisok .gt_row { padding-top: 16px; padding-bottom: 16px; padding-left: 15px; padding-right: 15px; margin: 10px; border-top-style: solid; border-top-width: 1px; border-top-color: #D3D3D3; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: middle; overflow-x: hidden; }
+ #kxdlboisok .gt_stub { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #D3D3D3; padding-left: 15px; padding-right: 15px; }
+ #kxdlboisok .gt_stub_row_group { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #D3D3D3; padding-left: 15px; padding-right: 15px; vertical-align: top; }
+ #kxdlboisok .gt_row_group_first td { border-top-width: 2px; }
+ #kxdlboisok .gt_row_group_first th { border-top-width: 2px; }
+ #kxdlboisok .gt_table_body { border-top-style: solid; border-top-width: 2px; border-top-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; }
+ #kxdlboisok .gt_sourcenotes { color: #333333; background-color: #FFFFFF; border-bottom-style: none; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; }
+ #kxdlboisok .gt_sourcenote { font-size: 90%; padding-top: 8px; padding-bottom: 8px; padding-left: 15px; padding-right: 15px; text-align: left; }
+ #kxdlboisok .gt_left { text-align: left; }
+ #kxdlboisok .gt_center { text-align: center; }
+ #kxdlboisok .gt_right { text-align: right; font-variant-numeric: tabular-nums; }
+ #kxdlboisok .gt_font_normal { font-weight: normal; }
+ #kxdlboisok .gt_font_bold { font-weight: bold; }
+ #kxdlboisok .gt_font_italic { font-style: italic; }
+ #kxdlboisok .gt_super { font-size: 65%; }
+ #kxdlboisok .gt_footnote_marks { font-size: 75%; vertical-align: 0.4em; position: initial; }
+ #kxdlboisok .gt_asterisk { font-size: 100%; vertical-align: 0; }
+ 
+</style>
+<table class="gt_table" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
+<thead class="gt_header">
+  <tr>
+    <th colspan="10" class="gt_heading gt_title gt_font_normal">Mrpc: Validation Results</th>
+  </tr>
+</thead>
+<tr class="gt_col_headings gt_spanner_row">
+  <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="2" colspan="1" scope="col" id="Type">Type</th>
+  <th class="gt_center gt_columns_top_border gt_column_spanner_outer" rowspan="1" colspan="2" scope="colgroup" id="Precision">
+    <span class="gt_column_spanner">Precision</span>
+  </th>
+  <th class="gt_center gt_columns_top_border gt_column_spanner_outer" rowspan="1" colspan="2" scope="colgroup" id="Recall">
+    <span class="gt_column_spanner">Recall</span>
+  </th>
+  <th class="gt_center gt_columns_top_border gt_column_spanner_outer" rowspan="1" colspan="2" scope="colgroup" id="F1-score">
+    <span class="gt_column_spanner">F1-score</span>
+  </th>
+  <th class="gt_center gt_columns_top_border gt_column_spanner_outer" rowspan="1" colspan="2" scope="colgroup" id="Support">
+    <span class="gt_column_spanner">Support</span>
+  </th>
+  <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="2" colspan="1" scope="col" id="Accuracy">Accuracy</th>
+</tr>
+<tr class="gt_col_headings">
+  <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col" id="Synthetic">Synthetic</th>
+  <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col" id="Human">Human</th>
+  <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col" id="Synthetic">Synthetic</th>
+  <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col" id="Human">Human</th>
+  <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col" id="Synthetic">Synthetic</th>
+  <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col" id="Human">Human</th>
+  <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col" id="Synthetic">Synthetic</th>
+  <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col" id="Human">Human</th>
+</tr>
+<tbody class="gt_table_body">
+  <tr>
+    <td class="gt_row gt_left">all_models_all_features</td>
+    <td class="gt_row gt_center">0.86</td>
+    <td class="gt_row gt_center">0.60</td>
+    <td class="gt_row gt_center">0.93</td>
+    <td class="gt_row gt_center">0.40</td>
+    <td class="gt_row gt_center">0.90</td>
+    <td class="gt_row gt_center">0.48</td>
+    <td class="gt_row gt_center">2340</td>
+    <td class="gt_row gt_center">585</td>
+    <td class="gt_row gt_center">0.83</td>
+  </tr>
+  <tr>
+    <td style="background-color: lightgrey;" class="gt_row gt_left">all_models_tfidf_1000_features</td>
+    <td style="background-color: lightgrey;" class="gt_row gt_center">0.87</td>
+    <td style="background-color: lightgrey;" class="gt_row gt_center">0.87</td>
+    <td style="background-color: lightgrey;" class="gt_row gt_center">0.98</td>
+    <td style="background-color: lightgrey;" class="gt_row gt_center">0.43</td>
+    <td style="background-color: lightgrey;" class="gt_row gt_center">0.93</td>
+    <td style="background-color: lightgrey;" class="gt_row gt_center">0.57</td>
+    <td style="background-color: lightgrey;" class="gt_row gt_center">2340</td>
+    <td style="background-color: lightgrey;" class="gt_row gt_center">585</td>
+    <td style="background-color: lightgrey;" class="gt_row gt_center">0.87</td>
+  </tr>
+  <tr>
+    <td class="gt_row gt_left">all_models_top3_features</td>
+    <td class="gt_row gt_center">0.83</td>
+    <td class="gt_row gt_center">0.53</td>
+    <td class="gt_row gt_center">0.94</td>
+    <td class="gt_row gt_center">0.25</td>
+    <td class="gt_row gt_center">0.89</td>
+    <td class="gt_row gt_center">0.34</td>
+    <td class="gt_row gt_center">2340</td>
+    <td class="gt_row gt_center">585</td>
+    <td class="gt_row gt_center">0.81</td>
+  </tr>
+  <tr>
+    <td style="background-color: lightgrey;" class="gt_row gt_left">beluga7b-human_all_features</td>
+    <td style="background-color: lightgrey;" class="gt_row gt_center">0.69</td>
+    <td style="background-color: lightgrey;" class="gt_row gt_center">0.68</td>
+    <td style="background-color: lightgrey;" class="gt_row gt_center">0.66</td>
+    <td style="background-color: lightgrey;" class="gt_row gt_center">0.71</td>
+    <td style="background-color: lightgrey;" class="gt_row gt_center">0.68</td>
+    <td style="background-color: lightgrey;" class="gt_row gt_center">0.69</td>
+    <td style="background-color: lightgrey;" class="gt_row gt_center">585</td>
+    <td style="background-color: lightgrey;" class="gt_row gt_center">585</td>
+    <td style="background-color: lightgrey;" class="gt_row gt_center">0.68</td>
+  </tr>
+  <tr>
+    <td class="gt_row gt_left">llama2_chat13b-human_all_features</td>
+    <td class="gt_row gt_center">0.94</td>
+    <td class="gt_row gt_center">0.89</td>
+    <td class="gt_row gt_center">0.89</td>
+    <td class="gt_row gt_center">0.95</td>
+    <td class="gt_row gt_center">0.92</td>
+    <td class="gt_row gt_center">0.92</td>
+    <td class="gt_row gt_center">585</td>
+    <td class="gt_row gt_center">585</td>
+    <td class="gt_row gt_center">0.92</td>
+  </tr>
+  <tr>
+    <td style="background-color: lightgrey;" class="gt_row gt_left">llama2_chat7b-human_all_features</td>
+    <td style="background-color: lightgrey;" class="gt_row gt_center">0.75</td>
+    <td style="background-color: lightgrey;" class="gt_row gt_center">0.73</td>
+    <td style="background-color: lightgrey;" class="gt_row gt_center">0.72</td>
+    <td style="background-color: lightgrey;" class="gt_row gt_center">0.77</td>
+    <td style="background-color: lightgrey;" class="gt_row gt_center">0.74</td>
+    <td style="background-color: lightgrey;" class="gt_row gt_center">0.75</td>
+    <td style="background-color: lightgrey;" class="gt_row gt_center">585</td>
+    <td style="background-color: lightgrey;" class="gt_row gt_center">585</td>
+    <td style="background-color: lightgrey;" class="gt_row gt_center">0.74</td>
+  </tr>
+  <tr>
+    <td class="gt_row gt_left">mistral7b-human_all_features</td>
+    <td class="gt_row gt_center">0.74</td>
+    <td class="gt_row gt_center">0.74</td>
+    <td class="gt_row gt_center">0.74</td>
+    <td class="gt_row gt_center">0.74</td>
+    <td class="gt_row gt_center">0.74</td>
+    <td class="gt_row gt_center">0.74</td>
+    <td class="gt_row gt_center">585</td>
+    <td class="gt_row gt_center">585</td>
+    <td class="gt_row gt_center">0.74</td>
+  </tr>
+</tbody>
+
+
 </table>
+
+</div>
+        
+</body>
+</html>
+            

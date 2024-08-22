@@ -69,7 +69,7 @@ def create_medians_table(pivot_table, table_format="github"):
 
 def main(): 
     path = pathlib.Path(__file__)
-    datapath = path.parents[2] / "results" / "distance"
+    datapath = path.parents[3] / "results" / "prompt_select" / "distance"
 
     df = pd.read_csv(datapath / "distances_all_PC_cols.csv")
 

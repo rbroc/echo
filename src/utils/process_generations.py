@@ -46,12 +46,12 @@ def get_ai_paths(ai_dir: pathlib.Path, models: list, dataset: str, temp:float|in
                 ai_paths.extend(paths)
 
         elif temp: 
-            file_identifier = f"{temp}.ndjson"
-            paths = [file for file in model_path.iterdir() if file.name.endswith(file_identifier)]
+            end_identifier = f"{temp}.ndjson"
+            paths = [file for file in model_path.iterdir() if file.name.endswith(end_identifier) and file.name.startswith(dataset)]
             ai_paths.extend(paths)
 
         else:
-            paths = [file for file in model_path.iterdir()]
+            paths = [file for file in model_path.iterdir() if file.name.startswith(dataset)]
             ai_paths.extend(paths)
             print(f"[INFO:] No prompt number or temperature specified. Using all files in {model_path}")
 
