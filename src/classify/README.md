@@ -6,6 +6,7 @@ Code in this folder:
 | <div style="width:120px"></div>| Description |
 |---------|:-----------|
 | `/pca` | PCA folder with the script `run_PCA.py` to run PCA prior to classify pipeline  |
+| `/table` | Contains the script `create_table.py` to create tables from classifcation reports saved in `results/classify/clf_reports` that can be executed by running `run.sh` within the folder  |
 | `run_clf_all_features.py` | Run XGBOOST on all PC components |
 | `run_clf_tfidf.py` | Run Logistic Regression on TF-IDF vectorised completions |
 | `run_clf_top_features.py` | Run XGBOOST on the top N PC components |
