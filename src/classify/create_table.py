@@ -7,7 +7,7 @@ import pathlib
 import argparse
 import pandas as pd
 
-from great_tables import GT
+from great_tables import GT, style, loc
 
 def create_df_from_clf_txt(filepath:pathlib.Path, skiprows=[0, 1, 2], nrows=5):
     '''
@@ -93,28 +93,70 @@ def prepare_df_for_table(df, type:str):
 
     return class_df
 
-def create_table(df, savepath:pathlib.Path): 
-    table = GT(df)
-    table = table.tab_spanner(label="Precision", columns=["precision_0", "precision_1"])
-    table = table.tab_spanner(label="Recall", columns=["recall_0", "recall_1"])
-    table = table.tab_spanner(label="F1-score", columns=["f1_score_0", "f1_score_1"])
-    table = table.tab_spanner(label="Support", columns=["support_0", "support_1"])
+def create_table(df, title:str, savepath:pathlib.Path): 
+    '''
+    create table from df using great_tables 
 
+    Args:
+        df: dataframe
+        title: title of the table
+        savepath: path to save the table
+    '''
+
+    table = GT(df)
+    
+    # make multi-col spanners
+    table = (
+        table
+        .tab_spanner(label="Precision", columns=["precision_0", "precision_1"])
+        .tab_spanner(label="Recall", columns=["recall_0", "recall_1"])
+        .tab_spanner(label="F1-score", columns=["f1_score_0", "f1_score_1"])
+        .tab_spanner(label="Support", columns=["support_0", "support_1"])
+    )   
+
+    # rename cols to only represent the class 
     table = table.cols_label(
-                            precision_0="0", 
-                            precision_1="1", 
-                            recall_0="0", 
-                            recall_1="1", 
-                            f1_score_0="0", 
-                            f1_score_1="1", 
-                            support_0="0", 
-                            support_1="1",
+                            precision_0="Synthetic", 
+                            precision_1="Human", 
+                            recall_0="Synthetic", 
+                            recall_1="Human", 
+                            f1_score_0="Synthetic", 
+                            f1_score_1="Human", 
+                            support_0="Synthetic", 
+                            support_1="Human",
                             accuracy="Accuracy",
                             type="Type"
                             )
 
-    table = table.opt_vertical_padding(scale=2).opt_horizontal_padding(scale=3)
 
+    # layout
+    table = (
+            table
+            .opt_vertical_padding(scale=2)
+            .opt_horizontal_padding(scale=3)
+            # center all but the type column
+            .cols_align("center", columns=[col for col in df.columns if col != "type"])
+    )
+
+    # annotations
+    table = (
+            table
+            .tab_header(title)
+    )
+
+    # count n-rows in df
+    n_rows = df.shape[0] + 1
+    every_second_row = [i for i in range(1, n_rows, 2)] # make list of every second row
+
+    # color every second row
+    table = (
+            table
+            .tab_style(
+                style.fill(color = "lightgrey"),
+                loc.body(rows = every_second_row)
+            )
+    )
+    
     # save table
     html = table.as_raw_html("table.html")
 
@@ -146,7 +188,11 @@ def main():
     final_df = pd.concat(dfs)
 
     # create table
-    create_table(final_df, datapath)
+    create_table(
+                df = final_df,
+                title = f"{args.dataset.capitalize()}: Validation Results", 
+                savepath = datapath
+                )
 
 
 
