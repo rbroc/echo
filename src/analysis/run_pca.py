@@ -2,6 +2,7 @@
 Script to investigate generated data
 '''
 import pathlib
+import multiprocessing as mp
 import sys
 sys.path.append(str(pathlib.Path(__file__).parents[2]))
 
@@ -26,7 +27,9 @@ def main():
     print("[INFO:] Extracting Metrics ...")
     df = df.drop("doc_length", axis=1)
 
-    metrics_df = get_descriptive_metrics(df, "completions", "en_core_web_md")
+    n_cores = mp.cpu_count() - 1 
+
+    metrics_df = get_descriptive_metrics(df, "completions", "en_core_web_md",  batch_size=100, n_process=n_cores)
     metrics_df.to_csv(results_path / "metrics_data.csv")
 
     print("[INFO:] Running PCA ...")
