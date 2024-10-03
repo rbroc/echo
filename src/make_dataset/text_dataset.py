@@ -5,11 +5,16 @@ Make dataset:
 - save splits
 """
 
+import ast
 import pathlib
 import re
+import sys
+
 import pandas as pd
-import ast
 from tqdm import tqdm
+
+sys.path.append(str(pathlib.Path(__file__).parents[2]))
+from src.utils.split_data import create_split
 
 MODELS = ["beluga7b", "llama2_chat7b", "llama2_chat13b", "mistral7b"]
 PROMPT_NUMBERS = [21]
@@ -112,6 +117,8 @@ def standardize_ai_data(ai_dfs: list[pd.DataFrame], clean: bool = True):
     for idx, df in enumerate(ai_dfs):
         new_df = df.copy()
 
+        new_df["is_human"] = 0
+
         # standardise prompt and completions cols
         prompt_colname = [col for col in new_df.columns if col.startswith("prompt_")][
             0
@@ -141,24 +148,31 @@ def standardize_ai_data(ai_dfs: list[pd.DataFrame], clean: bool = True):
     return ai_dfs
 
 
-def combine_data(ai_dfs, human_df, clean_ai=True):
+def standardize_human_data(human_df):
+    # add model and is_human cols
+    human_df["model"] = "human"
+    human_df["is_human"] = 1
+
+    # drop source col to make smaller file
+    human_df.drop(columns=["source"], inplace=True)
+    human_df.rename(columns={"human_completions": "completions"}, inplace=True)
+
+    return human_df
+
+
+def combine_data(ai_dfs, human_df):
     """
     Return a dataframe for a particular dataset with all AI generations and human data in one.
 
     Args:
         ai_dfs: list of dataframes
         human_df: dataframe corresponding to the dfs in ai_dfs
-        clean_ai: whether to clean ai data (e.g., lowercase, removing irregular format)
 
     Returns:
         combined_df: combined dataframe
     """
-    ai_dfs = standardize_ai_data(ai_dfs, clean=clean_ai)
-
-    # process human data
-    human_df = human_df.query('id in @ai_dfs[0]["id"]').copy()
-    human_df["model"] = "human"
-    human_df.rename(columns={"human_completions": "completions"}, inplace=True)
+    ai_dfs = standardize_ai_data(ai_dfs, clean=True)
+    human_df = standardize_human_data(human_df)
 
     # combine
     all_dfs = [human_df, *ai_dfs]
@@ -170,7 +184,6 @@ def combine_data(ai_dfs, human_df, clean_ai=True):
 def preprocess_datasets(
     ai_dir: pathlib.Path,
     human_dir: pathlib.Path,
-    clean_ai=True,
     temp: int | float = None,
 ):
     """
@@ -194,7 +207,7 @@ def preprocess_datasets(
     for dataset in tqdm(DATASETS, desc="Datasets"):
         ai_paths, human_path = get_all_paths(ai_dir, human_dir, dataset, temp)
         ai_dfs, human_df = load_dataset(ai_paths, human_path)
-        dataset_df = combine_data(ai_dfs, human_df, clean_ai=clean_ai)
+        dataset_df = combine_data(ai_dfs, human_df)
         dataset_df["dataset"] = dataset
 
         all_dfs.append(dataset_df)
@@ -214,7 +227,9 @@ def main():
     human_dir = path.parents[2] / "datasets" / "human_datasets"
 
     combined_df = preprocess_datasets(
-        ai_dir, human_dir, temp=1, clean_ai=True
+        ai_dir,
+        human_dir,
+        temp=1,
     )
 
     print(combined_df)
@@ -223,7 +238,22 @@ def main():
     outpath = path.parents[2] / "datasets" / "complete_datasets"
     outpath.mkdir(parents=True, exist_ok=True)
 
-    combined_df.to_json(outpath / "text_data.jsonl", lines=True, orient="records")
+    # split (stratified)
+    stratify_cols = ["is_human", "dataset", "model"]
+    train_df, val_df, test_df = create_split(
+        combined_df, random_state=129, val_test_size=0.15, stratify_cols=stratify_cols
+    )
+
+    # save splits as parquet
+    for df in zip([train_df, val_df, test_df], ["train", "val", "test"]):
+        df[0].to_parquet(outpath / f"{df[1]}_text.parquet")
+
+        # print len
+        print(f"[INFO]: {df[1]} length: {len(df[0])}")
+
+        # print length of each dataset (df["dataset"])
+        print(df[0]["dataset"].value_counts())
+
 
 if __name__ == "__main__":
     main()

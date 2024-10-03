@@ -10,7 +10,6 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-from sklearn.model_selection import train_test_split
 from xgboost import XGBClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn import metrics
@@ -32,62 +31,6 @@ def clf_evaluate(classifier, X, y):
     clf_report = metrics.classification_report(y, y_pred)
 
     return clf_report
-
-def create_split(df, feature_cols:list, random_state:int=129, val_test_size:float=0.15, outcome_col:str="is_human", save_path:pathlib.Path=None, verbose:bool=False):
-    '''
-    Create X, y from df, split into train, test and val 
-
-    Args: 
-        df: dataframe to split
-        random_state: seed for split for reproducibility
-        val_test_size: size of validation and test sets. 0.15 results in 15% val and 15% test. 
-        feature_cols: feature columns in df (predictors)
-        outcome_col: column for outcome. Defaults to "is_human"
-        verbose: 
-        save_path: directory to save splitted data. If None, does not sav
-
-    Returns: 
-        splits: dict with all splits 
-    '''
-    X = df[feature_cols]
-
-    # if model col is present, make explicit categorical for xgboost
-    if "model" in X.columns:
-        X["model"] = X["model"].astype("category")
-
-    # subset df to a single outcome col for y 
-    y = df[[outcome_col]]
-
-    splits = {}
-    # create splits based on val_test_size, save to dict. If val_test_size = 0.15, 15% val and 15% test (stratify by y to somewhat keep class balance)
-    print(f"[INFO:] Creating splits with features: {feature_cols} using random state {random_state} ...")   
-    splits["X_train"], splits["X_test"], splits["y_train"], splits["y_test"] = train_test_split(X, y, test_size=val_test_size*2, random_state=random_state, stratify=y)
-
-    # split val from test, stratify by y again 
-    splits["X_val"], splits["X_test"], splits["y_val"], splits["y_test"] = train_test_split(splits["X_test"], splits["y_test"], test_size=0.5, random_state=random_state, stratify=splits["y_test"])
-  
-    # validate size of splits, print info msg
-    if verbose:
-        # make table of split sizes (absolute numbers and percentages)
-        split_sizes = pd.DataFrame(index=["train", "val", "test"], columns=["absolute", "percentage"])
-
-        # compute absolute numbers, only for X as they should be the same for y
-        total_size = len(df)
-        for split in ["train", "val", "test"]:
-            split_sizes.loc[split, "percentage"] = len(splits[f"X_{split}"]) / total_size * 100
-            split_sizes.loc[split, "absolute"] = len(splits[f"X_{split}"])
-
-        print("\n[INFO:] Split sizes:\n")
-        print(split_sizes)
-        print(f"\nTotal size: {total_size}")
-
-    # save splits to save_path if specified
-    if save_path: 
-        save_path.mkdir(parents=True, exist_ok=True)
-        for key, value in splits.items(): # get dataset name from df
-            value.to_csv(save_path / f"{key}.csv")
-
-    return splits
 
 def get_feature_importances(splits, clf):
     # get feature importance, sort by importance
