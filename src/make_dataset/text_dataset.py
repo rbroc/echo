@@ -235,7 +235,7 @@ def main():
     print(combined_df)
 
     # save as jsonl
-    outpath = path.parents[2] / "datasets" / "complete_datasets"
+    outpath = path.parents[2] / "datasets" / "complete_datasets" / "text"
     outpath.mkdir(parents=True, exist_ok=True)
 
     # split (stratified)
