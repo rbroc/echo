@@ -14,6 +14,7 @@ import pandas as pd
 from tqdm import tqdm
 
 sys.path.append(str(pathlib.Path(__file__).parents[2]))
+from src.generate.generation import extract_min_max_tokens
 from src.utils.split_data import create_split
 
 MODELS = ["beluga7b", "llama2_chat7b", "llama2_chat13b", "mistral7b"]
@@ -85,20 +86,13 @@ def clean_ai_df(df, col="completions"):
     """
     lowercase, remove irregular format to standardise to human datasets like in src/clean/clean_data.py
     """
-    # remove space at the beginning of a string
-    df[col] = df[col].str.replace(r"^\s+", "", regex=True)
-
-    # make lowercase ALL
-    df[col] = df[col].str.lower()
-
-    # convert any a: or b: in the start to A: and B: (to match human data)
-    df[col] = df[col].str.replace(r"^(a:|b:)", lambda m: m.group(1).upper(), regex=True)
-
-    # rm newline characters
-    df[col] = df[col].str.replace("<newline>", " ", regex=False)
-
-    # rm extra spaces
-    df[col] = df[col].str.replace(r"\s+", " ", regex=True)
+    df[col] = df[col].str.replace(r"^\s+", "", regex=True)  # rm space at beginning
+    df[col] = df[col].str.lower()  # lowercase
+    df[col] = df[col].str.replace(
+        r"^(a:|b:)", lambda m: m.group(1).upper(), regex=True
+    )  # convert a: or b: to A: or B:
+    df[col] = df[col].str.replace("<newline>", " ", regex=False)  # rm newline
+    df[col] = df[col].str.replace(r"\s+", " ", regex=True)  # rm extra spaces
 
     return df
 
@@ -145,7 +139,10 @@ def standardize_ai_data(ai_dfs: list[pd.DataFrame], clean: bool = True):
 
         ai_dfs[idx] = new_df  # replace original df with new df
 
-    return ai_dfs
+    # combine ai_dfs into one
+    ai_df = pd.concat(ai_dfs, ignore_index=True, axis=0)
+
+    return ai_df
 
 
 def standardize_human_data(human_df):
@@ -160,25 +157,25 @@ def standardize_human_data(human_df):
     return human_df
 
 
-def combine_data(ai_dfs, human_df):
+def drop_lengths(df, dataset: str, verbose=True):
     """
-    Return a dataframe for a particular dataset with all AI generations and human data in one.
-
-    Args:
-        ai_dfs: list of dataframes
-        human_df: dataframe corresponding to the dfs in ai_dfs
-
-    Returns:
-        combined_df: combined dataframe
+    Drop rows based on min and max doc lengths
     """
-    ai_dfs = standardize_ai_data(ai_dfs, clean=True)
-    human_df = standardize_human_data(human_df)
+    # extract min and max tokens from completions, drop cols that are below or above these in doc length
+    min_tokens, max_tokens = extract_min_max_tokens(dataset)
 
-    # combine
-    all_dfs = [human_df, *ai_dfs]
-    combined_df = pd.concat(all_dfs, ignore_index=True, axis=0)
+    # drop cols that are below or above min and max tokens
+    filtered_df = df[
+        (df["doc_length"] >= min_tokens) & (df["doc_length"] <= max_tokens)
+    ]
 
-    return combined_df
+    # print info msg
+    if verbose:
+        print(
+            f"[INFO:] {dataset.upper()}: Dropped {len(df) - len(filtered_df)} rows on doc length. Tokens min/max {min_tokens}/{max_tokens}."
+        )
+
+    return filtered_df
 
 
 def preprocess_datasets(
@@ -207,7 +204,16 @@ def preprocess_datasets(
     for dataset in tqdm(DATASETS, desc="Datasets"):
         ai_paths, human_path = get_all_paths(ai_dir, human_dir, dataset, temp)
         ai_dfs, human_df = load_dataset(ai_paths, human_path)
-        dataset_df = combine_data(ai_dfs, human_df)
+
+        # drop lengths based on min and max tokens
+        ai_df = standardize_ai_data(ai_dfs, clean=True)
+        human_df = standardize_human_data(human_df)
+
+        # drop lengths (only on ai df since filter is based on human data length)
+        ai_df = drop_lengths(ai_df, dataset)
+
+        # combine
+        dataset_df = pd.concat([human_df, ai_df], ignore_index=True, axis=0)
         dataset_df["dataset"] = dataset
 
         all_dfs.append(dataset_df)
