@@ -8,10 +8,7 @@ import pathlib
 import sys
 from argparse import ArgumentParser
 
-import numpy as np
 import pandas as pd
-import spacy
-import textdescriptives as td
 
 sys.path.append(str(pathlib.Path(__file__).parents[2]))
 from src.utils.get_metrics import get_all_metrics, get_information_metrics
