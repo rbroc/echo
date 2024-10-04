@@ -4,17 +4,13 @@ Make dataset:
 - split into train, val, test
 - save splits
 """
-
-import ast
 import pathlib
-import re
 import sys
 
 import pandas as pd
 from tqdm import tqdm
 
 sys.path.append(str(pathlib.Path(__file__).parents[2]))
-from src.generate.generation import extract_min_max_tokens
 from src.utils.split_data import create_split
 
 MODELS = ["beluga7b", "llama2_chat7b", "llama2_chat13b", "mistral7b"]
@@ -81,70 +77,6 @@ def load_dataset(
 
     return ai_dfs, human_df
 
-
-def clean_ai_df(df, col="completions"):
-    """
-    lowercase, remove irregular format to standardise to human datasets like in src/clean/clean_data.py
-    """
-    df[col] = df[col].str.replace(r"^\s+", "", regex=True)  # rm space at beginning
-    df[col] = df[col].str.lower()  # lowercase
-    df[col] = df[col].str.replace(
-        r"^(a:|b:)", lambda m: m.group(1).upper(), regex=True
-    )  # convert a: or b: to A: or B:
-    df[col] = df[col].str.replace("<newline>", " ", regex=False)  # rm newline
-    df[col] = df[col].str.replace(r"\s+", " ", regex=True)  # rm extra spaces
-
-    return df
-
-
-def standardize_ai_data(ai_dfs: list[pd.DataFrame], clean: bool = True):
-    """
-    Standardize AI data to match human data.
-
-    Args:
-        ai_dfs: list of dataframes
-        clean_ai: whether to clean ai data (e.g., lowercase, removing irregular format)
-
-    Returns:
-        ai_dfs: list of dataframes
-    """
-    for idx, df in enumerate(ai_dfs):
-        new_df = df.copy()
-
-        new_df["is_human"] = 0
-
-        # standardise prompt and completions cols
-        prompt_colname = [col for col in new_df.columns if col.startswith("prompt_")][
-            0
-        ]  # get column name that starts with prompt_ (e.g., prompt_1, prompt_2, ...)
-        new_df["prompt_number"] = prompt_colname.split("_")[1]  # extract numbers
-        new_df.rename(columns={prompt_colname: "prompt"}, inplace=True)
-
-        mdl_colname = [col for col in new_df.columns if col.endswith("_completions")][0]
-        new_df["model"] = re.sub(
-            r"_completions$", "", mdl_colname
-        )  # remove "_completions" from e.g., "beluga_completions"
-        new_df.rename(columns={mdl_colname: "completions"}, inplace=True)
-
-        # add temperature val to col
-        if "sample_params" in df.columns:
-            new_df["temperature"] = df.sample_params.apply(
-                lambda x: (
-                    ast.literal_eval(x).get("temperature") if pd.notna(x) else None
-                )
-            )
-
-        if clean:
-            new_df = clean_ai_df(new_df)
-
-        ai_dfs[idx] = new_df  # replace original df with new df
-
-    # combine ai_dfs into one
-    ai_df = pd.concat(ai_dfs, ignore_index=True, axis=0)
-
-    return ai_df
-
-
 def standardize_human_data(human_df):
     # add model and is_human cols
     human_df["model"] = "human"
@@ -155,28 +87,6 @@ def standardize_human_data(human_df):
     human_df.rename(columns={"human_completions": "completions"}, inplace=True)
 
     return human_df
-
-
-def drop_lengths(df, dataset: str, verbose=True):
-    """
-    Drop rows based on min and max doc lengths
-    """
-    # extract min and max tokens from completions, drop cols that are below or above these in doc length
-    min_tokens, max_tokens = extract_min_max_tokens(dataset)
-
-    # drop cols that are below or above min and max tokens
-    filtered_df = df[
-        (df["doc_length"] >= min_tokens) & (df["doc_length"] <= max_tokens)
-    ]
-
-    # print info msg
-    if verbose:
-        print(
-            f"[INFO:] {dataset.upper()}: Dropped {len(df) - len(filtered_df)} rows on doc length. Tokens min/max {min_tokens}/{max_tokens}."
-        )
-
-    return filtered_df
-
 
 def preprocess_datasets(
     ai_dir: pathlib.Path,
@@ -205,15 +115,10 @@ def preprocess_datasets(
         ai_paths, human_path = get_all_paths(ai_dir, human_dir, dataset, temp)
         ai_dfs, human_df = load_dataset(ai_paths, human_path)
 
-        # drop lengths based on min and max tokens
-        ai_df = standardize_ai_data(ai_dfs, clean=True)
         human_df = standardize_human_data(human_df)
 
-        # drop lengths (only on ai df since filter is based on human data length)
-        ai_df = drop_lengths(ai_df, dataset)
-
         # combine
-        dataset_df = pd.concat([human_df, ai_df], ignore_index=True, axis=0)
+        dataset_df = pd.concat([human_df, *ai_dfs], ignore_index=True, axis=0)
         dataset_df["dataset"] = dataset
 
         all_dfs.append(dataset_df)
@@ -229,8 +134,8 @@ def preprocess_datasets(
 
 def main():
     path = pathlib.Path(__file__)
-    ai_dir = path.parents[2] / "datasets" / "ai_datasets" / "vLLM" / "FULL_DATA"
-    human_dir = path.parents[2] / "datasets" / "human_datasets"
+    ai_dir = path.parents[2] / "datasets_files" / "text" /"ai_datasets" / "clean_data"
+    human_dir = path.parents[2] / "datasets_files" / "text" / "human_datasets"
 
     combined_df = preprocess_datasets(
         ai_dir,
@@ -241,7 +146,7 @@ def main():
     print(combined_df)
 
     # save as jsonl
-    outpath = path.parents[2] / "datasets" / "complete_datasets" / "text"
+    outpath = path.parents[2] / "datasets_complete" / "text"
     outpath.mkdir(parents=True, exist_ok=True)
 
     # split (stratified)
