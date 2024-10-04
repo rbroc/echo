@@ -63,7 +63,7 @@ def main():
 
     # define paths 
     path = pathlib.Path(__file__)
-    datapath = path.parents[2] / "metrics" / "human_metrics" 
+    datapath = path.parents[2] / "datasets_files" / "metrics" / "human_metrics" 
 
     min_lengths = []
     max_lengths = []
