@@ -138,29 +138,28 @@ def main():
 
     out_dir = path.parents[1] / "datasets_files" / "text" / "ai_datasets" / "clean_data"
 
-    temp = 1
+    for temp in [1, 1.5]:
+        for dataset in tqdm(DATASETS, desc="Datasets"):
+            # get all ai paths for a particular dataset and temperature
+            ai_paths = get_ai_paths(ai_dir, dataset=dataset, temp=temp)
 
-    for dataset in tqdm(DATASETS, desc="Datasets"):
-        # get all ai paths for a particular dataset and temperature
-        ai_paths = get_ai_paths(ai_dir, dataset=dataset, temp=temp)
+            for p in tqdm(ai_paths, desc="AI Paths"):
+                # get model name
+                model_name = p.parents[0].name
 
-        for p in tqdm(ai_paths, desc="AI Paths"):
-            # get model name
-            model_name = p.parents[0].name
+                # create dir
+                file_dir = out_dir / model_name
+                file_dir.mkdir(parents=True, exist_ok=True)
 
-            # create dir
-            file_dir = out_dir / model_name
-            file_dir.mkdir(parents=True, exist_ok=True)
+                file_name = p.name  # e.g., dailymail_cnn_prompt_21_temp1.ndjsonß
 
-            file_name = p.name  # e.g., dailymail_cnn_prompt_21_temp1.ndjsonß
-
-            # read files, and save to "clean_data" but model name as folder name
-            df = pd.read_json(p, lines=True)
-            df = standardize_ai_data([df], clean=True)
-            df = drop_lengths(df[0], dataset) # unpack list, drop lengths
-            
-            # save to ndjson
-            df.to_json(file_dir / file_name, orient="records", lines=True)
+                # read files, and save to "clean_data" but model name as folder name
+                df = pd.read_json(p, lines=True)
+                df = standardize_ai_data([df], clean=True)
+                df = drop_lengths(df[0], dataset) # unpack list, drop lengths
+                
+                # save to ndjson
+                df.to_json(file_dir / file_name, orient="records", lines=True)
 
 if __name__ == "__main__":
     main()
