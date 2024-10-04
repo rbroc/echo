@@ -179,4 +179,4 @@ results/analysis/*.html
 results/classify/pca_results/data/*
 
 # data folder for now 
-datasets/complete_datasets/*
+complete_datasets/*
