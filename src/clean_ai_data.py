@@ -9,6 +9,9 @@ import re
 import pandas as pd
 from tqdm import tqdm
 
+from generate.generation import extract_min_max_tokens
+
+
 MODELS = ["beluga7b", "llama2_chat7b", "llama2_chat13b", "mistral7b"]
 PROMPT_NUMBERS = [21]
 DATASETS = ["dailymail_cnn", "stories", "mrpc", "dailydialog"]
@@ -57,7 +60,6 @@ def clean_ai_df(df, col="completions"):
 
     return df
 
-
 def standardize_ai_data(ai_dfs: list[pd.DataFrame], clean: bool = True):
     """
     Standardize AI data to match human data.
@@ -102,11 +104,31 @@ def standardize_ai_data(ai_dfs: list[pd.DataFrame], clean: bool = True):
 
     return ai_dfs
 
+def drop_lengths(df, dataset: str, verbose=True):
+    """
+    Drop rows based on min and max doc lengths
+    """
+    # extract min and max tokens from completions, drop cols that are below or above these in doc length
+    min_tokens, max_tokens = extract_min_max_tokens(dataset)
+
+    # drop cols that are below or above min and max tokens
+    filtered_df = df[
+        (df["doc_length"] >= min_tokens) & (df["doc_length"] <= max_tokens)
+    ]
+
+    # print info msg
+    if verbose:
+        print(
+            f"[INFO:] {dataset.upper()}: Dropped {len(df) - len(filtered_df)} rows on doc length. Tokens min/max {min_tokens}/{max_tokens}."
+        )
+
+    return filtered_df
+
 
 def main():
     path = pathlib.Path(__file__)
     ai_dir = (
-        path.parents[2]
+        path.parents[1]
         / "datasets_files"
         / "text"
         / "ai_datasets"
@@ -114,7 +136,7 @@ def main():
         / "FULL_DATA"
     )
 
-    out_dir = path.parents[2] / "datasets_files" / "text" / "ai_datasets" / "clean_data"
+    out_dir = path.parents[1] / "datasets_files" / "text" / "ai_datasets" / "clean_data"
 
     temp = 1
 
@@ -135,7 +157,8 @@ def main():
             # read files, and save to "clean_data" but model name as folder name
             df = pd.read_json(p, lines=True)
             df = standardize_ai_data([df], clean=True)
-            df[0].to_csv(file_dir / file_name, index=False)
+            df = drop_lengths(df[0], dataset) # unpack list, drop lengths
+            df.to_csv(file_dir / file_name, index=False)
 
 
 if __name__ == "__main__":
