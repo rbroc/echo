@@ -1,8 +1,13 @@
+"""
+Clean generated AI data to match human data (e.g., lowercase, removing irregular format)
+"""
+
+import ast
 import pathlib
+import re
+
 import pandas as pd
 from tqdm import tqdm
-import re
-import ast
 
 MODELS = ["beluga7b", "llama2_chat7b", "llama2_chat13b", "mistral7b"]
 PROMPT_NUMBERS = [21]
@@ -36,6 +41,7 @@ def get_ai_paths(
         )
 
     return ai_paths
+
 
 def clean_ai_df(df, col="completions"):
     """
@@ -96,9 +102,17 @@ def standardize_ai_data(ai_dfs: list[pd.DataFrame], clean: bool = True):
 
     return ai_dfs
 
-def main():     
+
+def main():
     path = pathlib.Path(__file__)
-    ai_dir = path.parents[2] / "datasets_files" / "text" /"ai_datasets" / "vLLM" / "FULL_DATA"
+    ai_dir = (
+        path.parents[2]
+        / "datasets_files"
+        / "text"
+        / "ai_datasets"
+        / "vLLM"
+        / "FULL_DATA"
+    )
 
     out_dir = path.parents[2] / "datasets_files" / "text" / "ai_datasets" / "clean_data"
 
@@ -106,23 +120,22 @@ def main():
 
     for dataset in tqdm(DATASETS, desc="Datasets"):
         # get all ai paths for a particular dataset and temperature
-         ai_paths = get_ai_paths(ai_dir, dataset=dataset, temp=temp)
+        ai_paths = get_ai_paths(ai_dir, dataset=dataset, temp=temp)
 
-         for p in tqdm(ai_paths, desc="AI Paths"):
-            # get model name 
+        for p in tqdm(ai_paths, desc="AI Paths"):
+            # get model name
             model_name = p.parents[0].name
 
-            # create dir 
+            # create dir
             file_dir = out_dir / model_name
             file_dir.mkdir(parents=True, exist_ok=True)
 
-            file_name = p.name # e.g., dailymail_cnn_prompt_21_temp1.ndjson
+            file_name = p.name  # e.g., dailymail_cnn_prompt_21_temp1.ndjson
 
-            # read files, and save to "clean_data" but model name as folder name 
+            # read files, and save to "clean_data" but model name as folder name
             df = pd.read_json(p, lines=True)
             df = standardize_ai_data([df], clean=True)
             df[0].to_csv(file_dir / file_name, index=False)
-         
 
 
 if __name__ == "__main__":
