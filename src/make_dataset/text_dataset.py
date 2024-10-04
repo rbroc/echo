@@ -44,6 +44,8 @@ def get_ai_paths(
             f"[WARNING:] Length of ai paths is zero. Ensure that you have valid arguments."
         )
 
+    ai_paths = sorted(ai_paths)
+
     return ai_paths
 
 
@@ -99,12 +101,7 @@ def preprocess_datasets(
     Args:
         ai_dir: path to directory with AI datasets
         human_dir: path to directory with human datasets
-        models: list of models to include
-        datasets: list of datasets to include
-        clean_ai: whether to clean ai data (e.g., lowercase, removing irregular format)
-
         temp: temperature in file name (e.g., 1 if temp1, 1.4 if temp1.4)
-        prompt_n: prompt number (e.g., 3 or 21). Defaults to 21 which is what we settled on.
 
     Returns:
         all_dfs_combined: combined dataframe with all datasets
@@ -137,16 +134,18 @@ def main():
     ai_dir = path.parents[2] / "datasets_files" / "text" /"ai_datasets" / "clean_data"
     human_dir = path.parents[2] / "datasets_files" / "text" / "human_datasets"
 
+    temp = 1
+
     combined_df = preprocess_datasets(
         ai_dir,
         human_dir,
-        temp=1,
+        temp=temp,
     )
 
     print(combined_df)
 
     # save as jsonl
-    outpath = path.parents[2] / "datasets_complete" / "text"
+    outpath = path.parents[2] / "datasets_complete" / "text" / f"temp_{temp}"
     outpath.mkdir(parents=True, exist_ok=True)
 
     # split (stratified)
