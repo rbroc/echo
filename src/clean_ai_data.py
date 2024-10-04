@@ -158,8 +158,7 @@ def main():
             df = pd.read_json(p, lines=True)
             df = standardize_ai_data([df], clean=True)
             df = drop_lengths(df[0], dataset) # unpack list, drop lengths
-            df.to_csv(file_dir / file_name, index=False)
-
+            df.to_json(file_dir / file_name)
 
 if __name__ == "__main__":
     main()
