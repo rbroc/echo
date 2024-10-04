@@ -152,13 +152,15 @@ def main():
             file_dir = out_dir / model_name
             file_dir.mkdir(parents=True, exist_ok=True)
 
-            file_name = p.name  # e.g., dailymail_cnn_prompt_21_temp1.ndjson
+            file_name = p.name  # e.g., dailymail_cnn_prompt_21_temp1.ndjsonß
 
             # read files, and save to "clean_data" but model name as folder name
             df = pd.read_json(p, lines=True)
             df = standardize_ai_data([df], clean=True)
             df = drop_lengths(df[0], dataset) # unpack list, drop lengths
-            df.to_json(file_dir / file_name)
+            
+            # save to ndjson
+            df.to_json(file_dir / file_name, orient="records", lines=True)
 
 if __name__ == "__main__":
     main()
