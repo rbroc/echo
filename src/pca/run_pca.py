@@ -8,15 +8,38 @@ import sys
 
 import pandas as pd
 
+from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
+
 sys.path.append(str(pathlib.Path(__file__).parents[2]))
-from src.utils.pca import (
+from src.utils.pca_plots import (
     get_loadings,
     plot_cumulative_variance,
     plot_loadings,
-    run_PCA,
 )
 from src.utils.cols_to_drop import get_cols_to_drop
 
+def run_PCA(df: pd.DataFrame, feature_names: list, random_state:int=129, n_components=None):
+    '''
+    Run PCA on a list of feature names. Normalises features prior to running PCA.
+    
+    Args:
+        df: dataframe to scale and run PCA on.
+        feature_names: List of column names to use for PCA.
+        random_state: Random state for PCA. Default is 129.
+        n_components: Number of principal components to keep. Default is None (keep all components).
+        
+    Returns:
+        pca: The fitted PCA model.
+        scaler: The fitted StandardScaler object for future scaling.
+    '''
+    std_scaler = StandardScaler()
+    scaled_df = std_scaler.fit_transform(df[feature_names]) # fit and transform on train data for PCA
+
+    pca_model = PCA(n_components=n_components, random_state=random_state) 
+    pca_model.fit(scaled_df) # only fit since we will transform train and test data with the model when we use it
+
+    return pca_model, std_scaler
 
 def main():
     path = pathlib.Path(__file__)
@@ -50,12 +73,11 @@ def main():
     features = [feat for feat in all_features if feat not in cols_to_drop]
 
     # run PCA
-    pca_model, pca_df = run_PCA(
+    pca_model, scaler = run_PCA(
         train_df,
         feature_names=features,
-        n_components=len(features),
-        keep_metrics_df=False,
-    )  # keep_metrics_df=False to only keep pca components and row identifiers
+        random_state=129,
+    )
 
     # cumvar
     plot_cumulative_variance(
@@ -75,6 +97,9 @@ def main():
     # save results + model
     with open(savedir / f"{file_name}_model.pkl", "wb") as file:
         pickle.dump(pca_model, file)
+
+    with open(savedir / f"{file_name}_scaler.pkl", "wb") as file:
+        pickle.dump(scaler, file)
 
     with open(savedir / f"{file_name}_EXPVAR.txt", "w") as file:
         file.write("PRINCIPAL COMPONENTS: EXPLAINED VARIANCE\n")

@@ -7,52 +7,8 @@ import pickle
 import pandas as pd
 import numpy as np
 
-from sklearn.preprocessing import StandardScaler
-from sklearn.decomposition import PCA
-
 import seaborn as sns
 import matplotlib.pyplot as plt
-
-def run_PCA(metrics_df:pd.DataFrame, feature_names:list, n_components:int=4, keep_metrics_df=True):
-    '''
-    Run PCA on list of feature names. Normalises features prior to running PCA
-    '''
-    # normalise 
-    std_scaler = StandardScaler()
-    scaled_df = std_scaler.fit_transform(metrics_df[feature_names])
-
-    # run pca 
-    pca = PCA(n_components=n_components, random_state=129)
-    results = pca.fit_transform(scaled_df)
-
-    # save
-    column_names = [f"PC{i}" for i in range(1, n_components + 1)]
-    pca_df = pd.DataFrame(data = results)
-    pca_df.columns = column_names
-   
-    if keep_metrics_df: # add new components to overall metrics df
-        df = pd.concat([metrics_df.reset_index(), pca_df.reset_index()], axis=1)
-    else: # only keep pca components and identifiers
-        metrics_df = metrics_df[["id", "model", "is_human", "temperature", "prompt_number"]]
-        df = pd.concat([metrics_df.reset_index(), pca_df.reset_index()], axis=1)
-
-    return pca, df
-
-def save_PCA_results(pca, results_path):
-    '''
-    Save PCA results to desired path (includes pca obj. and txt file with explained variance)
-    '''
-    with open(results_path / 'pca_model.pkl', 'wb') as file:
-        pickle.dump(pca, file)
-
-    with open(results_path / 'explained_variance.txt', 'w') as file:
-        # Write the header
-        file.write("PRINCIPAL COMPONENTS: EXPLAINED VARIANCE\n")
-        file.write("Original features: 'doc_length', 'n_tokens', 'n_characters', 'n_sentences'\n")
-
-        # Write the PCA components and explained variance
-        for i, variance in enumerate(pca.explained_variance_ratio_, start=1):
-            file.write(f"pca_{i}: {variance:.8f}\n")
 
 ## loadings ## 
 def get_loadings(pca, feature_names):
