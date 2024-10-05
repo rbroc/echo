@@ -14,11 +14,18 @@ def main():
     metrics_path = path.parents[2] / "datasets_complete" / "metrics" / f"temp_{temp}"
     text_path = path.parents[2] / "datasets_complete" / "text" / f"temp_{temp}"
 
-    for split in ["train", "val", "test"]:
-        text_df = pd.read_parquet(text_path / f"{split}_text.parquet")
-        metrics_df = pd.read_parquet(metrics_path / f"{split}_metrics.parquet")
+    splits = ["train", "val", "test"]
 
-        print(text_df[["id", "model"]].equals(metrics_df[["id", "model"]]))
+    for split in splits:
+        print(f"[INFO]: Checking {split} split")
+        text_df = pd.read_parquet(text_path / f"{split}_text.parquet").reset_index(drop=True)
+        metrics_df = pd.read_parquet(metrics_path / f"{split}_metrics.parquet").reset_index(drop=True)
+
+        # print whether they match on id and model
+        print(f"[INFO]: Ids and model match: {text_df[['id', 'model']].equals(metrics_df[['id', 'model']])}")
+
+        print(f"[INFO]: Length of text df: {len(text_df)}")
+        print(f"[INFO]: Length of metrics df: {len(metrics_df)}\n")
 
 
 if __name__ == "__main__":
