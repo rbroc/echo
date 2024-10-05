@@ -7,7 +7,7 @@ Even though we are creating seperate classifiers for each dataset, we still want
 import pathlib
 import sys
 import pandas as pd
-sys.path.append(str(pathlib.Path(__file__).parents[3]))
+sys.path.append(str(pathlib.Path(__file__).parents[2]))
 from src.utils.process_metrics import load_metrics
 
 def identify_NA_metrics(df, percent_zero:float=None):
@@ -34,15 +34,23 @@ def identify_NA_metrics(df, percent_zero:float=None):
 
 def main():
     path = pathlib.Path(__file__)
-    datapath = path.parents[3] / "metrics"
+    temp = 1
 
-    df = load_metrics(
-                            human_dir=datapath / "human_metrics", 
-                            ai_dir=datapath / "ai_metrics",
-                            dataset=None, temp=1, 
-                            human_completions_only=True,
-                            filter_lengths=True
-                            )
+    datapath = (
+        path.parents[2]
+        / "datasets_complete"
+        / "metrics"
+        / f"temp_{temp}"
+    )
+
+    # load train metrics data
+    train_df = pd.read_parquet(datapath / "train_metrics.parquet")
+    val_df = pd.read_parquet(datapath / "val_metrics.parquet")
+    test_df = pd.read_parquet(datapath / "test_metrics.parquet")
+
+    # combine
+    df = pd.concat([train_df, val_df, test_df], ignore_index=True)
+
 
     # drop type cols first (since they are not what should determine what features to drop)
     type_cols = ["model", "id", "is_human", "unique_id", "sample_params", "temperature", "prompt_number", "dataset", "annotations"] 
