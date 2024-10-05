@@ -25,8 +25,6 @@ def main():
     # dirs based on temp
     savedir = path.parents[2] / "results" / "classify" / "pca_results" / f"temp_{temp}"
     loadingspath = savedir / "loadings"
-    cumvarpath = savedir / "cumulative_variance"
-    expvarpath = savedir / "explained_variance"
 
     datapath = (
         path.parents[2]
@@ -83,7 +81,7 @@ def main():
     plot_cumulative_variance(
         pca_model,
         f"{file_name.capitalize()} data (Temperature of {temp})",
-        cumvarpath,
+        savedir,
         f"{file_name}_CUMVAR.png",
     )
 
@@ -98,7 +96,7 @@ def main():
     with open(savedir / f"{file_name}_model.pkl", "wb") as file:
         pickle.dump(pca_model, file)
 
-    with open(expvarpath / f"{file_name}_EXPVAR.txt", "w") as file:
+    with open(savedir / f"{file_name}_EXPVAR.txt", "w") as file:
         file.write("PRINCIPAL COMPONENTS: EXPLAINED VARIANCE\n")
         file.write(f"Features: {features}\n")
 
@@ -108,7 +106,7 @@ def main():
         expvar_df = pd.DataFrame(
             pca_model.explained_variance_ratio_, columns=["explained_variance"]
         )
-        expvar_df.to_csv(expvarpath / f"{file_name}_EXPVAR.csv")
+        expvar_df.to_csv(savedir / f"{file_name}_EXPVAR.csv")
 
 
 if __name__ == "__main__":
