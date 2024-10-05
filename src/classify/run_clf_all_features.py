@@ -2,11 +2,13 @@
 Run XGBOOST classifier for each dataset and temp combination, save results to /results/classify/clf_results on all features.
 """
 
-import pathlib
 import argparse
-import pandas as pd
-import sys
+import pathlib
 import pickle
+import sys
+
+import pandas as pd
+from xgboost import XGBClassifier
 
 sys.path.append(str(pathlib.Path(__file__).parents[2]))
 from src.utils.classify import (
@@ -48,6 +50,9 @@ def main():
 
     dataset, temp = args.dataset, args.temp
 
+    if temp == 1.0:
+        temp = int(temp)
+
     # paths
     path = pathlib.Path(__file__)
     pcapath = (
@@ -65,9 +70,6 @@ def main():
     savepath.mkdir(parents=True, exist_ok=True)
 
     datapath = path.parents[2] / "datasets_complete" / "metrics" / f"temp_{temp}"
-
-    if temp == 1.0:
-        temp = int(temp)
 
     # filter to only include one dataset
     train_df = pd.read_parquet(datapath / f"train_metrics.parquet")
@@ -96,12 +98,23 @@ def main():
 
     # create pc feature names (from shape of X_train)
     pc_feature_names = [f"PC{i}" for i in range(1, X_train.shape[1] + 1)]
-    print(len(pc_feature_names))
+
+    # compute amount of model = human (class 1) versus model != human (class 0) for scale_pos_weight
+    human_count = train_df[train_df["model"] == "human"].shape[0]
+    non_human_count = train_df[train_df["model"] != "human"].shape[0]
+    scale_pos_weight = non_human_count / human_count
 
     # fit
+    clf = XGBClassifier(
+        enable_categorical=True,
+        use_label_encoder=False,
+        random_state=129,
+        scale_pos_weight=scale_pos_weight,
+    )
+
     clf, clf_report = clf_pipeline(
         df=train_df,
-        model="XGBoost",
+        clf=clf,
         X_train=X_train,
         y_train=y_train,
         X_val=X_val,
@@ -144,9 +157,21 @@ def main():
         X_train_mdl = get_transformed_X(train_df_mdl, features, pca_model, scaler)
         X_val_mdl = get_transformed_X(val_df_mdl, features, pca_model, scaler)
 
+        # get scale pos weight for good measure (should be 1 as now we are comparing one model to human)
+        human_count = train_df_mdl[train_df_mdl["model"] == "human"].shape[0]
+        non_human_count = train_df_mdl[train_df_mdl["model"] != "human"].shape[0]
+        scale_pos_weight = non_human_count / human_count
+
+        clf = XGBClassifier(
+            enable_categorical=True,
+            use_label_encoder=False,
+            random_state=129,
+            scale_pos_weight=scale_pos_weight,
+        )
+
         clf, clf_report = clf_pipeline(
             df=train_df_mdl,  # only used for metadata
-            model="XGBoost",
+            clf=clf,
             X_train=X_train_mdl,
             y_train=y_train_mdl,
             X_val=X_val_mdl,
