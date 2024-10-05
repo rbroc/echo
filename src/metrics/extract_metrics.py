@@ -91,10 +91,14 @@ def get_ai_metrics(
     )
 
     if compute_perplexity:
+        model_id = "gpt2"
+
+        print(f"[INFO:] Computing perplexity and entropy via {model_id} ...")
+
         completions_df = get_information_metrics(
             completions_df,
             text_column="completions",
-            model_id="gpt2",
+            model_id=model_id,
             batch_size=batch_size,
         )
 
@@ -217,7 +221,7 @@ def main():
     ai_dir = path.parents[2] / "datasets_files" / "text" / "ai_datasets" / "clean_data"
     human_dir = path.parents[2] / "datasets_files" / "text" / "human_datasets"
 
-    metrics_path = path.parents[2] / "metrics"
+    metrics_path = path.parents[2] / "datasets_files" / "metrics"
     metrics_path.mkdir(parents=True, exist_ok=True)
 
     # get cores for multiprocessing (-1 for safety)
