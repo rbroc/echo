@@ -23,7 +23,7 @@ def main():
     temp = 1
 
     # dirs based on temp
-    savedir = path.parents[2] / "results" / "classify" / "pca_results" / f"temp_{temp}"
+    savedir = path.parents[2] / "results" / "pca_results" / f"temp_{temp}"
     loadingspath = savedir / "loadings"
 
     datapath = (
