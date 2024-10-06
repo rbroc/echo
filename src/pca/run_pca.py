@@ -7,17 +7,15 @@ import pickle
 import sys
 
 import pandas as pd
-
-from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
+from sklearn.preprocessing import StandardScaler
+from tqdm import tqdm
 
 sys.path.append(str(pathlib.Path(__file__).parents[2]))
-from src.utils.pca_plots import (
-    get_loadings,
-    plot_cumulative_variance,
-    plot_loadings,
-)
 from src.utils.cols_to_drop import get_cols_to_drop
+from src.utils.pca_plots import (get_loadings, plot_cumulative_variance,
+                                 plot_loadings)
+
 
 def run_PCA(df: pd.DataFrame, feature_names: list, random_state:int=129, n_components=None):
     '''
@@ -73,6 +71,7 @@ def main():
     features = [feat for feat in all_features if feat not in cols_to_drop]
 
     # run PCA
+    print(f"[INFO:] Running PCA")
     pca_model, scaler = run_PCA(
         train_df,
         feature_names=features,
@@ -89,12 +88,13 @@ def main():
 
     # loadings
     loadings = get_loadings(pca_model, features)
-    components = loadings.columns[:5]
+    components = loadings.columns.tolist()
 
-    for comp in components:
+    for comp in tqdm(components, desc="[INFO:] Plotting loadings"):
         plot_loadings(loadings, comp, loadingspath)
 
     # save results + model
+    print(f"[INFO]: Saving results")
     with open(savedir / f"{file_name}_model.pkl", "wb") as file:
         pickle.dump(pca_model, file)
 
