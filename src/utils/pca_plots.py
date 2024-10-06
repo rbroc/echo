@@ -33,6 +33,9 @@ def plot_loadings(loadings, component:str="PC1", save_dir=None):
 
     sns.set_theme(rc={'figure.figsize':(10, 16)})
     loadings[component].sort_values().plot.barh()
+    
+    # make title bold and bigger
+    plt.title(component, fontsize=20, fontweight='bold')
 
     # add more whitespace
     plt.tight_layout(pad=2)
