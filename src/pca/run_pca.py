@@ -89,6 +89,7 @@ def main():
     # loadings
     loadings = get_loadings(pca_model, features)
     components = loadings.columns.tolist()
+    loadings.to_csv(savedir / "loadings_matrix.csv")
 
     for comp in tqdm(components, desc="[INFO:] Plotting loadings"):
         plot_loadings(loadings, comp, loadingspath)
