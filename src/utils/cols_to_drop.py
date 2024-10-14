@@ -7,7 +7,6 @@ def get_cols_to_drop():
         "model",
         "id",
         "is_human",
-        "unique_id",
         "sample_params",
         "temperature",
         "prompt_number",
