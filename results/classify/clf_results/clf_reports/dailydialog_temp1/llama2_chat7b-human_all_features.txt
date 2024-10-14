@@ -1,14 +1,14 @@
-Results from model run at 2024-10-14 11:10:18.100240
+Results from model run at 2024-10-14 11:20:57.813380
 Original dataset: dailydialog, temperature: 1.0
 Random state: 129
               precision    recall  f1-score   support
 
-           0       0.90      0.85      0.87       750
+           0       0.89      0.85      0.87       750
            1       0.86      0.90      0.88       750
 
-    accuracy                           0.88      1500
-   macro avg       0.88      0.88      0.88      1500
-weighted avg       0.88      0.88      0.88      1500
+    accuracy                           0.87      1500
+   macro avg       0.87      0.87      0.87      1500
+weighted avg       0.87      0.87      0.87      1500
 
 Model(s) compared with human:['llama2_chat7b']
 Features: ['PC1', 'PC2', 'PC3', 'PC4', 'PC5', 'PC6', 'PC7', 'PC8', 'PC9', 'PC10', 'PC11', 'PC12', 'PC13', 'PC14', 'PC15', 'PC16', 'PC17', 'PC18', 'PC19', 'PC20', 'PC21', 'PC22', 'PC23', 'PC24', 'PC25', 'PC26', 'PC27', 'PC28', 'PC29', 'PC30', 'PC31', 'PC32', 'PC33', 'PC34', 'PC35', 'PC36', 'PC37', 'PC38', 'PC39', 'PC40', 'PC41', 'PC42', 'PC43', 'PC44', 'PC45', 'PC46', 'PC47', 'PC48', 'PC49', 'PC50', 'PC51', 'PC52', 'PC53', 'PC54', 'PC55', 'PC56', 'PC57', 'PC58', 'PC59', 'PC60', 'PC61', 'PC62', 'PC63', 'PC64']

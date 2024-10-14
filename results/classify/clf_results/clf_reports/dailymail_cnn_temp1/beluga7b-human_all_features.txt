@@ -1,10 +1,10 @@
-Results from model run at 2024-10-14 11:10:26.705772
+Results from model run at 2024-10-14 11:21:07.044470
 Original dataset: dailymail_cnn, temperature: nan
 Random state: 129
               precision    recall  f1-score   support
 
-           0       0.97      0.99      0.98       450
-           1       0.99      0.97      0.98       450
+           0       0.97      1.00      0.98       450
+           1       1.00      0.97      0.98       450
 
     accuracy                           0.98       900
    macro avg       0.98      0.98      0.98       900

@@ -1,10 +1,10 @@
-Results from model run at 2024-10-14 11:10:14.360782
+Results from model run at 2024-10-14 11:20:53.756103
 Original dataset: dailydialog, temperature: nan
 Random state: 129
               precision    recall  f1-score   support
 
-           0       0.77      0.73      0.75       750
-           1       0.74      0.78      0.76       750
+           0       0.77      0.74      0.75       750
+           1       0.75      0.77      0.76       750
 
     accuracy                           0.76      1500
    macro avg       0.76      0.76      0.76      1500

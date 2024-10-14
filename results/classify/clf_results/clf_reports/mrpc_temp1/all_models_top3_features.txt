@@ -1,14 +1,14 @@
-Results from model run at 2024-10-14 11:11:08.953815
+Results from model run at 2024-10-14 11:21:50.657548
 Original dataset: mrpc, temperature: nan
 Random state: 129
               precision    recall  f1-score   support
 
-           0       0.89      0.75      0.82      2340
-           1       0.39      0.63      0.48       585
+           0       0.90      0.74      0.81      2340
+           1       0.39      0.67      0.49       585
 
     accuracy                           0.73      2925
-   macro avg       0.64      0.69      0.65      2925
-weighted avg       0.79      0.73      0.75      2925
+   macro avg       0.65      0.70      0.65      2925
+weighted avg       0.80      0.73      0.75      2925
 
 Model(s) compared with human:['beluga7b', 'llama2_chat13b', 'llama2_chat7b', 'mistral7b']
-Features: ['PC6', 'PC1', 'PC36']
+Features: ['PC6', 'PC1', 'PC11']
