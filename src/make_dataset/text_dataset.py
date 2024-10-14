@@ -1,17 +1,19 @@
 """
-Make dataset: 
-- preprocess ai data, combine with human data
+Make text dataset: 
+- load individual files for ai and human data 
+- combine ai and human data (already cleaned)
 - split into train, val, test
 - save splits
+
+Run this script
+    python src/make_dataset/text_dataset.py
 """
+
 import pathlib
-import sys
 
 import pandas as pd
 from tqdm import tqdm
-
-sys.path.append(str(pathlib.Path(__file__).parents[2]))
-from src.utils.split_data import create_split
+from util_split_data import split_on_unique_ids
 
 MODELS = ["beluga7b", "llama2_chat7b", "llama2_chat13b", "mistral7b"]
 PROMPT_NUMBERS = [21]
@@ -79,6 +81,7 @@ def load_dataset(
 
     return ai_dfs, human_df
 
+
 def standardize_human_data(human_df):
     # add model and is_human cols
     human_df["model"] = "human"
@@ -89,6 +92,7 @@ def standardize_human_data(human_df):
     human_df.rename(columns={"human_completions": "completions"}, inplace=True)
 
     return human_df
+
 
 def preprocess_datasets(
     ai_dir: pathlib.Path,
@@ -130,39 +134,37 @@ def preprocess_datasets(
 
 
 def main():
-    path = pathlib.Path(__file__)
-    ai_dir = path.parents[2] / "datasets_files" / "text" /"ai_datasets" / "clean_data"
-    human_dir = path.parents[2] / "datasets_files" / "text" / "human_datasets"
-
     temp = 1
 
-    combined_df = preprocess_datasets(
+    path = pathlib.Path(__file__)
+    ai_dir = path.parents[2] / "datasets_files" / "text" / "ai_datasets" / "clean_data"
+    human_dir = path.parents[2] / "datasets_files" / "text" / "human_datasets"
+    outpath = path.parents[2] / "datasets_complete" / "text" / f"temp_{temp}"
+    outpath.mkdir(parents=True, exist_ok=True)
+
+    df = preprocess_datasets(
         ai_dir,
         human_dir,
         temp=temp,
     )
 
-    print(combined_df)
+    # sort dataset by id and model (to ensure consistency with metrics data, will be shuffled anyways)
+    df = df.sort_values(["id", "model"])
 
-    # save as jsonl
-    outpath = path.parents[2] / "datasets_complete" / "text" / f"temp_{temp}"
-    outpath.mkdir(parents=True, exist_ok=True)
+    # split on unique ids
+    train_df, val_df, test_df = split_on_unique_ids(df)
 
-    # split (stratified)
-    stratify_cols = ["is_human", "dataset", "model"]
-    train_df, val_df, test_df = create_split(
-        combined_df, random_state=129, val_test_size=0.15, stratify_cols=stratify_cols
-    )
-
-    # save splits as parquet
     for df in zip([train_df, val_df, test_df], ["train", "val", "test"]):
         df[0].to_parquet(outpath / f"{df[1]}_text.parquet")
 
-        # print len
+        # info msgs
         print(f"[INFO]: {df[1]} length: {len(df[0])}")
 
-        # print length of each dataset (df["dataset"])
+        print("[INFO:] DATASET COUNTS")
         print(df[0]["dataset"].value_counts())
+
+        print("[INFO:] MODEL COUNTS")
+        print(df[0]["model"].value_counts())
 
 
 if __name__ == "__main__":

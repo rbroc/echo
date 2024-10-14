@@ -3,14 +3,11 @@ Create metrics dataset (to match text dataset)
 """
 
 import pathlib
-import sys
 
 import pandas as pd
-
-sys.path.append(str(pathlib.Path(__file__).parents[2]))
 from tqdm import tqdm
 
-from src.utils.split_data import create_split
+from util_split_data import split_on_unique_ids
 
 DATASETS = ["dailymail_cnn", "stories", "mrpc", "dailydialog"]
 
@@ -70,35 +67,37 @@ def preprocess_metrics(
 
 
 def main():
+    temp = 1
+
     path = pathlib.Path(__file__)
     ai_dir = path.parents[2] / "datasets_files" / "metrics" / "ai_metrics"
     human_dir = path.parents[2] / "datasets_files" / "metrics" / "human_metrics"
-
-    temp = 1
-
-    metrics_df = preprocess_metrics(human_dir=human_dir, ai_dir=ai_dir, temp=temp)
-
-    print(metrics_df)
-
-    # save as jsonl
     outpath = path.parents[2] / "datasets_complete" / "metrics" / f"temp_{temp}"
     outpath.mkdir(parents=True, exist_ok=True)
 
-    # split (stratified)
-    stratify_cols = ["is_human", "dataset", "model"]
-    train_df, val_df, test_df = create_split(
-        metrics_df, random_state=129, val_test_size=0.15, stratify_cols=stratify_cols
-    )
+    df = preprocess_metrics(human_dir=human_dir, ai_dir=ai_dir, temp=temp)
 
-    # save splits as parquet
+    # sort dataset by id (to ensure consistency with text data, will be shuffled anyways)
+    df = df.sort_values(["id", "model"])
+
+    # drop "unique_id" column (if it exists)
+    if "unique_id" in df.columns:
+        df = df.drop(columns=["unique_id"])
+
+    # split on unique ids
+    train_df, val_df, test_df = split_on_unique_ids(df)
+
     for df in zip([train_df, val_df, test_df], ["train", "val", "test"]):
         df[0].to_parquet(outpath / f"{df[1]}_metrics.parquet")
 
-        # print len
+        # info msgs
         print(f"[INFO]: {df[1]} length: {len(df[0])}")
 
-        # print length of each dataset (df["dataset"])
+        print("[INFO:] DATASET COUNTS")
         print(df[0]["dataset"].value_counts())
+
+        print("[INFO:] MODEL COUNTS")
+        print(df[0]["model"].value_counts())
 
 
 if __name__ == "__main__":
