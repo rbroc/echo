@@ -18,11 +18,17 @@ def main():
 
     for split in splits:
         print(f"[INFO]: Checking {split} split")
-        text_df = pd.read_parquet(text_path / f"{split}_text.parquet").reset_index(drop=True)
-        metrics_df = pd.read_parquet(metrics_path / f"{split}_metrics.parquet").reset_index(drop=True)
+        text_df = pd.read_parquet(text_path / f"{split}_text.parquet").reset_index(
+            drop=True
+        )
+        metrics_df = pd.read_parquet(
+            metrics_path / f"{split}_metrics.parquet"
+        ).reset_index(drop=True)
 
         # print whether they match on id and model
-        print(f"[INFO]: Ids and model match: {text_df[['id', 'model']].equals(metrics_df[['id', 'model']])}")
+        print(
+            f"[INFO]: Ids and model match: {text_df[['id', 'model']].equals(metrics_df[['id', 'model']])}"
+        )
 
         print(f"[INFO]: Length of text df: {len(text_df)}")
         print(f"[INFO]: Length of metrics df: {len(metrics_df)}\n")
