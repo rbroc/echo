@@ -1,14 +1,14 @@
-Results from model run at 2024-10-05 20:38:38.833097
-Original dataset: dailymail_cnn, temperature: 1.0
+Results from model run at 2024-10-14 11:11:05.243169
+Original dataset: dailymail_cnn, temperature: nan
 Random state: 129
               precision    recall  f1-score   support
 
-           0       0.98      0.98      0.98      1800
-           1       0.92      0.93      0.92       450
+           0       0.97      0.97      0.97      1800
+           1       0.89      0.88      0.88       450
 
-    accuracy                           0.97      2250
-   macro avg       0.95      0.95      0.95      2250
-weighted avg       0.97      0.97      0.97      2250
+    accuracy                           0.95      2250
+   macro avg       0.93      0.93      0.93      2250
+weighted avg       0.95      0.95      0.95      2250
 
-Model(s) compared with human:['llama2_chat7b', 'mistral7b', 'beluga7b', 'llama2_chat13b']
-Features: ['PC59', 'PC7', 'PC44']
+Model(s) compared with human:['beluga7b', 'llama2_chat13b', 'llama2_chat7b', 'mistral7b']
+Features: ['PC55', 'PC35', 'PC2']

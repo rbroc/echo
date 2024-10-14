@@ -1,4 +1,4 @@
-Results from model run at 2024-10-05 20:38:03.292577
+Results from model run at 2024-10-14 11:10:31.041136
 Original dataset: dailymail_cnn, temperature: 1.0
 Random state: 129
               precision    recall  f1-score   support
