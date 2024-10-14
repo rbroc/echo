@@ -40,3 +40,12 @@ do
         python run_clf_tfidf.py --dataset "$dataset" --temp "$temp"
     done
 done
+
+echo "[INFO:] Making CLF table for all each dataset"
+for dataset in "${datasets[@]}"
+do
+    for temp in "${temperatures[@]}"
+    do  
+        python table/create_table.py --dataset "$dataset" --temp "$temp"
+    done
+done

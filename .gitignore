@@ -177,3 +177,7 @@ results/analysis/*.html
 
 # pca folder
 results/classify/pca_results/data/*
+
+# data folder for now 
+datasets_complete/**/*.parquet
+!datasets_complete/README.md

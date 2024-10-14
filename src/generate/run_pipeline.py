@@ -52,7 +52,7 @@ def main():
 
     # load data
     dataset  = args.dataset
-    datapath = path.parents[2] / "datasets" / "human_datasets" / dataset
+    datapath = path.parents[2] / "datasets_files" / "text" / "human_datasets" / dataset
     datafile = datapath / "data.ndjson"
 
     df = load_json_data(datafilepath=datafile, n_subset=args.data_subset)
@@ -94,9 +94,9 @@ def hf_pipeline(args, df, min_len, max_tokens, path, chosen_model_name, cache_mo
         df_completions: dataframe with completions
     '''
     if args.data_subset is None:
-        outpath = path.parents[2] / "datasets" / "ai_datasets" / "HF" / "FULL_DATA" / chosen_model_name
+        outpath = path.parents[2] / "datasets_files" / "text" / "ai_datasets" / "HF" / "FULL_DATA" / chosen_model_name
     else:
-        outpath = path.parents[2] / "datasets" / "ai_datasets" / "HF" / "SUBSET_DATA" / chosen_model_name
+        outpath = path.parents[2] / "datasets_files" / "text" / "ai_datasets" / "HF" / "SUBSET_DATA" / chosen_model_name
 
     outpath.mkdir(parents=True, exist_ok=True)
 
@@ -153,9 +153,9 @@ def vllm_pipeline(args, df, min_tokens, max_tokens, path, chosen_model_name, cac
         df_completions: dataframe with completions
     '''
     if args.data_subset is None:
-        outpath = path.parents[2] / "datasets" / "ai_datasets" / "vLLM" / "FULL_DATA" / chosen_model_name
+        outpath = path.parents[2] / "datasets_files" / "text" / "ai_datasets" / "vLLM" / "FULL_DATA" / chosen_model_name
     else:
-        outpath = path.parents[2] / "datasets" / "ai_datasets" / "vLLM" / "SUBSET_DATA" / chosen_model_name
+        outpath = path.parents[2] / "datasets_files" / "text" / "ai_datasets" / "vLLM" / "SUBSET_DATA" / chosen_model_name
 
     outpath.mkdir(parents=True, exist_ok=True)
 

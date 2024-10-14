@@ -1,14 +1,14 @@
-Results from model run at 2024-08-13 11:41:09.756989
-Original dataset: dailymail_cnn, temperature: 1.0
+Results from model run at 2024-10-14 11:21:05.114033
+Original dataset: dailymail_cnn, temperature: nan
 Random state: 129
               precision    recall  f1-score   support
 
-           0       0.99      0.99      0.99      1800
-           1       0.97      0.96      0.96       450
+           0       0.99      1.00      0.99      1800
+           1       0.99      0.96      0.98       450
 
-    accuracy                           0.98      2250
-   macro avg       0.98      0.97      0.98      2250
-weighted avg       0.98      0.98      0.98      2250
+    accuracy                           0.99      2250
+   macro avg       0.99      0.98      0.99      2250
+weighted avg       0.99      0.99      0.99      2250
 
-Model(s) compared with human:['beluga7b', 'llama2_chat13b', 'mistral7b', 'llama2_chat7b']
-Features: ['PC1', 'PC2', 'PC3', 'PC4', 'PC5', 'PC6', 'PC7', 'PC8', 'PC9', 'PC10', 'PC11', 'PC12', 'PC13', 'PC14', 'PC15', 'PC16', 'PC17', 'PC18', 'PC19', 'PC20', 'PC21', 'PC22', 'PC23', 'PC24', 'PC25', 'PC26', 'PC27', 'PC28', 'PC29', 'PC30', 'PC31', 'PC32', 'PC33', 'PC34', 'PC35', 'PC36', 'PC37', 'PC38', 'PC39', 'PC40', 'PC41', 'PC42', 'PC43', 'PC44', 'PC45', 'PC46', 'PC47', 'PC48', 'PC49', 'PC50', 'PC51', 'PC52', 'PC53', 'PC54', 'PC55', 'PC56', 'PC57', 'PC58', 'PC59', 'PC60', 'PC61', 'PC62', 'PC63', 'PC64', 'PC65']
+Model(s) compared with human:['beluga7b', 'llama2_chat13b', 'llama2_chat7b', 'mistral7b']
+Features: ['PC1', 'PC2', 'PC3', 'PC4', 'PC5', 'PC6', 'PC7', 'PC8', 'PC9', 'PC10', 'PC11', 'PC12', 'PC13', 'PC14', 'PC15', 'PC16', 'PC17', 'PC18', 'PC19', 'PC20', 'PC21', 'PC22', 'PC23', 'PC24', 'PC25', 'PC26', 'PC27', 'PC28', 'PC29', 'PC30', 'PC31', 'PC32', 'PC33', 'PC34', 'PC35', 'PC36', 'PC37', 'PC38', 'PC39', 'PC40', 'PC41', 'PC42', 'PC43', 'PC44', 'PC45', 'PC46', 'PC47', 'PC48', 'PC49', 'PC50', 'PC51', 'PC52', 'PC53', 'PC54', 'PC55', 'PC56', 'PC57', 'PC58', 'PC59', 'PC60', 'PC61', 'PC62', 'PC63', 'PC64']

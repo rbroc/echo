@@ -77,13 +77,23 @@ def compute_perplexity(texts:list, model_id:str = "gpt2", batch_size:int = 1):
         batch_size: batch size for processing
     '''
     perplexity = load("perplexity", module_type="metric")
-
-    perplexity_scores = perplexity.compute(
+    
+    try: 
+        perplexity_scores = perplexity.compute(
                                             predictions=texts, 
                                             model_id=model_id, 
                                             add_start_token=True, # (default to be able to compute perplexity of first token see: https://github.com/huggingface/evaluate/blob/main/metrics/perplexity/perplexity.py)
                                             batch_size=batch_size
                                             )
+    except IndexError as e: 
+        print("[INFO:] Error thrown. Text is too long to compute perplexity, reducing max_length to 1024 ...")
+        perplexity_scores = perplexity.compute(
+                                            predictions=texts, 
+                                            model_id=model_id, 
+                                            add_start_token=True, # (default to be able to compute perplexity of first token see:
+                                            batch_size=batch_size,
+                                            max_length=1024
+        )   
 
     return perplexity_scores
 

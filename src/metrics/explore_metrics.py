@@ -1,24 +1,30 @@
-'''
+"""
 Script to print min and max doc length of human datasets for systematically setting generation lengths for all language models.
-'''
+"""
 
-# utils
-import pathlib 
 import argparse
+import pathlib
 
-# data wrangling
 import pandas as pd
+
 
 def input_parse():
     parser = argparse.ArgumentParser()
 
-    # add arguments 
-    parser.add_argument("-f", "--filename", help = "pick which dataset you want", type = str, default = "stories")
+    # add arguments
+    parser.add_argument(
+        "-f",
+        "--filename",
+        help="pick which dataset you want",
+        type=str,
+        default="stories",
+    )
 
     # save arguments to be parsed from the CLI
     args = parser.parse_args()
 
     return args
+
 
 def get_min_max_doc_length(datapath, filename):
     # define paths
@@ -31,14 +37,13 @@ def get_min_max_doc_length(datapath, filename):
 
     # get dictionary
     min_lengths = {
-        #f"{filename}_source": round(source["doc_length"].min(), 3),
+        # f"{filename}_source": round(source["doc_length"].min(), 3),
         f"{filename}_completions": round(completions["doc_length"].min(), 3)
     }
-    max_lengths = {
-        f"{filename}_completions": round(completions["doc_length"].max(), 3)
-    }
+    max_lengths = {f"{filename}_completions": round(completions["doc_length"].max(), 3)}
 
     return min_lengths, max_lengths
+
 
 def get_median_doc_length(datapath, filename):
     # define paths
@@ -52,18 +57,19 @@ def get_median_doc_length(datapath, filename):
     # get dictionary
     median_lengths = {
         f"{filename}_source": round(source["doc_length"].median(), 3),
-        f"{filename}_completions": round(completions["doc_length"].median(), 3)
+        f"{filename}_completions": round(completions["doc_length"].median(), 3),
     }
 
     return median_lengths
 
-def main(): 
+
+def main():
     # init args
     args = input_parse()
 
-    # define paths 
+    # define paths
     path = pathlib.Path(__file__)
-    datapath = path.parents[2] / "metrics" / "human_metrics" 
+    datapath = path.parents[2] / "datasets_files" / "metrics" / "human_metrics"
 
     min_lengths = []
     max_lengths = []
@@ -77,7 +83,10 @@ def main():
         max_lengths.append(max_len)
         median_lengths.append(median_len)
 
-    print(f"\n MIN lengths for each dataset \n {min_lengths} \n\n MAX lengths for each dataset \n {max_lengths} \n\n MEDIAN lengths for each dataset \n {median_lengths}")
+    print(
+        f"\n MIN lengths for each dataset \n {min_lengths} \n\n MAX lengths for each dataset \n {max_lengths} \n\n MEDIAN lengths for each dataset \n {median_lengths}"
+    )
+
 
 if __name__ == "__main__":
     main()
