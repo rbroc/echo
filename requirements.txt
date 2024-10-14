@@ -19,3 +19,4 @@ xgboost==2.0.3
 ipykernel==6.29.3
 evaluate==0.4.2
 great_tables==0.10.0
+sentence-transformers==3.0.1
