@@ -62,7 +62,7 @@ def main():
         
         # read data, extract sents
         df = pd.read_parquet(in_file)
-        sents = df["completions"].values
+        sents = df["completions"].tolist()
 
         # encode
         model = SentenceTransformer(
@@ -76,15 +76,19 @@ def main():
             batch_size=args.batch_size,
             show_progress_bar=True,
         )
+
+
         # save embeddings
-        out_path = (
-            pathlib.Path(args.out_path)
-            if args.out_path is not None
-            else default_paths["out_path"]
+        out_file = (
+            pathlib.Path(args.out_file)
+            if args.out_file is not None
+            else default_paths["out_file"]
         )
 
-        out_path.parents[1].mkdir(parents=True, exist_ok=True)
-        np.save(out_path, embeddings)
+        # create directory 
+        out_file.parents[0].mkdir(parents=True, exist_ok=True)
 
+        np.save(out_file, embeddings)
+    
 if __name__ == "__main__":
     main()
