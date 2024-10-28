@@ -41,6 +41,15 @@ do
     done
 done
 
+echo "[INFO:] Running classification with Embeddings"
+for dataset in "${datasets[@]}"
+do
+    for temp in "${temperatures[@]}"
+    do  
+        python run_clf_embeddings.py --dataset "$dataset" --temp "$temp"
+    done
+done
+
 echo "[INFO:] Making CLF table for all each dataset"
 for dataset in "${datasets[@]}"
 do

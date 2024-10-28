@@ -1,0 +1,14 @@
+Results from model run at 2024-10-28 16:29:29.159405
+Original dataset: dailydialog, temperature: nan
+Random state: 129
+              precision    recall  f1-score   support
+
+           0       0.93      0.94      0.94      3000
+           1       0.75      0.72      0.74       750
+
+    accuracy                           0.90      3750
+   macro avg       0.84      0.83      0.84      3750
+weighted avg       0.90      0.90      0.90      3750
+
+Model(s) compared with human:['beluga7b', 'llama2_chat13b', 'llama2_chat7b', 'mistral7b']
+Features: ['embeddings', 'dims: 4096']

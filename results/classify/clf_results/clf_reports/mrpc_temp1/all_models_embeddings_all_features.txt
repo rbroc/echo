@@ -1,0 +1,14 @@
+Results from model run at 2024-10-28 16:31:31.581059
+Original dataset: mrpc, temperature: nan
+Random state: 129
+              precision    recall  f1-score   support
+
+           0       0.91      0.92      0.92      2340
+           1       0.68      0.64      0.66       585
+
+    accuracy                           0.87      2925
+   macro avg       0.80      0.78      0.79      2925
+weighted avg       0.87      0.87      0.87      2925
+
+Model(s) compared with human:['beluga7b', 'llama2_chat13b', 'llama2_chat7b', 'mistral7b']
+Features: ['embeddings', 'dims: 4096']
