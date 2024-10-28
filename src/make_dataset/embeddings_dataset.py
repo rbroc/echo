@@ -49,7 +49,7 @@ def main():
 
     # load model
     model = SentenceTransformer(
-        model_name_or_path="nvidia/NV-Embed-v2",
+        model_name_or_path="nvidia/NV-Embed-v2", # as of 2024-28-10, the best model on MTEB (classification)
         trust_remote_code=True,
         cache_folder=cache_models_path,
     )
