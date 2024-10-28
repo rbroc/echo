@@ -38,7 +38,16 @@ def main():
     
     splits = ["train", "val", "test"]
 
+    # load model 
+    model = SentenceTransformer(
+        model_name_or_path="nvidia/NV-Embed-v2",
+        trust_remote_code=True,
+        cache_folder=cache_models_path,
+        )
+
+    # load and process splits
     for split in splits: 
+        print(f"[INFO:] Embedding text from {split} split")
         default_paths = {
             "in_file": path.parents[2]
             / "datasets_complete"
@@ -64,19 +73,11 @@ def main():
         df = pd.read_parquet(in_file)
         sents = df["completions"].tolist()
 
-        # encode
-        model = SentenceTransformer(
-            model_name_or_path="nvidia/NV-Embed-v2",
-            trust_remote_code=True,
-            cache_folder=cache_models_path,
-        )
-
         embeddings = model.encode(
             sentences=sents,
             batch_size=args.batch_size,
             show_progress_bar=True,
         )
-
 
         # save embeddings
         out_file = (
