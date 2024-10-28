@@ -180,4 +180,5 @@ results/classify/pca_results/data/*
 
 # data folder for now 
 datasets_complete/**/*.parquet
+datasets_complete/**/*.npy
 !datasets_complete/README.md
