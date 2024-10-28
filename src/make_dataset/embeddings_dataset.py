@@ -22,6 +22,10 @@ def input_parse():
         default=32,
     )
 
+    parser.add_argument(
+        "-t", "--temp", default=1, help="Temperature of generations", type=float
+    )
+
     parser.add_argument("--in_file", type=str, help="Path to file with data to encode")
     parser.add_argument("--out_file", type=str, help="Path to save the embeddings")
 
@@ -30,23 +34,28 @@ def input_parse():
 
 
 def main():
-    temp = 1 
-
     args = input_parse()
+    temp = args.temp
+
+    if (
+        temp == 1.0
+    ):  # when temp is specified from CLI, it is a float (1.0), so needs to be converted (while allowing for 1.5 as input)
+        temp = int(temp)
+
     path = pathlib.Path(__file__)
     cache_models_path = path.parents[3] / "models"
-    
+
     splits = ["train", "val", "test"]
 
-    # load model 
+    # load model
     model = SentenceTransformer(
         model_name_or_path="nvidia/NV-Embed-v2",
         trust_remote_code=True,
         cache_folder=cache_models_path,
-        )
+    )
 
     # load and process splits
-    for split in splits: 
+    for split in splits:
         print(f"[INFO:] Embedding text from {split} split")
         default_paths = {
             "in_file": path.parents[2]
@@ -54,7 +63,6 @@ def main():
             / "text"
             / f"temp_{temp}"
             / f"{split}_text.parquet",
-
             "out_file": path.parents[2]
             / "datasets_complete"
             / "embeddings"
@@ -68,7 +76,7 @@ def main():
             if args.in_file is not None
             else default_paths["in_file"]
         )
-        
+
         # read data, extract sents
         df = pd.read_parquet(in_file)
         sents = df["completions"].tolist()
@@ -86,10 +94,11 @@ def main():
             else default_paths["out_file"]
         )
 
-        # create directory 
+        # create directory
         out_file.parents[0].mkdir(parents=True, exist_ok=True)
 
         np.save(out_file, embeddings)
-    
+
+
 if __name__ == "__main__":
     main()
