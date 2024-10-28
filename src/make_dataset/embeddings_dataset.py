@@ -19,7 +19,7 @@ def input_parse():
         "--batch_size",
         type=int,
         help="Batch size for encoding",
-        default=32,
+        default=16,
     )
 
     parser.add_argument(
@@ -53,6 +53,9 @@ def main():
         trust_remote_code=True,
         cache_folder=cache_models_path,
     )
+
+    # switch to FP16 (as FP32 caused memory issues) - see https://github.com/UKPLab/sentence-transformers/issues/822 
+    model.half()
 
     # load and process splits
     for split in splits:
