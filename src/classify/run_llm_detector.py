@@ -82,7 +82,7 @@ def main():
 
     # zero-shot classification
     X_val = X_val[:2]
-    model = Trooper("meta-llama/Llama-3.2-1B")
+    model = Trooper("keeeeenw/MicroLlama")
     model.fit(None, labels)
     y_pred = model.predict(X_val)
 
