@@ -89,7 +89,7 @@ def main():
             batch_size=args.batch_size,
             show_progress_bar=True,
         )
-    
+
         # save embeddings
         out_file = (
             pathlib.Path(args.out_file)
@@ -97,15 +97,14 @@ def main():
             else default_paths["out_file"]
         )
 
-        # create directory
+        # create directory 
         out_file.parents[0].mkdir(parents=True, exist_ok=True)
         np.save(out_file, embeddings)
 
-        # save labels 
-        labels = df["is_human"].values
-        labels_out_file = out_file.parents[0] / f"{split}_labels.npy"
-        np.save(labels_out_file, labels)
-    
+        # save metadata (labels and dataset) 
+        meta_data = df[["dataset", "is_human"]]
+        meta_data_out_file = out_file.parents[0] / f"{split}_metadata.parquet"
+        meta_data.to_parquet(meta_data_out_file)
 
 
 if __name__ == "__main__":
