@@ -9,6 +9,7 @@ import argparse
 import pandas as pd
 
 from great_tables import GT, style, loc
+from typing import List
 
 
 def create_df_from_clf_txt(filepath: pathlib.Path, skiprows=[0, 1, 2], nrows=5):
@@ -35,14 +36,14 @@ def create_df_from_clf_txt(filepath: pathlib.Path, skiprows=[0, 1, 2], nrows=5):
     df = df.iloc[:, 0].str.split(expand=True)
 
     # define new column names
-    new_cols = ["class", "precision", "recall", "f1-score", "support"]
+    new_cols = ["class", "precision", "recall", "f1", "support"]
     df.columns = new_cols
 
     # identify the row with the accuracy score
     is_accuracy = df["class"] == "accuracy"
 
     # move the accuracy row values into the precision and recall columns (they are placed incorrectly when the columns are split)
-    df.loc[is_accuracy, ["f1-score", "support"]] = df.loc[
+    df.loc[is_accuracy, ["f1", "support"]] = df.loc[
         is_accuracy, ["precision", "recall"]
     ].values
 
@@ -97,28 +98,74 @@ def prepare_df_for_table(df, type: str):
     # add type col
     class_df["type"] = type
 
+    # make empty col that has None for all values )
+    class_df["empty_1"] = None  # after human
+    class_df["empty_0"] = None  # after synthetic
+
     # sort cols
     class_df = class_df[
         [
             "type",
-            "precision_0",
+            # human
+            "f1_1",
             "precision_1",
-            "recall_0",
             "recall_1",
-            "f1-score_0",
-            "f1-score_1",
-            "support_0",
             "support_1",
+            "empty_1",
+            # synthetic
+            "f1_0",
+            "precision_0",
+            "recall_0",
+            "support_0",
+            "empty_0",
         ]
     ]
 
     # add accuracy
-    class_df["accuracy"] = avg_df.loc["f1-score", "accuracy"]
+    class_df["accuracy"] = avg_df.loc["f1", "accuracy"]
 
     # rename f1-score to f1_score
     class_df.columns = class_df.columns.str.replace("-", "_")
 
     return class_df
+
+
+def create_rowgroups(df: pd.DataFrame):
+    # set default value for group
+    df["group"] = "Other - Human"
+
+    # define a dictionary for type-to-group mapping
+    type_to_group = {
+        "all_models": "All Models - Human",
+        "beluga7b": "Beluga 7b - Human",
+        "llama2_chat13b": "Llama2 Chat 13b - Human",
+        "llama2_chat7b": "Llama2 Chat 7b - Human",
+        "mistral": "Mistral 7b - Human",
+    }
+
+    # apply group assignment based on partial matches
+    for key, group in type_to_group.items():
+        df.loc[df["type"].str.contains(key, case=False, na=False), "group"] = group
+
+    # mv group to first column
+    df = df[["group"] + [col for col in df.columns if col != "group"]]
+
+    # new row names
+    row_names = {
+        "all_models_all_features": "All Features",
+        "all_models_embeddings": "Embeddings",
+        "all_models_tfidf_1000_features": "TF-IDF 1000 Features",
+        "all_models_top3_features": "Top 3 Features",
+        "beluga7b-human_all_features": "All Features",
+        "llama2_chat13b-human_all_features": "All Features",
+        "llama2_chat7b-human_all_features": "All Features",
+        "mistral7b-human_all_features": "All Features",
+    }
+
+    # apply new row names with map
+    df["type"] = df["type"].map(row_names)
+
+    return df
 
 
 def create_table(df, title: str, savepath: pathlib.Path):
@@ -130,48 +177,49 @@ def create_table(df, title: str, savepath: pathlib.Path):
         title: title of the table
         savepath: path to save the table
     """
+    # create row groups
+    df = create_rowgroups(df)
 
-    table = GT(df)
+    table = GT(df, rowname_col="type", groupname_col="group")
 
     # make multi-col spanners
-    table = (
-        table.tab_spanner(label="Precision", columns=["precision_0", "precision_1"])
-        .tab_spanner(label="Recall", columns=["recall_0", "recall_1"])
-        .tab_spanner(label="F1-score", columns=["f1_score_0", "f1_score_1"])
-        .tab_spanner(label="Support", columns=["support_0", "support_1"])
+    table = table.tab_spanner(
+        label="Human", columns=["f1_1", "precision_1", "recall_1", "support_1"]
+    ).tab_spanner(
+        label="Synthetic", columns=["f1_0", "precision_0", "recall_0", "support_0"]
     )
 
     # rename cols to only represent the class
     table = table.cols_label(
-        precision_0="Synthetic",
-        precision_1="Human",
-        recall_0="Synthetic",
-        recall_1="Human",
-        f1_score_0="Synthetic",
-        f1_score_1="Human",
-        support_0="Synthetic",
-        support_1="Human",
+        precision_0="Precision",
+        precision_1="Precision",
+        recall_0="Recall",
+        recall_1="Recall",
+        f1_0="F1",
+        f1_1="F1",
+        support_0="Support",
+        support_1="Support",
         accuracy="Accuracy",
         type="Type",
+        # hacky way to add space between two classes
+        empty_1="",
+        empty_0="",
     )
 
     # layout
     table = (
-        table.opt_vertical_padding(scale=2).opt_horizontal_padding(scale=3)
+        table.opt_vertical_padding(scale=1.5).opt_horizontal_padding(scale=2)
         # center all but the type column
-        .cols_align("center", columns=[col for col in df.columns if col != "type"])
+        .cols_align("center")
     )
 
     # annotations
     table = table.tab_header(title)
 
-    # count n-rows in df
-    n_rows = df.shape[0] + 1
-    every_second_row = [i for i in range(1, n_rows, 2)]  # make list of every second row
-
-    # color every second row
+    # style
     table = table.tab_style(
-        style.fill(color="lightgrey"), loc.body(rows=every_second_row)
+        style=[style.text(weight="bold"), style.fill(color="#E8E8E8")],
+        locations=loc.row_groups(),
     )
 
     # save table
