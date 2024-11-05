@@ -2,6 +2,7 @@
 Formatter for loading and processing splits of data
 """
 import pathlib
+import pickle
 from typing import List
 import pandas as pd
 import numpy as np
@@ -30,7 +31,7 @@ class SplitFormatter:
             print(f"[WARNING]: Split '{split}' is empty.")
             return pd.DataFrame()
 
-        self.splits[split] = split_data[split_data[column] == value]
+        self.splits[split] = split_data[split_data[column] == value] # consider making it so that you can filter on multiple values
 
         return self.splits[split]
 
@@ -39,6 +40,7 @@ class SplitFormatter:
             self.splits[split] = self.loader_function(split)
 
             if self.splits[split] is not None:
+                print(f"[INFO]: Loaded data for split '{split}'. Filtering on {self.dataset}.")
                 self.splits[split] = self.splits[split][self.splits[split]["dataset"] == self.dataset]
             else:
                 print(f"[WARNING]: No data loaded for split '{split}'.")
@@ -56,8 +58,11 @@ class SplitFormatter:
         if split_data.empty:
             print(f"[WARNING]: Split '{split_name}' is empty.")
             return np.array([]), np.array([])
+        
+        X = split_data[X_col].values
+        y = split_data[y_col].values
 
-        return split_data[X_col].values, split_data[y_col].values
+        return X, y
 
     def get_X_y_sample(self, split_name:str, X_col:str, y_col:str, sample_size:int=5, random_state:int=129, stratify:bool=True):
         """
@@ -170,7 +175,7 @@ class MetricsSplitFormatter(SplitFormatter):
             print(f"[ERROR]: File '{file_path}' not found.")
             return pd.DataFrame()
     
-    def get_X_and_y(self, split_name: str, X_features: List[str], y_col: str, pca_model_path: str, scaler_path: str):
+    def get_X_and_y_data(self, split_name: str, X_features: List[str], y_col: str, pca_model_path: str, scaler_path: str):
         split_data = self.get_split(split_name)
         if split_data.empty:
             print(f"[WARNING]: Split '{split_name}' is empty.")
@@ -184,7 +189,7 @@ class MetricsSplitFormatter(SplitFormatter):
             pca_model = pickle.load(file)
 
         print(f"[INFO]: Transforming X with Scaler and PCA for split '{split_name}'.")
-        X_scaled = scaler.transform(split_data[features])
+        X_scaled = scaler.transform(split_data[X_features])
         X_transformed = pca_model.transform(X_scaled)
         y = split_data[y_col].values
 
