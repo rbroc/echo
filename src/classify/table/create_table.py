@@ -8,7 +8,7 @@ import pathlib
 import argparse
 import pandas as pd
 
-from great_tables import GT, style, loc
+from great_tables import GT, style, loc, md
 from typing import List
 
 
@@ -85,6 +85,7 @@ def input_parse():
 def prepare_df_for_table(df, type: str):
     # avg_df
     avg_df = df[["accuracy", "macro_avg", "weighted_avg"]]
+    print(avg_df)
 
     # class df
     class_df = df[["0", "1"]]
@@ -121,8 +122,12 @@ def prepare_df_for_table(df, type: str):
         ]
     ]
 
-    # add accuracy
-    class_df["accuracy"] = avg_df.loc["f1", "accuracy"]
+    # add overall scores
+    class_df["accuracy_f1"] = avg_df.loc["f1", "accuracy"]
+    class_df["macro_avg_f1"] = avg_df.loc["f1", "macro_avg"]
+
+    # another jank way to make empty space after the overall scores
+    class_df["empty_2"] = None
 
     # rename f1-score to f1_score
     class_df.columns = class_df.columns.str.replace("-", "_")
@@ -168,13 +173,14 @@ def create_rowgroups(df: pd.DataFrame):
     return df
 
 
-def create_table(df, title: str, savepath: pathlib.Path):
+def create_table(df, title: str, savepath: pathlib.Path, subtitle:str=None):
     """
     create table from df using great_tables
 
     Args:
         df: dataframe
         title: title of the table
+        subtitle: subtitle of table
         savepath: path to save the table
     """
     # create row groups
@@ -184,9 +190,11 @@ def create_table(df, title: str, savepath: pathlib.Path):
 
     # make multi-col spanners
     table = table.tab_spanner(
-        label="Human", columns=["f1_1", "precision_1", "recall_1", "support_1"]
+        label=md("**Human**"), columns=["f1_1", "precision_1", "recall_1", "support_1"]
     ).tab_spanner(
-        label="Synthetic", columns=["f1_0", "precision_0", "recall_0", "support_0"]
+        label=md("**Synthetic**"), columns=["f1_0", "precision_0", "recall_0", "support_0"]
+    ).tab_spanner(
+        label=md("**Overall**"), columns=["accuracy_f1", "macro_avg_f1"]
     )
 
     # rename cols to only represent the class
@@ -199,11 +207,13 @@ def create_table(df, title: str, savepath: pathlib.Path):
         f1_1="F1",
         support_0="Support",
         support_1="Support",
-        accuracy="Accuracy",
+        accuracy_f1="Accuracy (F1)",
+        macro_avg_f1="Macro Avg (F1)",
         type="Type",
-        # hacky way to add space between two classes
+        # hacky way to add space between two classes and after overall
         empty_1="",
         empty_0="",
+        empty_2=""
     )
 
     # layout
@@ -214,7 +224,7 @@ def create_table(df, title: str, savepath: pathlib.Path):
     )
 
     # annotations
-    table = table.tab_header(title)
+    table = table.tab_header(title, subtitle)
 
     # style
     table = table.tab_style(
@@ -261,7 +271,8 @@ def main():
     # create table
     create_table(
         df=final_df,
-        title=f"{dataset.capitalize()}: Validation Results",
+        title=f"{dataset.capitalize()}",
+        subtitle = "(Validation Data)",
         savepath=datapath,
     )
 
