@@ -1,6 +1,6 @@
 datasets==3.0.2 # updated during baseline creation (stormtrooper)
 evaluate==0.4.2
-great_tables==0.10.0
+great_tables==0.13.0
 huggingface_hub==0.26.1
 matplotlib==3.8.3
 ndjson==0.3.1
