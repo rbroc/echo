@@ -43,7 +43,7 @@ python src/classify/table.py -d mrpc -t 1
 ```
 
 ## Results (Prelim)
-As of 20th of August, some prelim results on VALIDATION data only (test data not in use at all). The reason for it being preliminary is that some final decisions have to be made still (see PR [#66](https://github.com/rbroc/echo/pull/66))
+As of 7th of November, some prelim results on VALIDATION data only (test data not in use at all).
 
 1. [dailydialog](https://htmlpreview.github.io/?https://github.com/rbroc/echo/blob/main/results/classify/clf_results/clf_reports/dailydialog_temp1/all_results.html)
 2. [stories](https://htmlpreview.github.io/?https://github.com/rbroc/echo/blob/main/results/classify/clf_results/clf_reports/stories_temp1/all_results.html)
