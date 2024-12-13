@@ -174,7 +174,7 @@ class TextSplitFormatter(SplitFormatter):
 
         # fit on main split
         print(
-            f"[INFO]: Fitting vectoriser on split '{split_to_fit_on}' using column '{X_col}'."
+            f"[INFO]: Fitting vectoriser on split '{split_to_fit_on}' using column '{X_col}'. Saving new column 'vectorized_completions'"
         )
         main_split["vectorized_completions"] = list(self.vectorizer.fit_transform(main_split[X_col]))
         self.splits[split_to_fit_on] = main_split
@@ -186,7 +186,7 @@ class TextSplitFormatter(SplitFormatter):
                 print(f"[WARNING]: Split '{split_name}' is empty. Skipping.")
                 continue
 
-            print(f"[INFO]: Transforming split '{split_name}' using fitted vectoriser.")
+            print(f"[INFO]: Transforming split '{split_name}' using fitted vectoriser. Saving new column 'vectorized_completions'")
             split_data["vectorized_completions"] = list(self.vectorizer.transform(split_data[X_col]))
             self.splits[split_name] = split_data
 

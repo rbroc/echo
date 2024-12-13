@@ -48,14 +48,14 @@ def main():
 
     test_split = text_formatter.get_split("test")
 
-    vectorised_splits = text_formatter.vectorise(
+    vectorised_splits = text_formatter.vectorize(
         X_col="completions",
         split_to_fit_on="train",
         splits_to_transform=["val"],
         max_features=1000,
     )
 
-    train_X, train_y = text_formatter.get_X_y_data(split_name="train", X_col="tfidf", y_col="is_human")
+    train_X, train_y = text_formatter.get_X_y_data(split_name="train", X_col="vectorized_completions", y_col="is_human")
 
 
 if __name__ == "__main__":
