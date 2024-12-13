@@ -44,7 +44,7 @@ class SplitFormatter:
 
             if self.splits[split] is not None:
                 if self.dataset is not None:
-                    # Only filter if a dataset is specified
+                    # only filter if a dataset is specified
                     print(
                         f"[INFO]: Loaded data for split '{split}'. Filtering on dataset '{self.dataset}'."
                     )
@@ -68,7 +68,7 @@ class SplitFormatter:
     def get_split(self, split_name: str):
         return self.splits.get(split_name, pd.DataFrame())
 
-    def get_X_y_data(self, split_name: str, X_col: str, y_col: str):
+    def get_X_y_data(self, split_name: str, X_col: str, y_col: str = "is_human"):
         """
         Get X and y data for a given split
         """
@@ -131,10 +131,10 @@ class TextSplitFormatter(SplitFormatter):
         splits_dir: pathlib.Path,
         dataset: str = None,
         splits_to_load: List[str] = ["train", "val", "test"],
-        vectoriser=None,
+        vectorizer=None,
     ):
         super().__init__(splits_dir, dataset, splits_to_load)
-        self.vectoriser = vectoriser
+        self.vectorizer = vectorizer
 
     def loader_function(self, split: str):
         file_path = self.splits_dir / f"{split}_text.parquet"
@@ -145,7 +145,7 @@ class TextSplitFormatter(SplitFormatter):
             print(f"[ERROR]: File '{file_path}' not found.")
             return pd.DataFrame()
 
-    def vectorise(
+    def vectorize(
         self,
         X_col: str = "completions",
         split_to_fit_on: str = "train",
@@ -153,7 +153,7 @@ class TextSplitFormatter(SplitFormatter):
         max_features: int = 1000,
     ):
         """
-        Vectorise text data using TfidfVectorizer as default or pass a custom vectoriser.
+        Vectorize text data using TfidfVectorizer as default or pass a custom vectoriser.
         """
         main_split = self.get_split(split_to_fit_on)
 
@@ -162,21 +162,21 @@ class TextSplitFormatter(SplitFormatter):
             return
 
         # init the vectoriser if not provided
-        if self.vectoriser is None:
+        if self.vectorizer is None:
             print(
                 f"[INFO]: Initialising default TfidfVectorizer with max_features={max_features}."
             )
-            self.vectoriser = TfidfVectorizer(
+            self.vectorizer = TfidfVectorizer(
                 lowercase=False, max_features=max_features
             )
         else:
-            self.vectoriser = vectoriser
+            self.vectorizer = vectoriser
 
         # fit on main split
         print(
             f"[INFO]: Fitting vectoriser on split '{split_to_fit_on}' using column '{X_col}'."
         )
-        main_split["tfidf"] = list(self.vectoriser.fit_transform(main_split[X_col]))
+        main_split["vectorized_completions"] = list(self.vectorizer.fit_transform(main_split[X_col]))
         self.splits[split_to_fit_on] = main_split
 
         # transform other splits
@@ -187,7 +187,7 @@ class TextSplitFormatter(SplitFormatter):
                 continue
 
             print(f"[INFO]: Transforming split '{split_name}' using fitted vectoriser.")
-            split_data["tfidf"] = list(self.vectoriser.transform(split_data[X_col]))
+            split_data["vectorized_completions"] = list(self.vectorizer.transform(split_data[X_col]))
             self.splits[split_name] = split_data
 
     
