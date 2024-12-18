@@ -124,7 +124,6 @@ class SplitFormatter:
 
         return X_sample, y_sample
 
-
 class TextSplitFormatter(SplitFormatter):
     def __init__(
         self,
@@ -250,29 +249,21 @@ class MetricsSplitFormatter(SplitFormatter):
             print(f"[ERROR]: File '{file_path}' not found.")
             return pd.DataFrame()
 
-    def get_X_y_data(
-        self,
-        split_name: str,
-        X_features: List[str],
-        y_col: str,
-        pca_model_path: str,
-        scaler_path: str,
-    ):
-        split_data = self.get_split(split_name)
-        if split_data.empty:
-            print(f"[WARNING]: Split '{split_name}' is empty.")
-            return np.array([]), np.array([])
-
+    def transform_X(scaler_path: Pathlib.path | str, pca_model_path: Pathlib.path | str, X: np.ndarray):
+        """
+        Transform X with fitted scaler and PCA object.
+        Either supply X directly or provide a split_name to fetch X.
+        """
         # load PCA model and scaler
-        with open(scaler_path, "rb") as file:
+        with open(str(scaler_path), "rb") as file:
             scaler = pickle.load(file)
 
-        with open(pca_model_path, "rb") as file:
+        with open(str(pca_model_path), "rb") as file:
             pca_model = pickle.load(file)
 
+        # transform X 
         print(f"[INFO]: Transforming X with Scaler and PCA for split '{split_name}'.")
         X_scaled = scaler.transform(split_data[X_features])
         X_transformed = pca_model.transform(X_scaled)
-        y = split_data[y_col].values
 
-        return X_transformed, y
+        return X_transformed
