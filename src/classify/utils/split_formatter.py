@@ -29,18 +29,26 @@ class SplitFormatter:
     def get_split(self, split_name: str) -> pd.DataFrame:
         return self.splits.get(split_name, pd.DataFrame())
 
-    def filter_split(self, split_name: str, column: str, value: str):
+    def filter_split(self, split_name: str, column: str, values: str | list[str]) -> pd.DataFrame:
+        """
+        Filters the specified split by matching the given column to one or more values.
+        """
         split_df = self.get_split(split_name)
 
         if split_df.empty:
             print(f"[WARNING]: Split '{split_name}' is empty.")
             return pd.DataFrame()
 
-        self.splits[split_name] = split_df[split_df[column] == value]
+        # Ensure `values` is a list for consistent handling
+        if isinstance(values, str):
+            values = [values]
+
+        # Filter rows where column value is in the list of values
+        self.splits[split_name] = split_df[split_df[column].isin(values)]
 
         return self.splits[split_name]
 
-    def load_splits(self, cols_to_drop=None) -> dict:
+    def load_splits(self) -> dict:
         """
         Load splits and optionally drop specified columns.
         """
