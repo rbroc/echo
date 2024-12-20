@@ -4,11 +4,10 @@ Formatter for loading and processing splits of data
 
 import pathlib
 import pickle
-from typing import List
+from typing import List, Tuple
 import pandas as pd
 import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
-
 
 class SplitFormatter:
     def __init__(
@@ -21,24 +20,30 @@ class SplitFormatter:
         self.splits_dir = splits_dir
         self.splits_to_load = splits_to_load
         self.splits = {}
+        
+        self.load_splits() # loads splits when class is instantiated
 
-    def loader_function(self, split: str):
+    def loader_function(self, split: str) -> pd.DataFrame:
         print(f"[INFO]: Dummy loader function called for split '{split}'.")
 
-    def filter_split(self, split, column: str, value: str):
-        split_data = self.get_split(split)
+    def get_split(self, split_name: str) -> pd.DataFrame:
+        return self.splits.get(split_name, pd.DataFrame())
 
-        if split_data.empty:
-            print(f"[WARNING]: Split '{split}' is empty.")
+    def filter_split(self, split_name: str, column: str, value: str):
+        split_df = self.get_split(split_name)
+
+        if split_df.empty:
+            print(f"[WARNING]: Split '{split_name}' is empty.")
             return pd.DataFrame()
 
-        self.splits[split] = split_data[
-            split_data[column] == value
-        ]  # consider making it so that you can filter on multiple values
+        self.splits[split_name] = split_df[split_df[column] == value]
 
-        return self.splits[split]
+        return self.splits[split_name]
 
-    def load_splits(self):
+    def load_splits(self, cols_to_drop=None) -> dict:
+        """
+        Load splits and optionally drop specified columns.
+        """
         for split in self.splits_to_load:
             self.splits[split] = self.loader_function(split)
 
@@ -65,20 +70,19 @@ class SplitFormatter:
 
         return self.splits
 
-    def get_split(self, split_name: str):
-        return self.splits.get(split_name, pd.DataFrame())
-
-    def get_X_y_data(self, split_name: str, X_col: str, y_col: str = "is_human"):
+    def get_X_y_data(
+        self, split_name: str, X_col: str, y_col: str = "is_human"
+    ) -> Tuple[np.array, np.array]:
         """
         Get X and y data for a given split
         """
-        split_data = self.get_split(split_name)
-        if split_data.empty:
+        split_df = self.get_split(split_name)
+        if split_df.empty:
             print(f"[WARNING]: Split '{split_name}' is empty.")
             return np.array([]), np.array([])
 
-        X = split_data[X_col].values
-        y = split_data[y_col].values
+        X = split_df[X_col]
+        y = split_df[y_col].values
 
         return X, y
 
@@ -90,19 +94,19 @@ class SplitFormatter:
         sample_size: int = 5,
         random_state: int = 129,
         stratify: bool = True,
-    ):
+    ) -> Tuple[np.array, np.array]:
         """
         Get a sample of X and y data for a given split
         """
-        split_data = self.get_split(split_name)
+        split_df = self.get_split(split_name)
 
-        if split_data.empty:
+        if split_df.empty:
             print(f"[WARNING]: Split '{split_name}' is empty.")
             return np.array([]), np.array([])
 
         # split up into the two classes
-        class_0 = split_data[split_data[y_col] == 0]
-        class_1 = split_data[split_data[y_col] == 1]
+        class_0 = split_df[split_df[y_col] == 0]
+        class_1 = split_df[split_df[y_col] == 1]
 
         # sample from each class
         sample_size_class_0 = sample_size // 2
@@ -115,14 +119,17 @@ class SplitFormatter:
             n=sample_size_class_1, random_state=random_state
         )
 
+        # concat and sample (if this step is not done, we would have several class 0 or class 1 in a row)
         sample_df = pd.concat([sample_class_0, sample_class_1]).sample(
             frac=1, random_state=random_state
         )
 
+        # extract X and Y seperately
         X_sample = sample_df[X_col].values
         y_sample = sample_df[y_col].values
 
         return X_sample, y_sample
+
 
 class TextSplitFormatter(SplitFormatter):
     def __init__(
@@ -175,21 +182,26 @@ class TextSplitFormatter(SplitFormatter):
         print(
             f"[INFO]: Fitting vectoriser on split '{split_to_fit_on}' using column '{X_col}'. Saving new column 'vectorized_completions'"
         )
-        main_split["vectorized_completions"] = list(self.vectorizer.fit_transform(main_split[X_col]))
+        main_split["vectorized_completions"] = list(
+            self.vectorizer.fit_transform(main_split[X_col])
+        )
         self.splits[split_to_fit_on] = main_split
 
         # transform other splits
         for split_name in splits_to_transform:
-            split_data = self.get_split(split_name)
-            if split_data.empty:
+            split_df = self.get_split(split_name)
+            if split_df.empty:
                 print(f"[WARNING]: Split '{split_name}' is empty. Skipping.")
                 continue
 
-            print(f"[INFO]: Transforming split '{split_name}' using fitted vectoriser. Saving new column 'vectorized_completions'")
-            split_data["vectorized_completions"] = list(self.vectorizer.transform(split_data[X_col]))
-            self.splits[split_name] = split_data
+            print(
+                f"[INFO]: Transforming split '{split_name}' using fitted vectoriser. Saving new column 'vectorized_completions'"
+            )
+            split_df["vectorized_completions"] = list(
+                self.vectorizer.transform(split_df[X_col])
+            )
+            self.splits[split_name] = split_df
 
-    
         return self.splits
 
     def get_feature_names(self):
@@ -249,10 +261,9 @@ class MetricsSplitFormatter(SplitFormatter):
             print(f"[ERROR]: File '{file_path}' not found.")
             return pd.DataFrame()
 
-    def transform_X(scaler_path: Pathlib.path | str, pca_model_path: Pathlib.path | str, X: np.ndarray):
+    def transform_X(self, scaler_path: pathlib.Path | str, pca_model_path: pathlib.Path | str, X: np.ndarray):
         """
         Transform X with fitted scaler and PCA object.
-        Either supply X directly or provide a split_name to fetch X.
         """
         # load PCA model and scaler
         with open(str(scaler_path), "rb") as file:
@@ -261,9 +272,9 @@ class MetricsSplitFormatter(SplitFormatter):
         with open(str(pca_model_path), "rb") as file:
             pca_model = pickle.load(file)
 
-        # transform X 
-        print(f"[INFO]: Transforming X with Scaler and PCA for split '{split_name}'.")
-        X_scaled = scaler.transform(split_data[X_features])
+        # transform X
+        print(f"[INFO]: Transforming X with Scaler and PCA")
+        X_scaled = scaler.transform(X)
         X_transformed = pca_model.transform(X_scaled)
 
         return X_transformed
