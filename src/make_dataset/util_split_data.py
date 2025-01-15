@@ -35,4 +35,9 @@ def split_on_unique_ids(
     val_df = df[df["id"].isin(val_ids["id"])]
     test_df = df[df["id"].isin(test_ids["id"])]
 
+    # shuffle data (otherwise all parallel texts of same ID (e.g., 'dailydioalog-6202') will be right after each other) - sampling w. frac=1 to keep all
+    train_df = train_df.sample(frac=1, random_state=random_state)
+    val_df = val_df.sample(frac=1, random_state=random_state)
+    test_df = test_df.sample(frac=1, random_state=random_state)
+
     return train_df, val_df, test_df
