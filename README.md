@@ -27,11 +27,11 @@ Refer to the project description [here](https://cc.au.dk/en/clai/current-project
 The main contents of the repository is listed below.
 | <div style="width:120px"></div>| Description |
 |---------|:-----------|
-| `datasets` | Original datasets `human_datasets` which are described in the [overview](#datasets-overview) below and the generated `ai_datasets`.        |
-| `src` |  Scripts for generating data, running PCA/computing distances, and extracting metrics. See `src/README.md` for greater detail. |
-| `results` | Preliminary results (distance plots, length distributions etc.)  |
-| `metrics` | Text metrics for each dataset (human and ai), extracted with [textdescriptives](https://hlasse.github.io/TextDescriptives/)         |
-| `notes` | Jupyter notebooks used for meetings with the `echo` team to present progress |
+| `datasets_files` | Original datasets `human_datasets` which are described in the [overview](#datasets-overview) below and the generated `ai_datasets`. Metrics and embeddings datasets are also located here. Each dataset has individual files (e.g., "stories", "dailydialog" etc.).       |
+| `datasets_complete` | Train/Val/Test splits for each format (text, metrics, emnbeddings). Created from `src/make_dataset/run.sh`|
+| `src` |  Scripts for generating data, formatting and splitting data, running PCA, extracting metrics, and classifying. See `src/README.md` for greater detail. |
+| `results` | Preliminary results |
+| `notes` | Jupyter notebooks used for meetings with the `echo` team to present progress (NB. some nbs cannot be re-run, so they should be considered read-only) |
 | `tokens` |Place your `.txt` token here for the HuggingFace Hub to run `llama2` models.|
 
 ## Usage 
