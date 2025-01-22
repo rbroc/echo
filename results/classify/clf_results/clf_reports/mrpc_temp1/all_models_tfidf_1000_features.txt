@@ -1,16 +1,16 @@
-Results from model run at 2024-10-14 11:22:07.727296
-Original dataset: mrpc, temperature: nan
+Results from model run at 2025-01-22 14:19:48.102557
+Original dataset: mrpc, temperature: 1.0
 Random state: 129
               precision    recall  f1-score   support
 
-           0       0.88      0.98      0.92      2340
-           1       0.83      0.44      0.58       585
+           0       0.94      0.82      0.88      2340
+           1       0.54      0.81      0.64       585
 
-    accuracy                           0.87      2925
-   macro avg       0.85      0.71      0.75      2925
-weighted avg       0.87      0.87      0.85      2925
+    accuracy                           0.82      2925
+   macro avg       0.74      0.82      0.76      2925
+weighted avg       0.86      0.82      0.83      2925
 
-Model(s) compared with human:['beluga7b', 'llama2_chat13b', 'llama2_chat7b', 'mistral7b']
+Model(s) compared with human:['llama2_chat13b', 'llama2_chat7b', 'beluga7b', 'mistral7b']
 Features: ['000' '10' '100' '11' '12' '13' '14' '15' '16' '17' '18' '19' '20' '200'
  '2000' '2001' '2002' '2003' '2004' '21' '22' '23' '24' '25' '26' '27'
  '28' '30' '300' '32' '33' '34' '35' '38' '39' '40' '45' '50' '500' '54'

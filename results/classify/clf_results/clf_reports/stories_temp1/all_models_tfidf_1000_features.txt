@@ -1,16 +1,16 @@
-Results from model run at 2024-10-14 11:22:17.634831
-Original dataset: stories, temperature: nan
+Results from model run at 2025-01-22 14:20:04.028552
+Original dataset: stories, temperature: 1.0
 Random state: 129
               precision    recall  f1-score   support
 
-           0       0.98      0.99      0.99      3000
-           1       0.96      0.93      0.94       750
+           0       0.99      0.99      0.99      3000
+           1       0.95      0.98      0.96       750
 
-    accuracy                           0.98      3750
-   macro avg       0.97      0.96      0.97      3750
-weighted avg       0.98      0.98      0.98      3750
+    accuracy                           0.99      3750
+   macro avg       0.97      0.98      0.98      3750
+weighted avg       0.99      0.99      0.99      3750
 
-Model(s) compared with human:['beluga7b', 'llama2_chat13b', 'llama2_chat7b', 'mistral7b']
+Model(s) compared with human:['mistral7b', 'beluga7b', 'llama2_chat13b', 'llama2_chat7b']
 Features: ['abilities' 'ability' 'able' 'about' 'above' 'across' 'act' 'actions'
  'actually' 'advanced' 'adventure' 'adventures' 'after' 'again' 'against'
  'age' 'ago' 'ahead' 'ai' 'air' 'alex' 'alien' 'aliens' 'alive' 'all'
