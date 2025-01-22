@@ -1,16 +1,16 @@
-Results from model run at 2024-10-14 11:21:58.902764
-Original dataset: dailydialog, temperature: nan
+Results from model run at 2025-01-22 14:19:34.607332
+Original dataset: dailydialog, temperature: 1.0
 Random state: 129
               precision    recall  f1-score   support
 
-           0       0.86      0.95      0.90      3000
-           1       0.67      0.40      0.50       750
+           0       0.95      0.81      0.87      3000
+           1       0.52      0.83      0.64       750
 
-    accuracy                           0.84      3750
-   macro avg       0.77      0.68      0.70      3750
-weighted avg       0.82      0.84      0.82      3750
+    accuracy                           0.81      3750
+   macro avg       0.73      0.82      0.75      3750
+weighted avg       0.86      0.81      0.83      3750
 
-Model(s) compared with human:['beluga7b', 'llama2_chat13b', 'llama2_chat7b', 'mistral7b']
+Model(s) compared with human:['mistral7b', 'llama2_chat13b', 'llama2_chat7b', 'beluga7b']
 Features: ['00' '000' '10' '100' '12' '15' '20' '30' '50' 'ability' 'able' 'about'
  'absolutely' 'accept' 'account' 'action' 'activities' 'actually' 'add'
  'additional' 'additionally' 'address' 'advice' 'affordable' 'afraid'

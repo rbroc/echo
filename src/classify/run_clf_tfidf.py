@@ -8,8 +8,7 @@ import pathlib
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 
-
-from sklearn.linear_model import LogisticRegression
+from xgboost import XGBClassifier
 from utils.classify import clf_pipeline
 
 
@@ -74,21 +73,31 @@ def main():
     train_df = train_df[train_df["dataset"] == dataset]
     val_df = val_df[val_df["dataset"] == dataset]
 
-    # vectorise data
+     # vectorise data
     max_features_tfidf = 1000
-
     X_train_tfidf, X_val_tfidf, feature_names = vectorise(
         X_train=train_df["completions"].tolist(),
         X_val=val_df["completions"].tolist(),
         max_features=max_features_tfidf,
     )
 
+    # y vals
     y_train = train_df["is_human"].values
     y_val = val_df["is_human"].values
 
-    clf = LogisticRegression(random_state=129)
+    # compute scale_pos_weight
+    human_count = train_df[train_df["model"] == "human"].shape[0]
+    non_human_count = train_df[train_df["model"] != "human"].shape[0]
+    scale_pos_weight = non_human_count / human_count
 
-    # fit
+    # classify
+    clf = XGBClassifier(
+        enable_categorical=True,
+        use_label_encoder=False,
+        random_state=129,
+        scale_pos_weight=scale_pos_weight,
+    )
+
     clf, clf_report = clf_pipeline(
         df=train_df,
         clf=clf,
