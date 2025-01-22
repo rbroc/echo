@@ -29,6 +29,7 @@ We do XGBOOST classification on:
 4. Embeddings of completions
 
 And LLM detection on:
+
 5. text completions with a LLM detector
 
 ## Usage
