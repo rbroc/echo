@@ -1,5 +1,5 @@
 ### Classify
-This folder contains all code related that make the `results/classify` happen i.e., running PCA and various classifiers.
+This folder contains all code related that make the `results/classify` 
 
 ### Overview
 Code in this folder:
