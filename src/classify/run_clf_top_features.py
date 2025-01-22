@@ -11,7 +11,7 @@ import pandas as pd
 sys.path.append(str(pathlib.Path(__file__).parents[2]))
 import pickle
 
-from src.utils.classify import clf_pipeline
+from utils.classify import clf_pipeline
 from src.utils.cols_to_drop import get_cols_to_drop
 from xgboost import XGBClassifier
 

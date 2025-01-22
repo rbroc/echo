@@ -11,7 +11,7 @@ import pandas as pd
 from xgboost import XGBClassifier
 
 sys.path.append(str(pathlib.Path(__file__).parents[2]))
-from src.utils.classify import (
+from utils.classify import (
     clf_pipeline,
     get_feature_importances,
     plot_feature_importances,
