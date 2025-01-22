@@ -6,8 +6,11 @@ Make text dataset:
 - save splits
 
 Run this script
-    python src/make_dataset/text_dataset.py
+    python src/make_dataset/text_dataset.py -t {TEMPERATURE}
+
+The {TEMPERATURE} could be either 1 or 1.5. Defaults to 1.
 """
+import argparse
 
 import pathlib
 
@@ -19,6 +22,15 @@ MODELS = ["beluga7b", "llama2_chat7b", "llama2_chat13b", "mistral7b"]
 PROMPT_NUMBERS = [21]
 DATASETS = ["dailymail_cnn", "stories", "mrpc", "dailydialog"]
 
+def input_parse():
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument(
+        "-t", "--temp", default=1, help="Temperature of generations", type=float
+    )
+
+    args = parser.parse_args()
+    return args
 
 def get_ai_paths(
     ai_dir: pathlib.Path, dataset: str = "dailydialog", temp: float | int = 1
@@ -134,7 +146,13 @@ def preprocess_datasets(
 
 
 def main():
-    temp = 1
+    args = input_parse()
+    temp = args.temp
+
+    if (
+        temp == 1.0
+    ):  # when temp is specified from CLI, it is a float (1.0), so needs to be converted (while allowing for 1.5 as input)
+        temp = int(temp)
 
     path = pathlib.Path(__file__)
     ai_dir = path.parents[2] / "datasets_files" / "text" / "ai_datasets" / "clean_data"

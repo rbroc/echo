@@ -1,6 +1,13 @@
 """
 Create metrics dataset (to match text dataset)
+
+Run script: 
+    python src/make_dataset/metrics_dataset.py -t {TEMPERATURE}
+
+The {TEMPERATURE} could be either 1 or 1.5
 """
+
+import argparse
 
 import pathlib
 
@@ -11,6 +18,15 @@ from util_split_data import split_on_unique_ids
 
 DATASETS = ["dailymail_cnn", "stories", "mrpc", "dailydialog"]
 
+def input_parse():
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument(
+        "-t", "--temp", default=1, help="Temperature of generations", type=float
+    )
+
+    args = parser.parse_args()
+    return args
 
 def load_file(file):
     """
@@ -67,7 +83,13 @@ def preprocess_metrics(
 
 
 def main():
-    temp = 1
+    args = input_parse()
+    temp = args.temp
+
+    if (
+        temp == 1.0
+    ):  # when temp is specified from CLI, it is a float (1.0), so needs to be converted (while allowing for 1.5 as input)
+        temp = int(temp)
 
     path = pathlib.Path(__file__)
     ai_dir = path.parents[2] / "datasets_files" / "metrics" / "ai_metrics"

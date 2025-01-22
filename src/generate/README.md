@@ -17,7 +17,7 @@ The files within this folder are:
 ## Generating Text 
 To run the entire generation pipeline, please run the script 
 ```
-bash generate/run.sh
+bash src/generate/run.sh
 ```
 This runs several models on all four datasets. The pipeline is implemented with `vLLM` (see further for a `Hugging Face` implementation).
 

@@ -48,8 +48,10 @@ def main():
     splits = ["train", "val", "test"]
 
     # load model
+    embed_model_name = "nvidia/NV-Embed-v2" # as of 2024-10-28, the best model on MTEB (classification)
+    print(f"[INFO]: Loading embedding model {embed_model_name}")
     model = SentenceTransformer(
-        model_name_or_path="nvidia/NV-Embed-v2", # as of 2024-28-10, the best model on MTEB (classification)
+        model_name_or_path=embed_model_name, 
         trust_remote_code=True,
         cache_folder=cache_models_path,
     )
@@ -79,6 +81,15 @@ def main():
             if args.in_file is not None
             else default_paths["in_file"]
         )
+        out_file = (
+            pathlib.Path(args.out_file)
+            if args.out_file is not None
+            else default_paths["out_file"]
+        )
+
+        if out_file.exists():
+            print(f"[ERROR]: {out_file} exists, embeddings will not be re-run. Please delete file or pass an unique outfilepath")
+            continue # if file exists, then skip and go back to next iteration
 
         # read data, extract sents
         df = pd.read_parquet(in_file)
