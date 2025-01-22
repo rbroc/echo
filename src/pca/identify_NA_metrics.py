@@ -5,10 +5,7 @@ Since PCA cannot handle NA, we need to identify rows with NA metrics. In additio
 Even though we are creating seperate classifiers for each dataset, we still want to compare PCA components across datasets. Therefore, the same metrics should be dropped across all datasets.
 '''
 import pathlib
-import sys
 import pandas as pd
-sys.path.append(str(pathlib.Path(__file__).parents[2]))
-from src.utils.process_metrics import load_metrics
 
 def identify_NA_metrics(df, percent_zero:float=None):
     '''
@@ -53,13 +50,13 @@ def main():
 
 
     # drop type cols first (since they are not what should determine what features to drop)
-    type_cols = ["model", "id", "is_human", "unique_id", "sample_params", "temperature", "prompt_number", "dataset", "annotations"] 
+    type_cols = ["model", "id", "is_human", "sample_params", "temperature", "prompt_number", "dataset", "annotations"] 
     df = df.drop(columns=type_cols)
 
     # filter metrics
     cols = identify_NA_metrics(df, percent_zero=None)
 
-    print(cols)
+    print(f"[INFO:] Columns to drop: {', '.join(cols)}")
 
 
 if __name__ == "__main__":

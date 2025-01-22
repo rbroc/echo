@@ -1,16 +1,17 @@
 ### Classify
-This folder contains all code related that make the `results/classify` happen i.e., running PCA and various classifiers.
+This folder contains all code related that make the `results/classify` 
 
 ### Overview
 Code in this folder:
 | <div style="width:120px"></div>| Description |
 |---------|:-----------|
-| `/pca` | PCA folder with the script `run_PCA.py` to run PCA prior to classify pipeline  |
 | `/table` | Contains the script `create_table.py` to create tables from classifcation reports saved in `results/classify/clf_reports` that can be executed by running `run.sh` within the folder  |
-| `run_clf_all_features.py` | Run XGBOOST on all PC components |
-| `run_clf_tfidf.py` | Run Logistic Regression on TF-IDF vectorised completions |
-| `run_clf_top_features.py` | Run XGBOOST on the top N PC components |
-| `` | Run XGBOOST on the top N PC components |
+| `utils/classify.py` | Classify pipeline functions |
+| `run_clf_all_features.py` | CLF on all PC components |
+| `run_clf_top_features.py` | CLF on the top N PC components |
+| `run_clf_tfidf.py` | CLF on TF-IDF vectorised completions |
+| `run_clf_embeddings.py` | CLF on embeddings of completions |
+| `run_llm_detector.py` | Run LLM detector on text completions (not run yet) |
 
 ### Classification Pipeline
 The pipeline consists of classifying human and machine-generated texts in each domain seperately. We also group labels as such:
@@ -21,24 +22,35 @@ The pipeline consists of classifying human and machine-generated texts in each d
 5. Human vs. ALL of the above models 
 
 
-We furthermore (as described in the scripts overview) do three pipelines: 
-1. XGBOOST on all PC components 
-2. XGBOOST on the top N PC components (currently top 3)
-3. Logistic regression on TF-IDF vectorised data (with max features) 
+We do XGBOOST classification on:
+1. All PC components 
+2. Top N PC components (currently top 3)
+3. TF-IDF vectorised data (with max features) 
+4. Embeddings of completions
+
+And LLM detection on:
+
+5. text completions with a LLM detector
 
 ## Usage
-To run all three pipelines, you can simply run (from root):
+To run all pipelines, you can simply run (from root):
 ```bash
 bash src/classify/run.sh
 ```
 
+Note that this does not run the LLM detector: 
+```bash
+python src/classify/run_llm_detector.py
+```
+(Remember to activate virtual env)
+
 Furthermore, to re-create the tables, you can run: 
-```python
+```bash
 python src/classify/table.py -d {DATASET_NAME} -t {TEMPERATURE}
 ```
 Note you have to run this for each dataset and temperature individually with arguments e.g., 
 
-```python
+```bash
 python src/classify/table.py -d mrpc -t 1
 ```
 
