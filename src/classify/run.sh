@@ -58,3 +58,6 @@ do
         python table/create_table.py --dataset "$dataset" --temp "$temp"
     done
 done
+
+
+deactivate
