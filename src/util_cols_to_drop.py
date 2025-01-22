@@ -20,7 +20,6 @@ def get_cols_to_drop():
         "second_order_coherence",
         "smog",
         "pos_prop_SPACE",
-        "per_word_perplexity"
     ]  # cols found by running identify_NA_metrics.py
     manually_selected_cols = [
         "pos_prop_PUNCT"
