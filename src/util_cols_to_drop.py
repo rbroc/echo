@@ -1,5 +1,7 @@
 """
 Columns to drop for PCA and classification 
+
+Found by running pca/identify_NA_metrics.py
 """
 def get_cols_to_drop():
     # cols to drop
