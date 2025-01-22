@@ -4,16 +4,16 @@ Run XGBOOST classifier for each dataset and temp combination, save results to /r
 
 import argparse
 import pathlib
+import pickle
 import sys
 
 import pandas as pd
+from xgboost import XGBClassifier
+
+from utils.classify import clf_pipeline
 
 sys.path.append(str(pathlib.Path(__file__).parents[2]))
-import pickle
-
-from src.utils.classify import clf_pipeline
-from src.utils.cols_to_drop import get_cols_to_drop
-from xgboost import XGBClassifier
+from src.util_cols_to_drop import get_cols_to_drop
 
 
 def input_parse():

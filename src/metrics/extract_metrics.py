@@ -5,13 +5,11 @@ See metrics/README.md for instructions on how to run.
 
 import multiprocessing as mp
 import pathlib
-import sys
 from argparse import ArgumentParser
 
 import pandas as pd
 
-sys.path.append(str(pathlib.Path(__file__).parents[2]))
-from src.utils.get_metrics import get_all_metrics, get_information_metrics
+from utils.get_metrics import get_all_metrics, get_information_metrics
 
 MODELS = ["beluga7b", "llama2_chat7b", "llama2_chat13b", "mistral7b"]
 PROMPT_NUMBERS = [21]

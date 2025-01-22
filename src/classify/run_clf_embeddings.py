@@ -5,15 +5,14 @@ Run XGBOOST classifier for each dataset and temp combination on embeddings, save
 
 import argparse
 import pathlib
-import sys
 
 import pandas as pd
 import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
 
-sys.path.append(str(pathlib.Path(__file__).parents[2]))
+
 from xgboost import XGBClassifier
-from src.utils.classify import clf_pipeline
+from utils.classify import clf_pipeline
 
 
 def input_parse():

@@ -10,13 +10,15 @@ import sys
 import pandas as pd
 from xgboost import XGBClassifier
 
-sys.path.append(str(pathlib.Path(__file__).parents[2]))
-from src.utils.classify import (
+from utils.classify import (
     clf_pipeline,
     get_feature_importances,
     plot_feature_importances,
 )
-from src.utils.cols_to_drop import get_cols_to_drop
+
+
+sys.path.append(str(pathlib.Path(__file__).parents[2]))
+from src.util_cols_to_drop import get_cols_to_drop
 
 
 def input_parse():

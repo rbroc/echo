@@ -3,14 +3,15 @@ The src folder contains:
 | Folder/Script            | Description                                                                                                   |
 |-------------------|---------------------------------------------------------------------------------------------------------------|
 | `/analysis`        | Scripts for analysis (not currently used in pipeline) |
+| `/archive`        |  Unused scripts yet to be deleted |
 | `/classify`        | Scripts for classifying datasets from `datasets_complete`                                                       |
 | `/clean`           | Clean and inspect human datasets (`datasets_files`)                                                                             |
 | `/generate`        | Entire generation pipeline here.                                                                               |
 | `/make_dataset`         | Make train, val, test splits (`datasets_complete`)                                          |
 | `/metrics`         | Extract metrics using test descriptives for human and AI data.                                                |
 | `/make_dataset`    | PCA on `datasets_complete/metrics/train_metrics.parquet` (gotten from running scripts in `make_dataset`)                                       |
-| `/utils`           | Scripts for loading, preprocessing AI data (including combining with human datasets), running PCA, and computing distances.  |
 | `clean_ai_data.py`| Clean ai data prior to extracting metrics  |
+| `util_cols_to_drop.py`| Utils script with columns to drop prior to PCA (used in some `classify/run_clf_all_features.py`, `classify/run_clf_top_features.py`, `pca/run_pca.py`) |
 
 
 ### Pipeline 

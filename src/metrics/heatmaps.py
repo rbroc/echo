@@ -11,7 +11,7 @@ import pandas as pd
 import seaborn as sns
 
 sys.path.append(str(pathlib.Path(__file__).parents[2]))
-from src.utils.cols_to_drop import get_cols_to_drop
+from src.util_cols_to_drop import get_cols_to_drop
 
 
 def create_corrM(df, save_dir=None, file_name=None, fontsize=12, fontweight=None):

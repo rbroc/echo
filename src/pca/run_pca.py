@@ -11,10 +11,11 @@ from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 from tqdm import tqdm
 
-sys.path.append(str(pathlib.Path(__file__).parents[2]))
-from src.utils.cols_to_drop import get_cols_to_drop
-from src.utils.pca_plots import (get_loadings, plot_cumulative_variance,
+from utils.pca_plots import (get_loadings, plot_cumulative_variance,
                                  plot_loadings)
+
+sys.path.append(str(pathlib.Path(__file__).parents[2]))
+from src.util_cols_to_drop import get_cols_to_drop
 
 
 def run_PCA(df: pd.DataFrame, feature_names: list, random_state:int=129, n_components=None):
